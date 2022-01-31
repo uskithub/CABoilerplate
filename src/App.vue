@@ -2,8 +2,7 @@
 </script>
 
 <template lang="pug">
-v-app
-  router-view
+router-view
 </template>
 
 <style>

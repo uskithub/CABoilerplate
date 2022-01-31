@@ -11,10 +11,11 @@
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
     "baseUrl": ".",
-        "paths": {
-            "@/*": ["src/*"]
-            , "@views/*": ["src/service/presentation/views/*"]
-        },
+    "paths": {
+      "@/*": ["src/*"]
+      , "@views/*": ["src/service/presentation/views/*"]
+      , "@usecases/*": ["src/service/application/usecases/*"]
+    },
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

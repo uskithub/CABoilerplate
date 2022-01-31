@@ -2,5 +2,5 @@
 </script>
 
 <template lang="pug">
-Signin
+h1 Signin
 </template>
