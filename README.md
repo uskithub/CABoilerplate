@@ -166,7 +166,7 @@ export const enum Boot {
     userOpenSite = "ユーザはサイトを開く"
     , serviceCheckSession = "サービスはセッションがあるかを確認する"
     , sessionExistsThenPresentHome = "セッションがある場合_サービスはホーム画面を表示する"
-    
+
     /* 代替コース */
     , sessionNotExistsThenPreesntSignin = "セッションがない場合_サービスはログイン画面を表示する"
 }
@@ -348,4 +348,10 @@ const boot = () => {
             }
         });
 };
+```
+
+# firebase
+
+```shell
+$ yarn add firebase
 ```

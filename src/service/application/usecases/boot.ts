@@ -1,5 +1,8 @@
+import { SignInStatus } from "@/service/domain/interfaces/authenticator";
+import service from "@/service/domain/models/service";
+import { User } from "@/service/domain/models/user";
 import { AbstractScene } from "@/system/interfaces/usecase";
-import { Observable, of } from "rxjs";
+import { first, map, Observable, of, single } from "rxjs";
 
 /**
  * usecase: アプリを起動する
@@ -9,7 +12,7 @@ export const enum Boot {
     userOpenSite = "ユーザはサイトを開く"
     , serviceCheckSession = "サービスはセッションがあるかを確認する"
     , sessionExistsThenPresentHome = "セッションがある場合_サービスはホーム画面を表示する"
-    
+
     /* 代替コース */
     , sessionNotExistsThenPreesntSignin = "セッションがない場合_サービスはログイン画面を表示する"
 }
@@ -17,7 +20,7 @@ export const enum Boot {
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
 export type BootContext = { scene: Boot.userOpenSite }
     | { scene: Boot.serviceCheckSession }
-    | { scene: Boot.sessionExistsThenPresentHome }
+    | { scene: Boot.sessionExistsThenPresentHome; user: User; }
     | { scene: Boot.sessionNotExistsThenPreesntSignin }
 ;
 
@@ -30,17 +33,27 @@ export type BootContext = { scene: Boot.userOpenSite }
 export class BootScene extends AbstractScene<BootContext> {
     context: BootContext;
 
-    constructor(context: BootContext) {
+    constructor(context: BootContext = { scene: Boot.userOpenSite }) {
         super();
         this.context = context;
     }
 
     private check(): Observable<this> {
-        if (/* TODO: ドメインモデルが持つメソッドが結果を返すようにする */ false) {
-            return of(this.instantiate({ scene: Boot.sessionExistsThenPresentHome }));
-        } else {
-            return of(this.instantiate({ scene: Boot.sessionNotExistsThenPreesntSignin }));
-        }
+        return service
+            .observeSignInStatus()
+            .pipe(
+                map((signInStatusContext) => {
+                    switch(signInStatusContext.kind) {
+                        case SignInStatus.signIn: {
+                            return this.instantiate({ scene: Boot.sessionExistsThenPresentHome, user: signInStatusContext.user });
+                        }
+                        default: {
+                            return this.instantiate({ scene: Boot.sessionNotExistsThenPreesntSignin });
+                        }
+                    }
+                })
+                , first() // 一度観測したらsubscriptionを終わらせる
+            );
     }
 
     next(): Observable<this>|null {

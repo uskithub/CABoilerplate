@@ -12,7 +12,7 @@ const router = useRouter();
 const boot = () => {
     let subscription: Subscription|null = null;
     subscription = Usecase
-        .interact<BootContext, BootScene>(new BootScene({ scene: Boot.userOpenSite }))
+        .interact<BootContext, BootScene>(new BootScene())
         .subscribe({
             next: (performedSenario) => {
                 const lastContext = performedSenario.slice(-1)[0];

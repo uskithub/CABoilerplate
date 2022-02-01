@@ -10,6 +10,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src/")
       , "@views": path.resolve(__dirname, "src/service/presentation/views")
       , "@usecases": path.resolve(__dirname, "src/service/application/usecases")
+      , "@interfaces": path.resolve(__dirname, "src/service/domain/interfaces")
     }
   }
 })
