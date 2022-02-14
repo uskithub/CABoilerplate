@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import { provide } from "vue";
+import { CONTROLLERS_KEY, createControllers } from "@/service/presentation/controllers";
+
+const controllers = createControllers();
+provide(CONTROLLERS_KEY, controllers);
+
 </script>
 
 <template lang="pug">
