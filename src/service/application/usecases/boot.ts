@@ -40,7 +40,7 @@ export class BootScene extends AbstractScene<BootContext> {
 
     private check(): Observable<this> {
         return service
-            .observeSignInStatus()
+            .signInStatus()
             .pipe(
                 map((signInStatusContext) => {
                     switch(signInStatusContext.kind) {

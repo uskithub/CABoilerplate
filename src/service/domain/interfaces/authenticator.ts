@@ -21,5 +21,5 @@ export interface Authenticator {
     /**
      * サインインステータスの監視を開始します。
      */
-    observeSignInStatus: () => Observable<SignInStatusContext>;
+    signInStatus: () => Observable<SignInStatusContext>;
 }

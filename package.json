@@ -2,23 +2,34 @@
   "name": "caboilerplate",
   "version": "0.0.0",
   "scripts": {
+    "serve": "vite preview",
+    "build": "vite build",
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mdi/font": "5.9.55",
     "firebase": "^9.6.5",
+    "roboto-fontface": "*",
     "rxjs": "^7.5.2",
     "vue": "^3.2.25",
-    "vue-router": "4"
+    "vue-router": "4",
+    "vuetify": "^3.0.0-alpha.0",
+    "webfontloader": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.13",
     "@vitejs/plugin-vue": "^2.0.0",
+    "@vue/cli-plugin-babel": "5.0.0-beta.7",
+    "@vue/cli-service": "5.0.0-beta.7",
+    "@vuetify/vite-plugin": "^1.0.0-alpha.3",
     "pug": "^3.0.2",
     "sass": "^1.49.0",
+    "sass-loader": "^10.0.0",
     "typescript": "^4.4.4",
     "vite": "^2.7.2",
-    "vue-tsc": "^0.29.8"
+    "vue-cli-plugin-vuetify": "~2.4.5",
+    "vue-tsc": "^0.29.8",
+    "vuetify-loader": "^2.0.0-alpha.0"
   }
 }

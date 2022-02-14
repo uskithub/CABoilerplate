@@ -37,6 +37,7 @@ boot();
 </script>
 
 <template lang="pug">
-h1 Home
-router-link(to="/signin") -> Signin
+v-container
+  h1 Home
+  router-link(to="/signin") -> Signin
 </template>

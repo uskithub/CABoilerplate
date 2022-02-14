@@ -4,7 +4,7 @@ import { SignInStatusContext } from "../interfaces/authenticator";
 
 
 export default {
-    observeSignInStatus: (): Observable<SignInStatusContext> => {
-        return dependencies.auth.observeSignInStatus();
+    signInStatus: (): Observable<SignInStatusContext> => {
+        return dependencies.auth.signInStatus();
     }
 }

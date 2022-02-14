@@ -7,11 +7,11 @@ import { User } from "../domain/models/user";
 export class FirebaseAuthenticator implements Authenticator {
     #auth: Auth
     #unscriber: Unsubscribe
-    signInStatus$: ReplaySubject<SignInStatusContext>;
+    #signInStatus: ReplaySubject<SignInStatusContext>;
 
     constructor(app: FirebaseApp) {
         this.#auth = getAuth(app);
-        this.signInStatus$ = new ReplaySubject(1);
+        this.#signInStatus = new ReplaySubject(1);
 
         this.#unscriber = onAuthStateChanged(this.#auth, (user) => {
             if (user) {
@@ -22,15 +22,15 @@ export class FirebaseAuthenticator implements Authenticator {
                     , displayName: user.displayName
                 };
                 console.log("onAuthStateChanged: signIn", _user);
-                this.signInStatus$.next({ kind: SignInStatus.signIn, user: _user });
+                this.#signInStatus.next({ kind: SignInStatus.signIn, user: _user });
             } else {
                 console.log("onAuthStateChanged: signOut");
-                this.signInStatus$.next({ kind: SignInStatus.signOut });
+                this.#signInStatus.next({ kind: SignInStatus.signOut });
             }
         });
     }
 
-    observeSignInStatus(): Observable<SignInStatusContext> {
-        return this.signInStatus$.asObservable();
+    signInStatus(): Observable<SignInStatusContext> {
+        return this.#signInStatus.asObservable();
     }
 }

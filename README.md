@@ -255,7 +255,7 @@ next関数は、自身が表すシーンの次のシーンを指定します。�
 export class BootScene extends AbstractScene<BootContext> {
     context: BootContext;
 
-    constructor(context: BootContext) {
+    constructor(context: BootContext = { scene: Boot.userOpenSite }) {
         super();
         this.context = context;
     }
@@ -328,7 +328,7 @@ import { Subscription } from 'rxjs';
 const boot = () => {
     let subscription: Subscription|null = null;
     subscription = Usecase
-        .interact<BootContext, BootScene>(new BootScene({ scene: Boot.userOpenSite }))
+        .interact<BootContext, BootScene>(new BootScene())
         .subscribe({
             next: (performedSenario) => {
                 const lastContext = performedSenario.slice(-1)[0];
@@ -354,4 +354,71 @@ const boot = () => {
 
 ```shell
 $ yarn add firebase
+```
+
+
+# Vuetify
+
+vue-cliを入れる
+
+```shell
+$ yarn global add @vue/cli
+```
+
+```shell
+$ vue add vuetify
+
+? Choose a preset: (Use arrow keys)
+  Configure (advanced)
+  Default (recommended)
+❯ Vite Preview (Vuetify 3 + Vite)
+  Prototype (rapid development)
+  Vuetify 3 Preview (Vuetify 3)
+```
+
+src以下にpluginsフォルダができるので、system以下に移動する。
+vite.config.jsファイルが自動生成されるので、（.tsと重複するため）削除し、.tsを以下のように書き換える。
+
+```vite.config.ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import vuetify from '@vuetify/vite-plugin'
+import * as path from 'path'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    vue()
+    // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
+    , vuetify({
+      autoImport: true,
+    })
+  ]
+  , define: { 'process.env': {} }
+  ...
+})
+```
+
+```main.ts
+import { createApp } from 'vue'
+import vuetify from '@/system/plugins/vuetify'
+import { loadFonts } from '@/system/plugins/webfontloader'
+...
+loadFonts()
+
+const app = createApp(App);
+app.use(vuetify);
+app.use(router);
+app.mount('#app');
+```
+
+```App.vue
+<script setup lang="ts">
+</script>
+
+<template lang="pug">
+v-app
+  v-main
+    router-view
+</template>
 ```

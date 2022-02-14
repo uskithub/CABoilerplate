@@ -2,5 +2,6 @@
 </script>
 
 <template lang="pug">
-h1 Signin
+v-container
+  h1 Signin
 </template>
