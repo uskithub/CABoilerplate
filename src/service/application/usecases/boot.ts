@@ -9,19 +9,19 @@ import { first, map, Observable, of, single } from "rxjs";
  */
 export const enum Boot {
     /* 基本コース */
-    userOpenSite = "ユーザはサイトを開く"
-    , serviceCheckSession = "サービスはセッションがあるかを確認する"
-    , sessionExistsThenPresentHome = "セッションがある場合_サービスはホーム画面を表示する"
+    userOpensSite = "ユーザはサイトを開く"
+    , serviceChecksSession = "サービスはセッションがあるかを確認する"
+    , sessionExistsThenServicePresentsHome = "セッションがある場合_サービスはホーム画面を表示する"
 
     /* 代替コース */
-    , sessionNotExistsThenPreesntSignin = "セッションがない場合_サービスはログイン画面を表示する"
+    , sessionNotExistsThenServicePresentsSignin = "セッションがない場合_サービスはサインイン画面を表示する"
 }
 
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
-export type BootContext = { scene: Boot.userOpenSite }
-    | { scene: Boot.serviceCheckSession }
-    | { scene: Boot.sessionExistsThenPresentHome; user: User; }
-    | { scene: Boot.sessionNotExistsThenPreesntSignin }
+export type BootContext = { scene: Boot.userOpensSite }
+    | { scene: Boot.serviceChecksSession }
+    | { scene: Boot.sessionExistsThenServicePresentsHome; user: User; }
+    | { scene: Boot.sessionNotExistsThenServicePresentsSignin }
 ;
 
 /**
@@ -33,7 +33,7 @@ export type BootContext = { scene: Boot.userOpenSite }
 export class BootScene extends AbstractScene<BootContext> {
     context: BootContext;
 
-    constructor(context: BootContext = { scene: Boot.userOpenSite }) {
+    constructor(context: BootContext = { scene: Boot.userOpensSite }) {
         super();
         this.context = context;
     }
@@ -45,10 +45,10 @@ export class BootScene extends AbstractScene<BootContext> {
                 map((signInStatusContext) => {
                     switch(signInStatusContext.kind) {
                         case SignInStatus.signIn: {
-                            return this.instantiate({ scene: Boot.sessionExistsThenPresentHome, user: signInStatusContext.user });
+                            return this.instantiate({ scene: Boot.sessionExistsThenServicePresentsHome, user: signInStatusContext.user });
                         }
                         default: {
-                            return this.instantiate({ scene: Boot.sessionNotExistsThenPreesntSignin });
+                            return this.instantiate({ scene: Boot.sessionNotExistsThenServicePresentsSignin });
                         }
                     }
                 })
@@ -58,16 +58,16 @@ export class BootScene extends AbstractScene<BootContext> {
 
     next(): Observable<this>|null {
         switch (this.context.scene) {
-        case Boot.userOpenSite: {
-            return this.just({ scene: Boot.serviceCheckSession });
+        case Boot.userOpensSite: {
+            return this.just({ scene: Boot.serviceChecksSession });
         }
-        case Boot.serviceCheckSession : {
+        case Boot.serviceChecksSession : {
             return this.check();
         }
-        case Boot.sessionExistsThenPresentHome: {
+        case Boot.sessionExistsThenServicePresentsHome: {
             return null;
         }
-        case Boot.sessionNotExistsThenPreesntSignin: {
+        case Boot.sessionNotExistsThenServicePresentsSignin: {
             return null;
         }
         }

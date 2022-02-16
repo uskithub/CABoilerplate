@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { provide } from "vue";
-import { CONTROLLERS_KEY, createControllers } from "@/service/presentation/controllers";
+import { VIEW_MODELS_KEY, createViewModels } from "@/service/presentation/viewModels";
 
-const controllers = createControllers();
-provide(CONTROLLERS_KEY, controllers);
+const viewModels = createViewModels();
+provide(VIEW_MODELS_KEY, viewModels);
 
 </script>
 

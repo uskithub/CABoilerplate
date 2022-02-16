@@ -1,11 +1,14 @@
+// service
+import Home from '@views/Home.vue'
+import SignIn from '@views/SignIn.vue'
+import SignUp from '@views/SignUp.vue'
+
+// system
 import { createApp } from 'vue'
 import vuetify from '@/system/plugins/vuetify'
 import { loadFonts } from '@/system/plugins/webfontloader'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import App from './App.vue'
-import Home from '@views/Home.vue'
-import Signin from '@views/Signin.vue'
-
 import dependencies from '@/service/domain/dependencies'
 import { initializeApp } from 'firebase/app';
 import firebaseConfig from "@/system/config/firebase.config.json";
@@ -16,7 +19,8 @@ dependencies.auth = new FirebaseAuthenticator(firebaseApp);
 
 const routes = [
     { path: '/', component: Home }
-    , { path: '/signin', component: Signin }
+    , { path: '/signin', component: SignIn }
+    , { path: '/signup', component: SignUp }
 ];
 
 const router = createRouter({

@@ -1,17 +1,26 @@
 <script setup lang="ts">
 // system
 import { inject } from "vue";
-import type { Controllers } from "@/service/presentation/controllers";
-import { CONTROLLERS_KEY } from "@/service/presentation/controllers";
+import type { ViewModels } from "../viewModels";
+import { VIEW_MODELS_KEY } from "../viewModels";
 
-const controllers = inject(CONTROLLERS_KEY) as Controllers;
+const { store, createHomeViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
 
-controllers.common.boot();
+const {
+    state
+    , boot
+} = createHomeViewModel();
+
+boot();
 
 </script>
 
 <template lang="pug">
 v-container
   h1 Home
-  router-link(to="/signin") -> Signin
+  ul
+    li
+      router-link(to="/signin") -> SignIn
+    li
+      router-link(to="/signup") -> SignUp
 </template>
