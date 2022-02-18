@@ -13,10 +13,24 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-      , "@views/*": ["src/service/presentation/views/*"]
-      , "@usecases/*": ["src/service/application/usecases/*"]
-      , "@interfaces/*": ["src/service/domain/interfaces/*"]
+      , "@cl/service/*": ["src/client/service/*"]
+      , "@cl/system/*": ["src/client/system/*"]
+      , "@sv/service/*": ["src/server/service/*"]
+      , "@sv/system/*": ["src/server/system/*"]
+      , "@sh/service/*": ["src/shared/service/*"]
+      , "@sh/system/*": ["src/shared/system/*"]
+
+      , "@models/*": ["src/shared/service/domain/models/*"]
+      , "@interfaces/*": ["src/shared/service/domain/interfaces/*"]
+      , "@usecases/*": ["src/shared/service/usecase/*"]
+      , "@viewModels/*": ["src/client/service/presentation/viewModels/*"]
+      , "@views/*": ["src/client/service/presentation/views/*"]
     },
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": [
+    "src/**/*.ts"
+    , "src/**/*.d.ts"
+    , "src/**/*.tsx"
+    , "src/**/*.vue"
+  ]
 }

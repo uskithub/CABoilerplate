@@ -5,14 +5,14 @@ import SignUp from '@views/SignUp.vue'
 
 // system
 import { createApp } from 'vue'
-import vuetify from '@/system/plugins/vuetify'
-import { loadFonts } from '@/system/plugins/webfontloader'
+import vuetify from '@cl/system/plugins/vuetify'
+import { loadFonts } from '@cl/system/plugins/webfontloader'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import App from './App.vue'
-import dependencies from '@/service/domain/dependencies'
+import dependencies from '@sh/service/domain/dependencies'
 import { initializeApp } from 'firebase/app';
-import firebaseConfig from "@/system/config/firebase.config.json";
-import { FirebaseAuthenticator } from '@/service/infrastructure/firebaseAuthenticator'
+import firebaseConfig from "@cl/system/config/firebase.config.json";
+import { FirebaseAuthenticator } from '@cl/service/infrastructure/firebaseAuthenticator'
 
 const firebaseApp = initializeApp(firebaseConfig);
 dependencies.auth = new FirebaseAuthenticator(firebaseApp);

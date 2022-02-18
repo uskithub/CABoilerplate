@@ -1,5 +1,4 @@
-import { Authenticator } from "./interfaces/authenticator";
-
+import { Authenticator } from "@interfaces/authenticator";
 
 export interface Dependencies {
     auth: Authenticator;

@@ -1,15 +1,15 @@
 <script setup lang="ts">
 // system
 import { inject } from "vue";
-import type { ViewModels } from "../viewModels";
-import { VIEW_MODELS_KEY } from "../viewModels";
+import type { ViewModels } from "@viewModels/index";
+import { VIEW_MODELS_KEY } from "@viewModels/index";
 
 const { store, createHomeViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
 
 const {
     state
     , boot
-} = createHomeViewModel();
+} = createHomeViewModel(store);
 
 boot();
 

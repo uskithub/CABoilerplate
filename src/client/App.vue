@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { provide } from "vue";
-import { VIEW_MODELS_KEY, createViewModels } from "@/service/presentation/viewModels";
+import { VIEW_MODELS_KEY, createViewModels } from "@viewModels/index";
 
 const viewModels = createViewModels();
 provide(VIEW_MODELS_KEY, viewModels);

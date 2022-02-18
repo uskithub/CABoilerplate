@@ -16,9 +16,16 @@ export default defineConfig({
   , resolve: {
     alias: {
       "@": path.resolve(__dirname, "src/")
-      , "@views": path.resolve(__dirname, "src/service/presentation/views")
-      , "@usecases": path.resolve(__dirname, "src/service/application/usecases")
-      , "@interfaces": path.resolve(__dirname, "src/service/domain/interfaces")
+      , "@cl/service": path.resolve(__dirname, "src/client/service")
+      , "@cl/system": path.resolve(__dirname, "src/client/system")
+      , "@sh/service": path.resolve(__dirname, "src/shared/service")
+      , "@sh/system": path.resolve(__dirname, "src/shared/system")
+
+      , "@models": path.resolve(__dirname, "src/shared/service/domain/models")
+      , "@interfaces": path.resolve(__dirname, "src/shared/service/domain/interfaces")
+      , "@usecases": path.resolve(__dirname, "src/shared/service/usecase")
+      , "@viewModels": path.resolve(__dirname, "src/client/service/presentation/viewModels")
+      , "@views": path.resolve(__dirname, "src/client/service/presentation/views")
     }
   }
 })

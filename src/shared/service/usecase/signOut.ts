@@ -1,4 +1,4 @@
-import { AbstractScene } from "@system/interfaces/usecase";
+import { AbstractScene } from "@sh/system/interfaces/usecase";
 import { Observable } from "rxjs";
 
 /**

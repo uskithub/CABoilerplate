@@ -1,7 +1,6 @@
-import { Usecase } from "@/system/interfaces/usecase";
 import { Subscription } from "rxjs";
 import { reactive } from "vue";
-import { State, ViewModel } from ".";
+import { State, Store, ViewModel } from ".";
 
 export interface SignInState extends State {
     email: string|null;
@@ -13,10 +12,10 @@ export interface SignInViewModel extends ViewModel<SignInState> {
     state: SignInState
     emailRules: Array<(v: string)=>string|boolean>;
     passwordRules: Array<(v: string)=>string|boolean>;
-    signIn: ()=>void
+    signIn: () => void
 }
 
-export function createSignInViewModel(): SignInViewModel {
+export function createSignInViewModel(store: Store): SignInViewModel {
     const state = reactive<SignInState>({
         email: null
         , password: null

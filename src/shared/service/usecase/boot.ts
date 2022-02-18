@@ -1,7 +1,7 @@
-import { SignInStatus } from "@/service/domain/interfaces/authenticator";
-import service from "@/service/domain/models/service";
-import { User } from "@/service/domain/models/user";
-import { AbstractScene } from "@/system/interfaces/usecase";
+import { SignInStatus } from "@interfaces/authenticator";
+import service from "@models/service";
+import { User } from "@models/user";
+import { AbstractScene } from "@sh/system/interfaces/usecase";
 import { first, map, Observable, of, single } from "rxjs";
 
 /**

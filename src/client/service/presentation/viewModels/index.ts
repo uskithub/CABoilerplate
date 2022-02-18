@@ -10,9 +10,9 @@ export interface Store {}
 
 export type ViewModels = {
     store: Store;
-    createHomeViewModel: () => HomeViewModel;
-    createSignInViewModel: () => SignInViewModel;
-    createSignUpViewModel: () => SignUpViewModel;
+    createHomeViewModel: (store: Store) => HomeViewModel;
+    createSignInViewModel: (store: Store) => SignInViewModel;
+    createSignUpViewModel: (store: Store) => SignUpViewModel;
 }
 
 export function createViewModels(): ViewModels {

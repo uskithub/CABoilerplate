@@ -1,0 +1,16 @@
+{
+    "restartable": "rs"
+    , "verbose": false
+	, "ignore": [
+        ".git"
+        , "node_modules/**/node_modules"
+    ]
+    , "delay" : 3
+    , "execMap" : {
+        "ts" : "node --loader ts-node/esm"
+    }
+	, "watch": [
+		"src/**/*.ts"
+	]
+    , "ext": "ts, json"
+}

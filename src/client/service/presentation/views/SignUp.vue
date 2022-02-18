@@ -1,17 +1,17 @@
 <script setup lang="ts">
 // system
 import { inject } from "vue";
-import type { ViewModels } from "../viewModels";
-import { VIEW_MODELS_KEY } from "../viewModels";
+import type { ViewModels } from "@viewModels/index";
+import { VIEW_MODELS_KEY } from "@viewModels/index";
 
-const { store, createSignInViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
+const { store, createSignUpViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
 
 const {
     state
     , emailRules
     , passwordRules
-    , signIn
-} = createSignInViewModel();
+    , signUp
+} = createSignUpViewModel(store);
 
 </script>
 
@@ -19,7 +19,8 @@ const {
 v-container
   v-app-bar(app)
     v-toolbar-title ホーム
-  h1 SignIn
+  h1 SignUp
+
   v-form(ref="form" v-model="state.isValid" lazy-validation)
     v-text-field(
       v-model="state.email"
@@ -38,8 +39,6 @@ v-container
         :disabled="!state.isValid"
         color="success"
         class="mr-4"
-        @click="signIn"
-    ) Sign In
-
-  router-link(to="/signup") -> SignUp
+        @click="signUp"
+    ) Sign Up
 </template>
