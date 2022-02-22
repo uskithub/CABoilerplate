@@ -6,13 +6,9 @@ import { VIEW_MODELS_KEY } from "../viewModels";
 
 const { store, createHomeViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
 
-const {
-    state
-    , boot
-} = createHomeViewModel();
+const { state, boot } = createHomeViewModel();
 
 boot();
-
 </script>
 
 <template lang="pug">

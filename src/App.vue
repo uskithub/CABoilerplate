@@ -4,7 +4,6 @@ import { VIEW_MODELS_KEY, createViewModels } from "@/service/presentation/viewMo
 
 const viewModels = createViewModels();
 provide(VIEW_MODELS_KEY, viewModels);
-
 </script>
 
 <template lang="pug">

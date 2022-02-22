@@ -26,15 +26,15 @@ export function createSignInViewModel(): SignInViewModel {
     return {
         state
         , emailRules: [
-            v => !!v || 'E-mail is required'
-            , v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
+            v => !!v || "E-mail is required"
+            , v => /.+@.+\..+/.test(v) || "E-mail must be valid"
         ]
         , passwordRules: [
-            v => !!v || 'Password is required'
-            , v => (v && 8 <= v.length) || 'Name must be more than 8 characters'
+            v => !!v || "Password is required"
+            , v => (v && 8 <= v.length) || "Name must be more than 8 characters"
         ]
         , signIn: () => {
-            let subscription: Subscription|null = null;
+            const subscription: Subscription|null = null;
             // subscription = Usecase
             //     .interact<SignUpContext, SignUpScene>(new BootScene())
             //     .subscribe({
@@ -55,5 +55,5 @@ export function createSignInViewModel(): SignInViewModel {
             //         }
             //     });
         }
-    }
+    };
 }

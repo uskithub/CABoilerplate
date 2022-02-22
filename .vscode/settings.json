@@ -1,0 +1,24 @@
+{
+  "eslint.packageManager": "yarn",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.format.enable": true,
+  "eslint.validate": [
+    "typescript",
+    "javascript",
+    "javascriptreact",
+    "vue"
+  ],
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "octref.vetur",
+  },
+  "vetur.format.enable": true,
+  "vetur.format.defaultFormatter.ts": "none",
+  "vetur.format.defaultFormatter.pug": "prettier",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+}
