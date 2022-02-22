@@ -24,6 +24,7 @@ export default defineConfig({
       , "@models": path.resolve(__dirname, "src/shared/service/domain/models")
       , "@interfaces": path.resolve(__dirname, "src/shared/service/domain/interfaces")
       , "@usecases": path.resolve(__dirname, "src/shared/service/usecase")
+      , "@apis": path.resolve(__dirname, "src/client/service/infrastructure/apis")
       , "@viewModels": path.resolve(__dirname, "src/client/service/presentation/viewModels")
       , "@views": path.resolve(__dirname, "src/client/service/presentation/views")
     }

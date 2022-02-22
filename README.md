@@ -486,4 +486,41 @@ app.listen(port, () => {
 });
 ```
 
-## Server
+## Serverでtypescriptでかつesmodulesを使えるようにする
+
+```src/server/package.json
+{
+    "type": "module"
+}
+```
+
+## サーバ側も@でpathを解決できるようにする
+
+```shell
+$ yarn add --dev tsconfig-paths
+```
+
+
+
+# Api@client
+
+```shell
+$ yarn add @aspida/axios axios
+```
+
+```package.json
+  "scripts": {
+    ...
+    "api:build": "aspida"
+  },
+```
+
+```shell
+$ yarn api:build
+```
+
+# Api@Server
+
+```shell
+$ yarn add frourio frourio-express
+```

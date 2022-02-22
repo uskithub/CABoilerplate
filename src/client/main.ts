@@ -13,9 +13,11 @@ import dependencies from '@sh/service/domain/dependencies'
 import { initializeApp } from 'firebase/app';
 import firebaseConfig from "@cl/system/config/firebase.config.json";
 import { FirebaseAuthenticator } from '@cl/service/infrastructure/firebaseAuthenticator'
+import { ApiAuthenticator } from './service/infrastructure/apiAuthenticator'
 
 const firebaseApp = initializeApp(firebaseConfig);
-dependencies.auth = new FirebaseAuthenticator(firebaseApp);
+// dependencies.auth = new FirebaseAuthenticator(firebaseApp);
+dependencies.auth = new ApiAuthenticator();
 
 const routes = [
     { path: '/', component: Home }

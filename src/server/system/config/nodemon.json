@@ -7,7 +7,8 @@
     ]
     , "delay" : 3
     , "execMap" : {
-        "ts" : "node --loader ts-node/esm"
+        "_ts" : "NODE_OPTIONS='--loader ts-node/esm' ts-node -r tsconfig-paths/register",
+        "ts" : "node -r tsconfig-paths/register --experimental-loader=ts-node/esm --es-module-specifier-resolution=node"
     }
 	, "watch": [
 		"src/**/*.ts"

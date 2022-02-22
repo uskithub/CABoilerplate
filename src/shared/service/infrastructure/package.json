@@ -1,0 +1,10 @@
+{
+    "scripts": {
+        "api:build": "aspida",
+        "generate:frourio": "frourio-express --prefix server"
+    },
+    "devDependencies": {
+        "@aspida/axios": "^1.7.1",
+        "frourio-express": "^0.26.0"
+    }
+}

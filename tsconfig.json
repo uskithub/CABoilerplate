@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "useDefineForClassFields": true,
-    "module": "esnext",
+    "module": "nodenext",
     "moduleResolution": "node",
     "strict": true,
     "jsx": "preserve",
@@ -15,14 +15,17 @@
       "@/*": ["src/*"]
       , "@cl/service/*": ["src/client/service/*"]
       , "@cl/system/*": ["src/client/system/*"]
+
       , "@sv/service/*": ["src/server/service/*"]
       , "@sv/system/*": ["src/server/system/*"]
+
       , "@sh/service/*": ["src/shared/service/*"]
       , "@sh/system/*": ["src/shared/system/*"]
 
       , "@models/*": ["src/shared/service/domain/models/*"]
       , "@interfaces/*": ["src/shared/service/domain/interfaces/*"]
       , "@usecases/*": ["src/shared/service/usecase/*"]
+      , "@apis": ["src/client/service/interfaces/apis/*"]
       , "@viewModels/*": ["src/client/service/presentation/viewModels/*"]
       , "@views/*": ["src/client/service/presentation/views/*"]
     },
