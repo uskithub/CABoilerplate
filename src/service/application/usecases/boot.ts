@@ -44,12 +44,12 @@ export class BootScene extends AbstractScene<BootContext> {
             .pipe(
                 map((signInStatusContext) => {
                     switch(signInStatusContext.kind) {
-                        case SignInStatus.signIn: {
-                            return this.instantiate({ scene: Boot.sessionExistsThenServicePresentsHome, user: signInStatusContext.user });
-                        }
-                        default: {
-                            return this.instantiate({ scene: Boot.sessionNotExistsThenServicePresentsSignin });
-                        }
+                    case SignInStatus.signIn: {
+                        return this.instantiate({ scene: Boot.sessionExistsThenServicePresentsHome, user: signInStatusContext.user });
+                    }
+                    default: {
+                        return this.instantiate({ scene: Boot.sessionNotExistsThenServicePresentsSignin });
+                    }
                     }
                 })
                 , first() // 一度観測したらsubscriptionを終わらせる

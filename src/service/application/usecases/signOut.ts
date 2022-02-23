@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 /**
  * usecase: サインインする
  */
- export const enum SignOut {
+export const enum SignOut {
     /* 基本コース */
     userStartsSignOutProcess = "ユーザはサインアウトを開始する"
     , serviceClosesSession = "サービスはセッションを終了する"

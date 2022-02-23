@@ -7,4 +7,4 @@ export default {
     signInStatus: (): Observable<SignInStatusContext> => {
         return dependencies.auth.signInStatus();
     }
-}
+};

@@ -4,7 +4,7 @@ import { User } from "../models/user";
 /**
  * サインインステータス
  */
- export const enum SignInStatus {
+export const enum SignInStatus {
     signIn = "signIn"
     , signingIn = "signingIn"
     , signOut = "signOut"

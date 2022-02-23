@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 /**
  * usecase: サインインする
  */
- export const enum SignIn {
+export const enum SignIn {
     /* 基本コース */
     userStartsSignInProcess = "ユーザはサインインを開始する"
     , servicePresentsSignInView = "サービスはサインイン画面を表示する"
@@ -18,7 +18,7 @@ import { Observable } from "rxjs";
 
 export type SignInContext = { scene: SignIn.userStartsSignInProcess }
     | { scene: SignIn.servicePresentsSignInView }
-    | { scene: SignIn.userInputsIdAndPassword; userId: String; password: String; }
+    | { scene: SignIn.userInputsIdAndPassword; userId: string; password: string; }
     | { scene: SignIn.userTriesToSignIn }
     | { scene: SignIn.onSuccessThenServicePresentsHomeView }
     | { scene: SignIn.onFailureThenServicePresentsError; error: Error; }

@@ -422,6 +422,9 @@ v-app
 
 # コードフォーマット
 
+ゴール：TypeScript と vue ファイル内の Pug に対し、保存時に自動でフォーマットがなされるようにする。
+実現方法：
+
 - .ts/.vue の TypeScript は ESLint に、
 - .vue の pug は Vetur 経由で Prettier に、
 - .json は Prettier に
@@ -430,7 +433,7 @@ v-app
 
 ## eslint
 
-formatter にもなるので prettier は使わない。
+### インストール
 
 ```shell
 $ yarn add --dev eslint
@@ -451,67 +454,84 @@ $ yarn create @eslint/config
 
 ```.eslintrc.js
 module.exports = {
-    "env": {
-        "browser": true
-        , "es2021": true
+    env: {
+        browser: true
+        , es2021: true
+        , node: true
     }
-    , "extends": [
+    , extends: [
         "eslint:recommended"
-        , "plugin:vue/essential"
+        , "plugin:vue/vue3-recommended"
         , "plugin:@typescript-eslint/recommended"
     ]
-    , "parserOptions": {
-        "ecmaVersion": "latest"
-        , "parser": "@typescript-eslint/parser"
-        , "sourceType": "module"
+    , parser: "vue-eslint-parser"
+    , parserOptions: {
+        ecmaVersion: "latest"
+        , parser: "@typescript-eslint/parser"
+        , sourceType: "module"
     }
-    , "plugins": [
-        "vue"
-        , "@typescript-eslint"
-    ]
-    , "rules": {
-        "indent": [
-            "error"
-            , 4
-        ]
-        , "quotes": [
-            "warn"
-            , "double"
-        ]
-        , "semi": [
-            "warn"
-            , "always"
-        ]
-        , "comma-style" : [
-            "warn"
-            , "first"
-        ]
-        , "comma-spacing" : [
-            "warn"
-            , { "before": false, "after": true }
-        ]
-        , "no-var": [
-            "error"
-        ]
-        , "no-console": [
-            "off"
-        ]
-        , "no-unused-vars": [
-            "off"
-        ]
-        , "no-mixed-spaces-and-tabs": [
-            "warn"
-        ]
-        , "no-warning-comments": [
-            "warn"
-            , { "terms": ["todo"], "location": "anywhere" }
-        ]
+    , plugins: ["vue", "@typescript-eslint"]
+    , rules: {
+        indent: ["error", 4]
+        , quotes: ["warn", "double"]
+        , semi: ["warn", "always"]
+        , "comma-style": ["warn", "first"]
+        , "comma-spacing": ["warn", { before: false, after: true }]
+        , "comma-dangle": ["warn", "never"]
+        , "no-var": ["error"]
+        , "no-console": ["off"]
+        , "no-unused-vars": ["off"]
+        , "no-mixed-spaces-and-tabs": ["warn"]
+        , "no-warning-comments": ["warn", { terms: ["todo"], location: "anywhere" }]
     }
 };
+```
+
+### VSCode プラグイン
+
+"dbaeumer.vscode-eslint" をインストール。
+
+```.vscode/settings.json
+{
+  "eslint.packageManager": "yarn",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.format.enable": true,
+  "eslint.validate": [
+    "typescript",
+    "javascript",
+    "javascriptreact",
+    "vue"
+  ]
+}
 ```
 
 ## Pritter
 
 ```shell
 $ yarn add --dev prettier @prettier/plugin-pug
+```
+
+### VSCode プラグイン
+
+"octref.vetur", "esbenp.prettier-vscode" をインストール。
+
+"vetur.format.defaultFormatter.ts": "none" として、prettier を抑制し、ESLint のみが利くようにする。
+
+```.vscode/settings.json
+{
+  ...
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "octref.vetur",
+  },
+  "vetur.format.enable": true,
+  "vetur.format.defaultFormatter.ts": "none",
+  "vetur.format.defaultFormatter.pug": "prettier",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+}
 ```

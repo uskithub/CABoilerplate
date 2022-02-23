@@ -5,8 +5,8 @@ import { Observable, ReplaySubject } from "rxjs";
 import { User } from "../domain/models/user";
 
 export class FirebaseAuthenticator implements Authenticator {
-    #auth: Auth
-    #unscriber: Unsubscribe
+    #auth: Auth;
+    #unscriber: Unsubscribe;
     #signInStatus: ReplaySubject<SignInStatusContext>;
 
     constructor(app: FirebaseApp) {
