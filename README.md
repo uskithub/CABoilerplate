@@ -532,6 +532,5 @@ $ yarn add --dev prettier @prettier/plugin-pug
   "vetur.format.defaultFormatter.ts": "none",
   "vetur.format.defaultFormatter.pug": "prettier",
   "editor.formatOnSave": true,
-  "editor.formatOnPaste": true,
 }
 ```
