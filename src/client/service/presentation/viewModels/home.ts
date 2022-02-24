@@ -3,7 +3,7 @@ import { Boot, BootScene } from "@usecases/boot";
 import type { BootContext } from "@usecases/boot";
 
 // system
-import { Usecase } from "@/system/interfaces/usecase";
+import { Usecase } from "@shared/system/interfaces/usecase";
 import { Subscription } from "rxjs";
 import { reactive } from "vue";
 import { State, ViewModel } from ".";
