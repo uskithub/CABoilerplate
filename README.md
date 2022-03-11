@@ -534,3 +534,197 @@ $ yarn add --dev prettier @prettier/plugin-pug
   "editor.formatOnSave": true,
 }
 ```
+
+# Express による Vue と API のホスティング
+
+client も server も ESModule で動くようにする。
+
+```shell
+$ yarn add express
+$ yarn add -D @types/node @types/express nodemon ts-node
+```
+
+## ESModule で動くようにする
+
+node 実行時に `--experimental-loader=ts-node/esm`を付ける。
+
+tsconfig にて、"module": "nodenext"とする。
+
+```tsconfig.json
+{
+  ...
+  "module": "nodenext",
+  ...
+}
+```
+
+## サーバ側も@で path を解決できるようにする
+
+`tsconfig-path`を導入し、node 実行時に `-r tsconfig-paths/register`を付ける。
+
+```shell
+$ yarn add --dev tsconfig-paths
+```
+
+## nodemon 設定
+
+src/system/config 以下に nodemon.json を新規作成。
+
+| option                                | 役割                                                |
+| ------------------------------------- | --------------------------------------------------- |
+| -r tsconfig-paths/register            | tsconfig.json での paths を node 上で有効にするため |
+| --experimental-loader=ts-node/esm     | node 上で ESModule を有効にする                     |
+| --es-module-specifier-resolution=node | import で 拡張子と index を省略可能にする           |
+
+```nodemon.json
+{
+  "restartable": "rs",
+  "verbose": false,
+  "ignore": [".git", "node_modules/**/node_modules"],
+  "delay": 3,
+  "execMap": {
+    "ts": "node -r tsconfig-paths/register --experimental-loader=ts-node/esm --es-module-specifier-resolution=node"
+  },
+  "watch": ["src/**/*.ts", "src/**/*.vue"],
+  "ext": "ts, json"
+}
+```
+
+## Express のセットアップし、Vite をミドルウェアとして使用し Vue をホスティングする
+
+src/server/system 以下に main.ts を新規作成。
+
+```src/server/system/main.ts
+import express, { RequestHandler } from 'express';
+import { rootHandler } from './handlers';
+
+import { createServer  } from 'vite';
+
+import server from '@sh/service/infrastructure/$server';
+// import { helloHandler } from '../../shared/service/handlers';
+// import { helloHandler } from '@/shared/service/handlers';
+import { helloHandler } from '@sh/service/handlers';
+
+const app = express();
+const port = process.env.PORT || '3000';
+
+// ミドルウェアモードで Vite サーバを作成
+createServer({
+  server: { middlewareMode: 'html' }
+})
+.then(vite => {
+  // vite の接続インスタンスをミドルウェアとして使用
+  app.use(vite.middlewares);
+});
+
+app.get('/api', rootHandler);
+app.get('/hello/:name', helloHandler);
+
+server(app, { basePath: "http://localhost:3000/" })
+
+
+
+
+app.listen(port, () => {
+  return console.log(`Server is listening on ${port}`);
+});
+```
+
+## GraphQL Apollo
+
+```shell
+$ yarn add @apollo/client apollo-server-express graphql react
+$ yarn add @graphql-tools/graphql-file-loader @graphql-tools/load @graphql-tools/schema
+```
+
+@see: https://zenn.dev/eringiv3/books/a85174531fd56a/viewer/382755
+
+VSCode 拡張機能 `apollographql.vscode-apollo`
+
+# 多言語対応
+
+i18n ライクな機構を独自で用意する。
+shared/system/localizations 以下に index.ts として以下を用意。
+
+```index.ts
+import en from "./en";
+import ja from "./ja";
+export type Dictionary = typeof en;
+
+const _languages = ["ja", "en"] as const;
+export type _Languages = typeof _languages[number];
+type Languages = { [lang in _Languages]: Dictionary };
+
+
+const languages: Languages = { ja, en };
+const defaultLanguage = en;
+
+// 用意された言語ファイルか検査
+const isLanguage = (test: string): test is _Languages => {
+    return languages[test as _Languages] !== undefined;
+};
+
+export const i18n = (language: string): Dictionary => {
+    return isLanguage(language) ? languages[language] : defaultLanguage;
+};
+```
+
+```en.ts
+export default {
+    signUp : {
+        title : "Sign Up"
+        , buttons: {
+            signUp: "Sign Up"
+        }
+    }
+    , common : {
+        labels : {
+            mailAddress: "Mail Address"
+            , password: "Password"
+        }
+        , validations : {
+            required: (what: string) => `${ what } is required`
+            , malformed: (what: string) => `${ what } must be valid`
+        }
+    }
+};
+```
+
+```ja.ts
+import { Dictionary } from ".";
+
+const ja: Dictionary = {
+    signUp : {
+        title: "サインアップ"
+        , buttons: {
+            signUp: "サインアップ"
+        }
+    }
+    , common : {
+        labels : {
+            mailAddress: "メールアドレス"
+            , password: "パスワード"
+        }
+        , validations : {
+            required: (what: string) => `${ what } は必須です`
+            , malformed: (what: string) => `正しい ${ what } の形式ではありません`
+        }
+    }
+};
+
+export default ja;
+```
+
+使う場合は以下のようにする。
+
+```ts:クライアントで
+const t = i18n(navigator.language);
+t.common.labels.password;
+```
+
+```ts:サーバーにて
+export default (_req: Request, res: Response) => {
+  const t = i18n(_req.acceptsLanguages()[0]);
+  t.common.labels.password;
+};
+```

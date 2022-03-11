@@ -38,6 +38,23 @@ export class BootScene extends AbstractScene<BootContext> {
         this.context = context;
     }
 
+    next(): Observable<this>|null {
+        switch (this.context.scene) {
+        case Boot.userOpensSite: {
+            return this.just({ scene: Boot.serviceChecksSession });
+        }
+        case Boot.serviceChecksSession : {
+            return this.check();
+        }
+        case Boot.sessionExistsThenServicePresentsHome: {
+            return null;
+        }
+        case Boot.sessionNotExistsThenServicePresentsSignin: {
+            return null;
+        }
+        }
+    }
+
     private check(): Observable<this> {
         return service
             .signInStatus()
@@ -54,22 +71,5 @@ export class BootScene extends AbstractScene<BootContext> {
                 })
                 , first() // 一度観測したらsubscriptionを終わらせる
             );
-    }
-
-    next(): Observable<this>|null {
-        switch (this.context.scene) {
-        case Boot.userOpensSite: {
-            return this.just({ scene: Boot.serviceChecksSession });
-        }
-        case Boot.serviceChecksSession : {
-            return this.check();
-        }
-        case Boot.sessionExistsThenServicePresentsHome: {
-            return null;
-        }
-        case Boot.sessionNotExistsThenServicePresentsSignin: {
-            return null;
-        }
-        }
     }
 }

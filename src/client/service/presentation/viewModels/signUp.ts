@@ -1,59 +1,89 @@
+import { SignUp, SignUpContext, SignUpScene } from "@/shared/service/application/usecases/signUp";
 import { Usecase } from "@shared/system/interfaces/usecase";
 import { Subscription } from "rxjs";
-import { reactive } from "vue";
+import { inject, reactive } from "vue";
 import { State, ViewModel } from ".";
+import { DICTIONARY_KEY } from "@/shared/system/localizations";
+import type { Dictionary } from "@/shared/system/localizations";
 
 export interface SignUpState extends State {
     email: string|null;
     password: string|null;
     isValid: boolean;
+    idInvalidMessage: string|string[]|null;
+    passwordInvalidMessage: string|string[]|null;
 }
 
 export interface SignUpViewModel extends ViewModel<SignUpState> {
     state: SignUpState
-    emailRules: Array<(v: string)=>string|boolean>;
-    passwordRules: Array<(v: string)=>string|boolean>;
-    signUp: ()=>void
+    signUp: (id: string|null, password: string|null)=>void
 }
 
 export function createSignUpViewModel(): SignUpViewModel {
+    const t = inject(DICTIONARY_KEY) as Dictionary;
     const state = reactive<SignUpState>({
         email: null
         , password: null
         , isValid: true
+        , idInvalidMessage: null
+        , passwordInvalidMessage: null
     });
 
     return {
         state
-        , emailRules: [
-            v => !!v || "E-mail is required"
-            , v => /.+@.+\..+/.test(v) || "E-mail must be valid"
-        ]
-        , passwordRules: [
-            v => !!v || "Password is required"
-            , v => (v && 8 <= v.length) || "Name must be more than 8 characters"
-        ]
-        , signUp: () => {
-            const subscription: Subscription|null = null;
-            // subscription = Usecase
-            //     .interact<SignUpContext, SignUpScene>(new BootScene())
-            //     .subscribe({
-            //         next: (performedSenario) => {
-            //             const lastContext = performedSenario.slice(-1)[0];
-            //             switch(lastContext.scene){
-            //                 case Boot.sessionExistsThenPresentHome:
-            //                     break;
-            //                 case Boot.sessionNotExistsThenPreesntSignin:
-            //                     this.#router.replace("/signin");
-            //                     break;
-            //             }
-            //         }
-            //         , error: (e) => console.error(e)
-            //         , complete: () => {
-            //             console.info('complete')
-            //             subscription?.unsubscribe();
-            //         }
-            //     });
+        , signUp: (id: string|null, password: string|null) => {
+            let subscription: Subscription|null = null;
+            subscription = Usecase
+                .interact<SignUpContext, SignUpScene>(new SignUpScene({ scene: SignUp.userStartsSignUpProcess, id, password }))
+                .subscribe({
+                    next: (performedSenario) => {
+                        const lastContext = performedSenario.slice(-1)[0];
+                        switch(lastContext.scene){
+                        case SignUp.onSuccessThenServicePresentsHomeView:
+                            break;
+                        case SignUp.onFailureInInputsThenServicePresentsError: {
+                            if (lastContext.result === true){ return; }
+                            const labelMailAddress = t.common.labels.mailAddress;
+                            const labelPassword = t.common.labels.password;
+
+                            switch (lastContext.result.id) {
+                            case "isRequired":
+                                state.idInvalidMessage = t.common.validations.isRequired(labelMailAddress);
+                                break;
+                            case "isMalformed":
+                                state.idInvalidMessage = t.common.validations.isMalformed(labelMailAddress);
+                                break;
+                            case null:
+                                state.idInvalidMessage = null;
+                                break;
+                            }
+
+                            switch (lastContext.result.password) {
+                            case "isRequired":
+                                state.passwordInvalidMessage = t.common.validations.isRequired(labelPassword);
+                                break;
+                            case "isTooShort":
+                                state.passwordInvalidMessage = t.common.validations.isTooShort(labelPassword, 8);
+                                break;
+                            case "isTooLong":
+                                state.passwordInvalidMessage = t.common.validations.isTooLong(labelPassword, 20);
+                                break;
+                            case null:
+                                state.passwordInvalidMessage = null;
+                                break;
+                            }
+                            break;
+                        }
+                        case SignUp.onFailureInPublishingThenServicePresentsError:
+                            break;
+                        }
+                    }
+                    , error: (e) => console.error(e)
+                    , complete: () => {
+                        console.info("complete");
+                        subscription?.unsubscribe();
+                    }
+                });
         }
     };
 }

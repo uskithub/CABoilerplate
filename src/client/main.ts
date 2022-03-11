@@ -13,9 +13,12 @@ import dependencies from "@shared/service/domain/dependencies";
 import { initializeApp } from "firebase/app";
 import firebaseConfig from "@client/system/config/firebase.config.json";
 import { FirebaseAuthenticator } from "@client/service/infrastructure/firebaseAuthenticator";
+import { DICTIONARY_KEY, i18n } from "@/shared/system/localizations";
+// import { GraphqlAuthenticator } from "./service/infrastructure/graphqlAuthenticator";
 
 const firebaseApp = initializeApp(firebaseConfig);
 dependencies.auth = new FirebaseAuthenticator(firebaseApp);
+// dependencies.auth = new GraphqlAuthenticator();
 
 const routes = [
     { path: "/", component: Home }
@@ -30,7 +33,11 @@ const router = createRouter({
 
 loadFonts();
 
+const dictionary = i18n(navigator.language);
+
 const app = createApp(App);
 app.use(vuetify);
 app.use(router);
 app.mount("#app");
+app.provide(DICTIONARY_KEY, dictionary);
+
