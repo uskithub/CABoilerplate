@@ -16,7 +16,7 @@ export interface SignInViewModel extends ViewModel<SignInState> {
     signIn: ()=>void
 }
 
-export function createSignInViewModel(): SignInViewModel {
+export function createSignInViewModel(store: Store): SignInViewModel {
     const state = reactive<SignInState>({
         email: null
         , password: null

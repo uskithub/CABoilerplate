@@ -2,7 +2,7 @@ import { SignUp, SignUpContext, SignUpScene } from "@/shared/service/application
 import { Usecase } from "@shared/system/interfaces/usecase";
 import { Subscription } from "rxjs";
 import { inject, reactive } from "vue";
-import { State, ViewModel } from ".";
+import { State, Store, ViewModel } from ".";
 import { DICTIONARY_KEY } from "@/shared/system/localizations";
 import type { Dictionary } from "@/shared/system/localizations";
 
@@ -19,7 +19,7 @@ export interface SignUpViewModel extends ViewModel<SignUpState> {
     signUp: (id: string|null, password: string|null)=>void
 }
 
-export function createSignUpViewModel(): SignUpViewModel {
+export function createSignUpViewModel(store: Store): SignUpViewModel {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const state = reactive<SignUpState>({
         email: null

@@ -17,9 +17,10 @@ export class FirebaseAuthenticator implements Authenticator {
             if (user) {
                 const _user: User = {
                     uid: user.uid
-                    , email: user.email
-                    , photoURL: user.photoURL
+                    , mailAddress: user.email
+                    , photoUrl: user.photoURL
                     , displayName: user.displayName
+                    , isMailAddressVerified: user.emailVerified
                 };
                 console.log("onAuthStateChanged: signIn", _user);
                 this.#signInStatus.next({ kind: SignInStatus.signIn, user: _user });

@@ -8,8 +8,7 @@ import type { ViewModels } from "../viewModels";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { store, createSignUpViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-
-const { state, signUp } = createSignUpViewModel();
+const { state, signUp } = createSignUpViewModel(store);
 
 
 </script>

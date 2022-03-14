@@ -5,8 +5,7 @@ import type { ViewModels } from "../viewModels";
 import { VIEW_MODELS_KEY } from "../viewModels";
 
 const { store, createSignInViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-
-const { state, emailRules, passwordRules, signIn } = createSignInViewModel();
+const { state, emailRules, passwordRules, signIn } = createSignInViewModel(store);
 </script>
 
 <template lang="pug">
