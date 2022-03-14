@@ -8,6 +8,7 @@ import { Subscription } from "rxjs";
 import { reactive } from "vue";
 import { State, Store, ViewModel } from ".";
 import { useRouter } from "vue-router";
+import { UserNotAuthorizedToInteract } from "@/shared/service/serviceErrors";
 
 export type HomeState = State;
 
@@ -38,13 +39,18 @@ export function createHomeViewModel(store: Store): HomeViewModel {
                             break;
                         }
                     }
-                }
-                , error: (e) => console.error(e)
-                , complete: () => {
-                    console.info("complete");
-                    subscription?.unsubscribe();
-                }
-            });
+                    , error: (e) => {
+                        if (e instanceof UserNotAuthorizedToInteract) {
+                            console.error(e);
+                        } else {
+                            console.error(e);
+                        }
+                    }
+                    , complete: () => {
+                        console.info("complete");
+                        subscription?.unsubscribe();
+                    }
+                });
         }
     };
 }

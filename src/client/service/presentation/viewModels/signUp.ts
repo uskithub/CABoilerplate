@@ -6,6 +6,7 @@ import { State, Store, ViewModel } from ".";
 import { DICTIONARY_KEY } from "@/shared/system/localizations";
 import type { Dictionary } from "@/shared/system/localizations";
 import { useRouter } from "vue-router";
+import { UserNotAuthorizedToInteract } from "@/shared/service/serviceErrors";
 
 export interface SignUpState extends State {
     email: string|null;
@@ -35,7 +36,7 @@ export function createSignUpViewModel(store: Store): SignUpViewModel {
         state
         , signUp: (id: string|null, password: string|null) => {
             let subscription: Subscription|null = null;
-            subscription = Usecase
+            subscription = new Usecase(null)
                 .interact<SignUpContext, SignUpScene>(new SignUpScene({ scene: SignUp.userStartsSignUpProcess, id, password }))
                 .subscribe({
                     next: (performedSenario) => {
@@ -83,7 +84,13 @@ export function createSignUpViewModel(store: Store): SignUpViewModel {
                             break;
                         }
                     }
-                    , error: (e) => console.error(e)
+                    , error: (e) => {
+                        if (e instanceof UserNotAuthorizedToInteract) {
+                            console.error(e);
+                        } else {
+                            console.error(e);
+                        }
+                    }
                     , complete: () => {
                         console.info("complete");
                         subscription?.unsubscribe();

@@ -1,18 +1,32 @@
-import { Observable, of } from "rxjs";
+import { Usecases } from "@/shared/service/application/usecases";
+import { User } from "@/shared/service/domain/models/user";
+import { UserNotAuthorizedToInteract } from "@/shared/service/serviceErrors";
+import { Observable, of, throwError } from "rxjs";
 import { mergeMap, map } from "rxjs/operators";
+import ServiceModel from "@models/service";
 
 interface Scene<T> {
+    usecase: Usecases;
     context: T;
-    next: () => Observable<this> | null;
+    /**
+     * Usecaseを実行するユーザがそのUsecaseが許可されているかを返します
+     */
+    authorize: (actor: User|null) => boolean
+    next: () => Observable<this>|null;
 }
 
 export abstract class AbstractScene<T> implements Scene<T> {
+    abstract usecase: Usecases;
     abstract context: T;
-    abstract next(): Observable<this> | null;
+    abstract next(): Observable<this>|null;
 
     protected instantiate(nextContext: T): this {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return new (this.constructor as any)(nextContext);
+    }
+
+    authorize(actor: User|null): boolean {
+        return ServiceModel.authorize(this.usecase, actor);
     }
 
     just(nextContext: T): Observable<this> {
@@ -21,8 +35,13 @@ export abstract class AbstractScene<T> implements Scene<T> {
 }
 
 export class Usecase {
+    #actor: User|null;
 
-    static interact<T, U extends Scene<T>>(initialScene: U): Observable<T[]> {
+    constructor(actor: User|null) {
+        this.#actor = actor;
+    }
+
+    interact<T, U extends Scene<T>>(initialScene: U): Observable<T[]> {
 
         const _interact = (senario: U[]): Observable<U[]> => {
             const lastScene = senario.slice(-1)[0];
@@ -46,6 +65,11 @@ export class Usecase {
                     })
                 );
         };
+
+        if (!initialScene.authorize(this.#actor)) {
+            const err = new UserNotAuthorizedToInteract(initialScene.usecase);
+            return throwError(() => err);
+        }
 
         return _interact([initialScene])
             .pipe(

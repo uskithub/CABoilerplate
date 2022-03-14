@@ -1,8 +1,9 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
-import service from "@models/service";
+import ServiceModel from "@models/service";
 import { User } from "@models/user";
 import { AbstractScene } from "@shared/system/interfaces/usecase";
-import { first, map, Observable, of, single } from "rxjs";
+import { first, map, Observable } from "rxjs";
+import { Usecases } from ".";
 
 /**
  * usecase: アプリを起動する
@@ -31,6 +32,7 @@ export type BootContext = { scene: Boot.userOpensSite }
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
 export class BootScene extends AbstractScene<BootContext> {
+    usecase = Usecases.boot;
     context: BootContext;
 
     constructor(context: BootContext = { scene: Boot.userOpensSite }) {
@@ -56,7 +58,7 @@ export class BootScene extends AbstractScene<BootContext> {
     }
 
     private check(): Observable<this> {
-        return service
+        return ServiceModel
             .signInStatus()
             .pipe(
                 map((signInStatusContext) => {
