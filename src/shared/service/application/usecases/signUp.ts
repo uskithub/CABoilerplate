@@ -1,6 +1,7 @@
 import { AbstractScene } from "@shared/system/interfaces/usecase";
-import { Observable } from "rxjs";
-import User from "@models/user";
+import { first, map, Observable } from "rxjs";
+import type { User } from "@models/user";
+import UserModel from "@models/user";
 import type { SignUpValidationResult } from "@models/user";
 
 /**
@@ -10,21 +11,21 @@ export const enum SignUp {
     /* 基本コース */
     userStartsSignUpProcess = "ユーザはサインアップを開始する"
     , serviceValidateInputs = "サービスは入力項目に問題がないかを確認する"
-    , onSuccessThenservicePublishNewAccount = "入力項目に問題がない場合_サービスはアカウントは新規に発行する"
-    , onSuccessThenServicePresentsHomeView = "アカウントの発行に成功した場合_サービスはホーム画面を表示する"
+    , onSuccessInValidatingThenServicePublishNewAccount = "入力項目に問題がない場合_サービスはアカウントは新規に発行する"
+    , onSuccessInPublishingThenServicePresentsHomeView = "アカウントの発行に成功した場合_サービスはホーム画面を表示する"
 
     /* 代替コース */
-    , onFailureInInputsThenServicePresentsError = "入力項目に問題がある場合_サービスはエラーを表示する"
+    , onFailureInValidatingThenServicePresentsError = "入力項目に問題がある場合_サービスはエラーを表示する"
     , onFailureInPublishingThenServicePresentsError = "アカウントの発行に失敗した場合_サービスはエラーを表示する"
 }
 
 export type SignUpContext = { scene: SignUp.userStartsSignUpProcess; id: string|null; password: string|null; }
     | { scene: SignUp.serviceValidateInputs; id: string|null; password: string|null; }
-    | { scene: SignUp.onSuccessThenservicePublishNewAccount }
-    | { scene: SignUp.onSuccessThenServicePresentsHomeView }
-    | { scene: SignUp.onFailureInInputsThenServicePresentsError; result: SignUpValidationResult; }
+    | { scene: SignUp.onSuccessInValidatingThenServicePublishNewAccount; id: string; password: string; }
+    | { scene: SignUp.onSuccessInPublishingThenServicePresentsHomeView; user: User; }
+    | { scene: SignUp.onFailureInValidatingThenServicePresentsError; result: SignUpValidationResult; }
     | { scene: SignUp.onFailureInPublishingThenServicePresentsError; error: Error; }
-;
+    ;
 
 export class SignUpScene extends AbstractScene<SignUpContext> {
     context: SignUpContext;
@@ -42,15 +43,14 @@ export class SignUpScene extends AbstractScene<SignUpContext> {
         case SignUp.serviceValidateInputs : {
             return this.validate(this.context.id, this.context.password);
         }
-        case SignUp.onSuccessThenservicePublishNewAccount: {
+        case SignUp.onSuccessInValidatingThenServicePublishNewAccount: {
+            return this.publishNewAccount(this.context.id, this.context.password);
+        }
+        case SignUp.onSuccessInPublishingThenServicePresentsHomeView: {
             // TODO
             return null;
         }
-        case SignUp.onSuccessThenServicePresentsHomeView: {
-            // TODO
-            return null;
-        }
-        case SignUp.onFailureInInputsThenServicePresentsError: {
+        case SignUp.onFailureInValidatingThenServicePresentsError: {
             return null;
         }
         case SignUp.onFailureInPublishingThenServicePresentsError: {
@@ -60,11 +60,21 @@ export class SignUpScene extends AbstractScene<SignUpContext> {
     }
 
     private validate(id: string|null, password: string|null): Observable<this> {
-        const result = User.validate(id, password);
-        if (result === true) {
-            return this.just({ scene: SignUp.onSuccessThenservicePublishNewAccount });
+        const result = UserModel.validate(id, password);
+        if (result === true && id !== null && password != null) {
+            return this.just({ scene: SignUp.onSuccessInValidatingThenServicePublishNewAccount, id, password });
         } else {
-            return this.just({ scene: SignUp.onFailureInInputsThenServicePresentsError, result });
+            return this.just({ scene: SignUp.onFailureInValidatingThenServicePresentsError, result });
         }
+    }
+
+    private publishNewAccount(id: string, password: string): Observable<this> {
+        return UserModel.create(id, password)
+            .pipe(
+                map(user => {
+                    return this.instantiate({ scene: SignUp.onSuccessInPublishingThenServicePresentsHomeView, user });
+                })
+                , first() // 一度観測したらsubscriptionを終わらせる
+            );
     }
 }

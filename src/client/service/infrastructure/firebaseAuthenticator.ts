@@ -1,6 +1,6 @@
 import { Authenticator, SignInStatus, SignInStatusContext } from "@interfaces/authenticator";
 import { FirebaseApp } from "firebase/app";
-import { Auth, getAuth, onAuthStateChanged, Unsubscribe } from "firebase/auth";
+import { Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, Unsubscribe } from "firebase/auth";
 import { Observable, ReplaySubject } from "rxjs";
 import { User } from "@models/user";
 
@@ -33,5 +33,25 @@ export class FirebaseAuthenticator implements Authenticator {
 
     signInStatus(): Observable<SignInStatusContext> {
         return this.#signInStatus.asObservable();
+    }
+
+    createAccount(mailAddress: string, password: string): Observable<User> {
+        return new Observable(subscriber => {
+            createUserWithEmailAndPassword(this.#auth, mailAddress, password)
+                .then(userCredential => {
+                    const user = userCredential.user;
+                    subscriber.next({
+                        uid: user.uid
+                        , mailAddress: user.email
+                        , photoUrl: user.photoURL
+                        , displayName: user.displayName
+                        , isMailAddressVerified: user.emailVerified
+                    } as User);
+                    subscriber.complete();
+                })
+                .catch(error => {
+                    subscriber.error(error);
+                });
+        });
     }
 }

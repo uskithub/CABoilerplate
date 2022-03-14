@@ -22,4 +22,9 @@ export interface Authenticator {
      * サインインステータスの監視を開始します。
      */
     signInStatus: () => Observable<SignInStatusContext>;
+
+    /**
+     * アカウントを作成します。
+     */
+    createAccount: (mailAddress: string, password: string) => Observable<User>;
 }

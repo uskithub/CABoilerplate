@@ -5,6 +5,7 @@ import { inject, reactive } from "vue";
 import { State, Store, ViewModel } from ".";
 import { DICTIONARY_KEY } from "@/shared/system/localizations";
 import type { Dictionary } from "@/shared/system/localizations";
+import { useRouter } from "vue-router";
 
 export interface SignUpState extends State {
     email: string|null;
@@ -21,6 +22,7 @@ export interface SignUpViewModel extends ViewModel<SignUpState> {
 
 export function createSignUpViewModel(store: Store): SignUpViewModel {
     const t = inject(DICTIONARY_KEY) as Dictionary;
+    const router = useRouter();
     const state = reactive<SignUpState>({
         email: null
         , password: null
@@ -39,9 +41,12 @@ export function createSignUpViewModel(store: Store): SignUpViewModel {
                     next: (performedSenario) => {
                         const lastContext = performedSenario.slice(-1)[0];
                         switch(lastContext.scene){
-                        case SignUp.onSuccessThenServicePresentsHomeView:
+                        case SignUp.onSuccessInPublishingThenServicePresentsHomeView:
+                            store.user = lastContext.user;
+                            router.replace("/signin");
                             break;
-                        case SignUp.onFailureInInputsThenServicePresentsError: {
+
+                        case SignUp.onFailureInValidatingThenServicePresentsError: {
                             if (lastContext.result === true){ return; }
                             const labelMailAddress = t.common.labels.mailAddress;
                             const labelPassword = t.common.labels.password;

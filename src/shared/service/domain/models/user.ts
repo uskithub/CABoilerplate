@@ -1,9 +1,12 @@
 import { ValidationResult as r, AbstructValidation } from "@/shared/system/interfaces/validation";
+import { Observable } from "rxjs";
+import dependencies from "../dependencies";
 export interface User {
     uid: string;
-    photoURL: string | null;
-    email: string | null;
-    displayName: string | null;
+    mailAddress: string|null;
+    photoUrl: string|null;
+    displayName: string|null;
+    isMailAddressVerified: boolean;
 }
 
 const idValidationResults = [r.isRequired, r.isMalformed] as const;
@@ -64,5 +67,8 @@ export default {
         } else {
             return { id: idValidationResult, password: passwordValidationResult };
         }
+    }
+    , create: (id: string, password: string): Observable<User> => {
+        return dependencies.auth.createAccount(id, password);
     }
 };
