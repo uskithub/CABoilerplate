@@ -1,5 +1,5 @@
 import { SignUp, SignUpContext, SignUpScene } from "@/shared/service/application/usecases/signUp";
-import { Usecase } from "@shared/system/interfaces/usecase";
+import { Actor } from "@/shared/system/actor";
 import { Subscription } from "rxjs";
 import { inject, reactive } from "vue";
 import { State, Store, ViewModel } from ".";
@@ -36,8 +36,8 @@ export function createSignUpViewModel(store: Store): SignUpViewModel {
         state
         , signUp: (id: string|null, password: string|null) => {
             let subscription: Subscription|null = null;
-            subscription = new Usecase(null)
-                .interact<SignUpContext, SignUpScene>(new SignUpScene({ scene: SignUp.userStartsSignUpProcess, id, password }))
+            subscription = new Actor()
+                .interactIn<SignUpContext, SignUpScene>(new SignUpScene({ scene: SignUp.userStartsSignUpProcess, id, password }))
                 .subscribe({
                     next: (performedSenario) => {
                         const lastContext = performedSenario.slice(-1)[0];

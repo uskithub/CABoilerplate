@@ -3,7 +3,7 @@ import { Boot, BootScene } from "@usecases/boot";
 import type { BootContext } from "@usecases/boot";
 
 // system
-import { Usecase } from "@shared/system/interfaces/usecase";
+import { Actor } from "@/shared/system/actor";
 import { Subscription } from "rxjs";
 import { reactive } from "vue";
 import { State, Store, ViewModel } from ".";
@@ -25,8 +25,8 @@ export function createHomeViewModel(store: Store): HomeViewModel {
         state
         , boot: () => {
             let subscription: Subscription|null = null;
-            subscription = new Usecase(null)
-                .interact<BootContext, BootScene>(new BootScene())
+            subscription = new Actor()
+                .interactIn<BootContext, BootScene>(new BootScene())
                 .subscribe({
                     next: (performedSenario) => {
                         const lastContext = performedSenario.slice(-1)[0];

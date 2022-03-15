@@ -1,4 +1,3 @@
-import { Usecase } from "@shared/system/interfaces/usecase";
 import { Subscription } from "rxjs";
 import { reactive } from "vue";
 import { State, ViewModel } from ".";

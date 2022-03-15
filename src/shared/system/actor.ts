@@ -1,47 +1,17 @@
-import { Usecases } from "@/shared/service/application/usecases";
 import { User } from "@/shared/service/domain/models/user";
 import { UserNotAuthorizedToInteract } from "@/shared/service/serviceErrors";
 import { Observable, of, throwError } from "rxjs";
 import { mergeMap, map } from "rxjs/operators";
-import ServiceModel from "@models/service";
+import { Scene } from "./interfaces/scene";
 
-interface Scene<T> {
-    usecase: Usecases;
-    context: T;
-    /**
-     * Usecaseを実行するユーザがそのUsecaseが許可されているかを返します
-     */
-    authorize: (actor: User|null) => boolean
-    next: () => Observable<this>|null;
-}
+export class Actor {
+    #user: User|null;
 
-export abstract class AbstractScene<T> implements Scene<T> {
-    abstract usecase: Usecases;
-    abstract context: T;
-    abstract next(): Observable<this>|null;
-
-    protected instantiate(nextContext: T): this {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return new (this.constructor as any)(nextContext);
+    constructor(user: User|null = null) {
+        this.#user = user;
     }
 
-    authorize(actor: User|null): boolean {
-        return ServiceModel.authorize(this.usecase, actor);
-    }
-
-    just(nextContext: T): Observable<this> {
-        return of(this.instantiate(nextContext));
-    }
-}
-
-export class Usecase {
-    #actor: User|null;
-
-    constructor(actor: User|null) {
-        this.#actor = actor;
-    }
-
-    interact<T, U extends Scene<T>>(initialScene: U): Observable<T[]> {
+    interactIn<T, U extends Scene<T>>(initialScene: U): Observable<T[]> {
 
         const _interact = (senario: U[]): Observable<U[]> => {
             const lastScene = senario.slice(-1)[0];
@@ -66,8 +36,8 @@ export class Usecase {
                 );
         };
 
-        if (!initialScene.authorize(this.#actor)) {
-            const err = new UserNotAuthorizedToInteract(initialScene.usecase);
+        if (!initialScene.authorize(this.#user)) {
+            const err = new UserNotAuthorizedToInteract(initialScene.constructor.name);
             return throwError(() => err);
         }
 

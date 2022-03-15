@@ -1,8 +1,8 @@
-import { AbstractScene } from "@shared/system/interfaces/usecase";
-import { first, map, Observable } from "rxjs";
+import { AbstractScene } from "@/shared/system/interfaces/scene";
+import type { SignUpValidationResult } from "@models/user";
 import type { User } from "@models/user";
 import UserModel from "@models/user";
-import type { SignUpValidationResult } from "@models/user";
+import { first, map, Observable } from "rxjs";
 
 /**
  * usecase: サインアップする
