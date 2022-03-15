@@ -6,8 +6,10 @@ import { SignInUsecase } from "../../application/usecases/signIn";
 import { SignOutUsecase } from "../../application/usecases/signOut";
 import { SignUpUsecase } from "../../application/usecases/signUp";
 import { SignInStatusContext } from "../interfaces/authenticator";
-import { User } from "./user";
 import { Observable } from "rxjs";
+import { Actor } from "@/shared/system/interfaces/actor";
+import { Anyone } from "@/client/service/application/actors/anyone";
+import { SignedInUser } from "@/client/service/application/actors/signedInUser";
 
 
 export default {
@@ -15,7 +17,10 @@ export default {
         return dependencies.auth.signInStatus();
     }
 
-    , authorize: <T, U extends Usecase<T>>(actor: User|null, usecase: U): boolean => {
+    , authorize: <T extends Actor, U extends Usecase<T>>(actor: T|null, usecase: U): boolean => {
+
+        const isAnyone = (actor: any): actor is Anyone => actor.constructor === Anyone;
+        const isSignedInUser = (actor: any): actor is SignedInUser => actor.constructor === SignedInUser;
 
         switch (usecase.constructor) {
         case BootUsecase: {
@@ -25,10 +30,10 @@ export default {
             return actor === null;
         }
         case SignInUsecase: {
-            return false;
+            return actor === null;
         }
         case SignOutUsecase: {
-            return false;
+            return isSignedInUser(actor);
         }
         }
 
