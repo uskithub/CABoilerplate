@@ -1,4 +1,4 @@
-import { AbstractScene } from "@/shared/system/interfaces/scene";
+import { AbstractUsecase } from "@/shared/system/interfaces/usecase";
 import { Observable } from "rxjs";
 
 /**
@@ -24,7 +24,7 @@ export type SignInContext = { scene: SignIn.userStartsSignInProcess }
     | { scene: SignIn.onFailureThenServicePresentsError; error: Error; }
 ;
 
-export class SignInScene extends AbstractScene<SignInContext> {
+export class SignInUsecase extends AbstractUsecase<SignInContext> {
     context: SignInContext;
 
     constructor(context: SignInContext = { scene: SignIn.userStartsSignInProcess }) {

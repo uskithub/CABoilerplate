@@ -1,4 +1,4 @@
-import { AbstractScene } from "@/shared/system/interfaces/scene";
+import { AbstractUsecase } from "@/shared/system/interfaces/usecase";
 import { Observable } from "rxjs";
 
 /**
@@ -20,7 +20,7 @@ export type SignOutContext = { scene: SignOut.userStartsSignOutProcess }
     | { scene: SignOut.onFailureThenServicePresentsError; error: Error; }
 ;
 
-export class SignOutScene extends AbstractScene<SignOutContext> {
+export class SignOutUsecase extends AbstractUsecase<SignOutContext> {
     context: SignOutContext;
 
     constructor(context: SignOutContext = { scene: SignOut.userStartsSignOutProcess }) {

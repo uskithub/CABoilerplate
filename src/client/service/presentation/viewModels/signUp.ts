@@ -1,5 +1,4 @@
-import { SignUp, SignUpContext, SignUpScene } from "@/shared/service/application/usecases/signUp";
-import { Actor } from "@/shared/system/actor";
+import { SignUp, SignUpContext, SignUpUsecase } from "@/shared/service/application/usecases/signUp";
 import { Subscription } from "rxjs";
 import { inject, reactive } from "vue";
 import { State, Store, ViewModel } from ".";
@@ -7,6 +6,7 @@ import { DICTIONARY_KEY } from "@/shared/system/localizations";
 import type { Dictionary } from "@/shared/system/localizations";
 import { useRouter } from "vue-router";
 import { UserNotAuthorizedToInteract } from "@/shared/service/serviceErrors";
+import { Anyone } from "@/client/service/application/actors/anyone";
 
 export interface SignUpState extends State {
     email: string|null;
@@ -36,8 +36,8 @@ export function createSignUpViewModel(store: Store): SignUpViewModel {
         state
         , signUp: (id: string|null, password: string|null) => {
             let subscription: Subscription|null = null;
-            subscription = new Actor()
-                .interactIn<SignUpContext, SignUpScene>(new SignUpScene({ scene: SignUp.userStartsSignUpProcess, id, password }))
+            subscription = new Anyone()
+                .interactIn<SignUpContext, SignUpUsecase>(new SignUpUsecase({ scene: SignUp.userStartsSignUpProcess, id, password }))
                 .subscribe({
                     next: (performedSenario) => {
                         const lastContext = performedSenario.slice(-1)[0];

@@ -1,14 +1,14 @@
 // service
-import { Boot, BootScene } from "@usecases/boot";
+import { Boot, BootUsecase } from "@usecases/boot";
 import type { BootContext } from "@usecases/boot";
 
 // system
-import { Actor } from "@/shared/system/actor";
 import { Subscription } from "rxjs";
 import { reactive } from "vue";
 import { State, Store, ViewModel } from ".";
 import { useRouter } from "vue-router";
 import { UserNotAuthorizedToInteract } from "@/shared/service/serviceErrors";
+import { Anyone } from "@/client/service/application/actors/anyone";
 
 export type HomeState = State;
 
@@ -25,8 +25,8 @@ export function createHomeViewModel(store: Store): HomeViewModel {
         state
         , boot: () => {
             let subscription: Subscription|null = null;
-            subscription = new Actor()
-                .interactIn<BootContext, BootScene>(new BootScene())
+            subscription = new Anyone()
+                .interactIn<BootContext, BootUsecase>(new BootUsecase())
                 .subscribe({
                     next: (performedSenario) => {
                         const lastContext = performedSenario.slice(-1)[0];

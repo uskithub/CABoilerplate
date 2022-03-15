@@ -1,9 +1,9 @@
 import dependencies from "../dependencies";
-import { Scene } from "@/shared/system/interfaces/scene";
-import { BootScene } from "../../application/usecases/boot";
-import { SignInScene } from "../../application/usecases/signIn";
-import { SignOutScene } from "../../application/usecases/signOut";
-import { SignUpScene } from "../../application/usecases/signUp";
+import { Usecase } from "@/shared/system/interfaces/usecase";
+import { BootUsecase } from "../../application/usecases/boot";
+import { SignInUsecase } from "../../application/usecases/signIn";
+import { SignOutUsecase } from "../../application/usecases/signOut";
+import { SignUpUsecase } from "../../application/usecases/signUp";
 import { SignInStatusContext } from "../interfaces/authenticator";
 import { User } from "./user";
 import { Observable } from "rxjs";
@@ -14,18 +14,18 @@ export default {
         return dependencies.auth.signInStatus();
     }
 
-    , authorize: <T, U extends Scene<T>>(actor: User|null, scene: U): boolean => {
-        switch (scene.constructor) {
-        case BootScene: {
+    , authorize: <T, U extends Usecase<T>>(actor: User|null, initialScene: U): boolean => {
+        switch (initialScene.constructor) {
+        case BootUsecase: {
             return true;
         }
-        case SignUpScene: {
+        case SignUpUsecase: {
+            return actor === null;
+        }
+        case SignInUsecase: {
             return false;
         }
-        case SignInScene: {
-            return false;
-        }
-        case SignOutScene: {
+        case SignOutUsecase: {
             return false;
         }
         }

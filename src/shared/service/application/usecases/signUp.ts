@@ -1,4 +1,4 @@
-import { AbstractScene } from "@/shared/system/interfaces/scene";
+import { AbstractUsecase } from "@/shared/system/interfaces/usecase";
 import type { SignUpValidationResult } from "@models/user";
 import type { User } from "@models/user";
 import UserModel from "@models/user";
@@ -27,7 +27,7 @@ export type SignUpContext = { scene: SignUp.userStartsSignUpProcess; id: string|
     | { scene: SignUp.onFailureInPublishingThenServicePresentsError; error: Error; }
     ;
 
-export class SignUpScene extends AbstractScene<SignUpContext> {
+export class SignUpUsecase extends AbstractUsecase<SignUpContext> {
     context: SignUpContext;
 
     constructor(context: SignUpContext) {

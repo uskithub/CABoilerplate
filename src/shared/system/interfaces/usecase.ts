@@ -2,7 +2,7 @@ import ServiceModel from "@models/service";
 import { User } from "@/shared/service/domain/models/user";
 import { Observable, of } from "rxjs";
 
-export interface Scene<T> {
+export interface Usecase<T> {
     context: T;
     /**
      * Usecaseを実行するユーザがそのUsecaseが許可されているかを返します
@@ -11,7 +11,7 @@ export interface Scene<T> {
     next: () => Observable<this>|null;
 }
 
-export abstract class AbstractScene<T> implements Scene<T> {
+export abstract class AbstractUsecase<T> implements Usecase<T> {
     abstract context: T;
     abstract next(): Observable<this>|null;
 
