@@ -1,7 +1,7 @@
-import { AbstractUsecase } from "@/shared/system/interfaces/usecase";
 import type { SignUpValidationResult } from "@models/user";
 import type { User } from "@models/user";
 import UserModel from "@models/user";
+import { Usecase } from "robustive-ts";
 import { first, map, Observable } from "rxjs";
 
 /**
@@ -27,7 +27,7 @@ export type SignUpContext = { scene: SignUp.userStartsSignUpProcess; id: string|
     | { scene: SignUp.onFailureInPublishingThenServicePresentsError; error: Error; }
     ;
 
-export class SignUpUsecase extends AbstractUsecase<SignUpContext> {
+export class SignUpUsecase extends Usecase<SignUpContext> {
     context: SignUpContext;
 
     constructor(context: SignUpContext) {
@@ -69,7 +69,8 @@ export class SignUpUsecase extends AbstractUsecase<SignUpContext> {
     }
 
     private publishNewAccount(id: string, password: string): Observable<this> {
-        return UserModel.create(id, password)
+        return UserModel
+            .create(id, password)
             .pipe(
                 map(user => {
                     return this.instantiate({ scene: SignUp.onSuccessInPublishingThenServicePresentsHomeView, user });

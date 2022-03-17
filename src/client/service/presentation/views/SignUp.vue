@@ -8,8 +8,11 @@ import type { ViewModels } from "../viewModels";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { store, createSignUpViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-const { state, signUp } = createSignUpViewModel(store);
+const { state, signUp, signOut } = createSignUpViewModel(store);
 
+if (store.user !== null) {
+    state.isPresentDialog = true;
+}
 
 </script>
 
@@ -39,4 +42,14 @@ v-container
       color="success",
       @click="signUp(state.email, state.password)"
     ) {{ t.signUp.buttons.signUp }}
+
+  v-row(justify="center")
+    v-dialog(v-model="state.isPresentDialog", persistent, max-width="290")
+      v-card
+        v-card-title.text-h5 Use Google's location service?
+        v-card-text Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.
+        v-card-actions
+          v-spacer
+          v-btn(color="warning", text, @click="signOut()") Sign Out
+          v-btn(color="success", text, @click="state.isPresentDialog = false") Go Home
 </template>

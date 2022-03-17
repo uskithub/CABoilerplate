@@ -3,18 +3,17 @@ import { Boot, BootUsecase } from "@usecases/boot";
 import type { BootContext } from "@usecases/boot";
 
 // system
-import { Subscription } from "rxjs";
 import { reactive } from "vue";
 import { State, Store, ViewModel } from ".";
 import { useRouter } from "vue-router";
-import { UserNotAuthorizedToInteract } from "@/shared/service/serviceErrors";
-import { Anyone } from "@/client/service/application/actors/anyone";
+import { Anyone, UserNotAuthorizedToInteractIn } from "robustive-ts";
+import { Subscription } from "rxjs";
 
 export type HomeState = State;
 
 export interface HomeViewModel extends ViewModel<HomeState> {
     state: HomeState;
-    boot: () => void;
+    boot: ()=>void;
 }
 
 export function createHomeViewModel(store: Store): HomeViewModel {
@@ -28,7 +27,8 @@ export function createHomeViewModel(store: Store): HomeViewModel {
             subscription = new Anyone()
                 .interactIn<BootContext, BootUsecase>(new BootUsecase())
                 .subscribe({
-                    next: (performedSenario) => {
+                    next: performedSenario => {
+                        console.log("boot:", performedSenario);
                         const lastContext = performedSenario.slice(-1)[0];
                         switch (lastContext.scene) {
                         case Boot.sessionExistsThenServicePresentsHome:
@@ -40,7 +40,7 @@ export function createHomeViewModel(store: Store): HomeViewModel {
                         }
                     }
                     , error: (e) => {
-                        if (e instanceof UserNotAuthorizedToInteract) {
+                        if (e instanceof UserNotAuthorizedToInteractIn) {
                             console.error(e);
                         } else {
                             console.error(e);

@@ -7,7 +7,9 @@ import { VIEW_MODELS_KEY } from "../viewModels";
 const { store, createHomeViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
 const { state, boot } = createHomeViewModel(store);
 
-boot();
+if (store.user === null) {
+    boot();
+}
 
 </script>
 

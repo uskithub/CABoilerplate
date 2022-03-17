@@ -14,7 +14,8 @@ const passwordValidationResults = [r.isRequired, r.isTooLong, r.isTooShort] as c
 
 export type IdValidationResult = typeof idValidationResults[number];
 export type PasswordValidationResult = typeof passwordValidationResults[number];
-export type SignUpValidationResult = true | { id: IdValidationResult|null; password: PasswordValidationResult|null; }
+export type SignInValidationResult = true | { id: IdValidationResult|null; password: PasswordValidationResult|null; }
+export type SignUpValidationResult = SignInValidationResult
 
 export class IdValidation extends AbstructValidation<string, IdValidationResult> {
 
@@ -70,5 +71,11 @@ export default {
     }
     , create: (id: string, password: string): Observable<User> => {
         return dependencies.auth.createAccount(id, password);
+    }
+    , signIn: (id: string, password: string): Observable<User> => {
+        return dependencies.auth.signIn(id, password);
+    }
+    , signOut: (): Observable<void> => {
+        return dependencies.auth.signOut();
     }
 };

@@ -1,14 +1,15 @@
 import { SignUp, SignUpContext, SignUpUsecase } from "@/shared/service/application/usecases/signUp";
+import { SignOut, SignOutContext, SignOutUsecase } from "@/shared/service/application/usecases/signOut";
 import { Subscription } from "rxjs";
 import { inject, reactive } from "vue";
 import { State, Store, ViewModel } from ".";
 import { DICTIONARY_KEY } from "@/shared/system/localizations";
 import type { Dictionary } from "@/shared/system/localizations";
 import { useRouter } from "vue-router";
-import { UserNotAuthorizedToInteract } from "@/shared/service/serviceErrors";
-import { Anyone } from "@/client/service/application/actors/anyone";
+import { Anyone, UserNotAuthorizedToInteractIn } from "robustive-ts";
 
 export interface SignUpState extends State {
+    isPresentDialog: boolean;
     email: string|null;
     password: string|null;
     isValid: boolean;
@@ -19,13 +20,15 @@ export interface SignUpState extends State {
 export interface SignUpViewModel extends ViewModel<SignUpState> {
     state: SignUpState
     signUp: (id: string|null, password: string|null)=>void
+    signOut: ()=>void
 }
 
 export function createSignUpViewModel(store: Store): SignUpViewModel {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
     const state = reactive<SignUpState>({
-        email: null
+        isPresentDialog: false
+        , email: null
         , password: null
         , isValid: true
         , idInvalidMessage: null
@@ -81,11 +84,41 @@ export function createSignUpViewModel(store: Store): SignUpViewModel {
                             break;
                         }
                         case SignUp.onFailureInPublishingThenServicePresentsError:
+                            console.log("SERVICE ERROR:", lastContext.error);
                             break;
                         }
                     }
                     , error: (e) => {
-                        if (e instanceof UserNotAuthorizedToInteract) {
+                        if (e instanceof UserNotAuthorizedToInteractIn) {
+                            console.error(e);
+                        } else {
+                            console.error(e);
+                        }
+                    }
+                    , complete: () => {
+                        console.info("complete");
+                        subscription?.unsubscribe();
+                    }
+                });
+        }
+        , signOut: () => {
+            let subscription: Subscription|null = null;
+            subscription = new Anyone()
+                .interactIn<SignOutContext, SignOutUsecase>(new SignOutUsecase())
+                .subscribe({
+                    next: (performedSenario) => {
+                        const lastContext = performedSenario.slice(-1)[0];
+                        switch(lastContext.scene){
+                        case SignOut.onSuccessThenServicePresentsSignInView:
+                            state.isPresentDialog = false;
+                            break;
+                        case SignOut.onFailureThenServicePresentsError:
+                            console.log("SERVICE ERROR:", lastContext.error);
+                            break;
+                        }
+                    }
+                    , error: (e) => {
+                        if (e instanceof UserNotAuthorizedToInteractIn) {
                             console.error(e);
                         } else {
                             console.error(e);

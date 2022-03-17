@@ -19,7 +19,7 @@
     "graphql": "^16.3.0",
     "react": "^17.0.2",
     "roboto-fontface": "*",
-    "rxjs": "^7.5.2",
+    "rxjs": "^7.5.5",
     "vue": "^3.2.25",
     "vue-router": "4",
     "vuetify": "^3.0.0-alpha.0",

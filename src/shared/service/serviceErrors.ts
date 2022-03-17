@@ -9,9 +9,3 @@ class ServiceError extends Error {
         Object.setPrototypeOf(this, new.target.prototype);
     }
 }
-
-export class UserNotAuthorizedToInteract<T> extends ServiceError {
-    constructor(scene: T) {
-        super(`UserNotAuthorizedToInteract: ${ scene }`);
-    }
-}

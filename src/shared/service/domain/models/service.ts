@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dependencies from "../dependencies";
-import { Usecase } from "@/shared/system/interfaces/usecase";
 import { Boot, BootUsecase } from "../../application/usecases/boot";
 import { SignInUsecase } from "../../application/usecases/signIn";
 import { SignOutUsecase } from "../../application/usecases/signOut";
 import { SignUpUsecase } from "../../application/usecases/signUp";
 import { SignInStatusContext } from "../interfaces/authenticator";
-import { Observable } from "rxjs";
-import { Actor } from "@/shared/system/interfaces/actor";
-import { Anyone } from "@/client/service/application/actors/anyone";
+
 import { SignedInUser } from "@/client/service/application/actors/signedInUser";
+import { User } from "./user";
+import { Usecase, Anyone, Actor } from "robustive-ts";
+import { Observable } from "rxjs";
 
 
 export default {
@@ -17,7 +17,7 @@ export default {
         return dependencies.auth.signInStatus();
     }
 
-    , authorize: <T extends Actor, U extends Usecase<T>>(actor: T|null, usecase: U): boolean => {
+    , authorize: <V extends Actor<User>, T, U extends Usecase<T>>(actor: V|null, usecase: U): boolean => {
 
         const isAnyone = (actor: any): actor is Anyone => actor.constructor === Anyone;
         const isSignedInUser = (actor: any): actor is SignedInUser => actor.constructor === SignedInUser;

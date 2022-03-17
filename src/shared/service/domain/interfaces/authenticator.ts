@@ -27,4 +27,14 @@ export interface Authenticator {
      * アカウントを作成します。
      */
     createAccount: (mailAddress: string, password: string) => Observable<User>;
+
+    /**
+     * サインインします。
+     */
+    signIn: (mailAddress: string, password: string) => Observable<User>;
+
+    /**
+     * サインアウトします。
+     */
+    signOut: () => Observable<void>;
 }
