@@ -8,7 +8,7 @@ import type { ViewModels } from "../viewModels";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { store, createSignUpViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-const { state, signUp, signOut } = createSignUpViewModel(store);
+const { state, signUp, signOut, goHome } = createSignUpViewModel(store);
 
 if (store.user !== null) {
     state.isPresentDialog = true;
@@ -51,5 +51,5 @@ v-container
         v-card-actions
           v-spacer
           v-btn(color="warning", text, @click="signOut()") Sign Out
-          v-btn(color="success", text, @click="state.isPresentDialog = false") Go Home
+          v-btn(color="success", text, @click="goHome()") Go Home
 </template>

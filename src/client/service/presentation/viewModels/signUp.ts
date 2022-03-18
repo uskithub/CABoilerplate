@@ -21,6 +21,7 @@ export interface SignUpViewModel extends ViewModel<SignUpState> {
     state: SignUpState
     signUp: (id: string|null, password: string|null)=>void
     signOut: ()=>void
+    goHome: ()=>void
 }
 
 export function createSignUpViewModel(store: Store): SignUpViewModel {
@@ -47,7 +48,7 @@ export function createSignUpViewModel(store: Store): SignUpViewModel {
                         switch(lastContext.scene){
                         case SignUp.onSuccessInPublishingThenServicePresentsHomeView:
                             store.user = lastContext.user;
-                            router.replace("/signin");
+                            router.replace("/");
                             break;
 
                         case SignUp.onFailureInValidatingThenServicePresentsError: {
@@ -129,6 +130,10 @@ export function createSignUpViewModel(store: Store): SignUpViewModel {
                         subscription?.unsubscribe();
                     }
                 });
+        }
+        , goHome: () => {
+            state.isPresentDialog = false;
+            router.replace("/");
         }
     };
 }

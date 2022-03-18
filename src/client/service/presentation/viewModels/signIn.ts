@@ -20,6 +20,7 @@ export interface SignInViewModel extends ViewModel<SignInState> {
     state: SignInState
     signIn: (id: string|null, password: string|null)=>void
     signOut: ()=>void
+    goHome: ()=>void
 }
 
 export function createSignInViewModel(store: Store): SignInViewModel {
@@ -47,7 +48,9 @@ export function createSignInViewModel(store: Store): SignInViewModel {
                         const lastContext = performedSenario.slice(-1)[0];
                         switch(lastContext.scene){
                         case SignIn.onSuccessThenServicePresentsHomeView:
+                            router.replace("/");
                             break;
+
                         case SignIn.onFailureInValidatingThenServicePresentsError: {
                             if (lastContext.result === true){ return; }
                             const labelMailAddress = t.common.labels.mailAddress;
@@ -128,6 +131,10 @@ export function createSignInViewModel(store: Store): SignInViewModel {
                         subscription?.unsubscribe();
                     }
                 });
+        }
+        , goHome: () => {
+            state.isPresentDialog = false;
+            router.replace("/");
         }
     };
 }
