@@ -1,11 +1,12 @@
-import { SignIn, SignInContext, SignInUsecase } from "@/shared/service/application/usecases/signIn";
-import { SignOut, SignOutContext, SignOutUsecase } from "@/shared/service/application/usecases/signOut";
+import { SignIn, SignInUsecase } from "@/shared/service/application/usecases/signIn";
+import { SignOut, SignOutUsecase } from "@/shared/service/application/usecases/signOut";
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { Anyone, UserNotAuthorizedToInteractIn } from "robustive-ts";
 import { Subscription } from "rxjs";
 import { inject, reactive } from "vue";
 import { useRouter } from "vue-router";
-import { State, ViewModel } from ".";
+import { State, Store, ViewModel } from ".";
+import { SignedInUser } from "../../application/actors/signedInUser";
 
 export interface SignInState extends State {
     isPresentDialog: boolean;
@@ -42,7 +43,7 @@ export function createSignInViewModel(store: Store): SignInViewModel {
             state.passwordInvalidMessage = null;
             let subscription: Subscription|null = null;
             subscription = new Anyone()
-                .interactIn<SignInContext, SignInUsecase>(new SignInUsecase({scene: SignIn.userStartsSignInProcess, id, password}))
+                .interactIn(new SignInUsecase({scene: SignIn.userStartsSignInProcess, id, password}))
                 .subscribe({
                     next: (performedSenario) => {
                         const lastContext = performedSenario.slice(-1)[0];
@@ -104,9 +105,10 @@ export function createSignInViewModel(store: Store): SignInViewModel {
                 });
         }
         , signOut: () => {
+            if (store.user === null) { return; }
             let subscription: Subscription|null = null;
-            subscription = new Anyone()
-                .interactIn<SignOutContext, SignOutUsecase>(new SignOutUsecase())
+            subscription = new SignedInUser(store.user)
+                .interactIn(new SignOutUsecase())
                 .subscribe({
                     next: (performedSenario) => {
                         const lastContext = performedSenario.slice(-1)[0];

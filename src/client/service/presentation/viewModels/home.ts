@@ -1,6 +1,5 @@
 // service
 import { Boot, BootUsecase } from "@usecases/boot";
-import type { BootContext } from "@usecases/boot";
 
 // system
 import { reactive } from "vue";
@@ -25,7 +24,7 @@ export function createHomeViewModel(store: Store): HomeViewModel {
         , boot: () => {
             let subscription: Subscription|null = null;
             subscription = new Anyone()
-                .interactIn<BootContext, BootUsecase>(new BootUsecase())
+                .interactIn(new BootUsecase())
                 .subscribe({
                     next: performedSenario => {
                         console.log("boot:", performedSenario);

@@ -1,8 +1,9 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import ServiceModel from "@models/service";
 import { User } from "@models/user";
-import { Usecase } from "robustive-ts";
+import { Anyone, Usecase } from "robustive-ts";
 import { first, map, Observable } from "rxjs";
+import { IActor } from "robustive-ts/types/actor";
 
 /**
  * usecase: アプリを起動する
@@ -30,7 +31,7 @@ export type BootContext = { scene: Boot.userOpensSite }
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class BootUsecase extends Usecase<BootContext> {
+export class BootUsecase extends Usecase<BootContext, Anyone> {
     context: BootContext;
 
     constructor(context: BootContext = { scene: Boot.userOpensSite }) {
@@ -38,7 +39,7 @@ export class BootUsecase extends Usecase<BootContext> {
         this.context = context;
     }
 
-    next(): Observable<this>|null {
+    next(actor: Anyone): Observable<this>|null {
         switch (this.context.scene) {
         case Boot.userOpensSite: {
             return this.just({ scene: Boot.serviceChecksSession });

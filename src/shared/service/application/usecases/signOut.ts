@@ -1,3 +1,4 @@
+import { SignedInUser } from "@/client/service/application/actors/signedInUser";
 import UserModel from "@models/user";
 import { Usecase } from "robustive-ts";
 import { catchError, map, Observable, of } from "rxjs";
@@ -21,7 +22,7 @@ export type SignOutContext = { scene: SignOut.userStartsSignOutProcess }
     | { scene: SignOut.onFailureThenServicePresentsError; error: Error; }
 ;
 
-export class SignOutUsecase extends Usecase<SignOutContext> {
+export class SignOutUsecase extends Usecase<SignOutContext, SignedInUser> {
     context: SignOutContext;
 
     constructor(context: SignOutContext = { scene: SignOut.userStartsSignOutProcess }) {
@@ -29,7 +30,7 @@ export class SignOutUsecase extends Usecase<SignOutContext> {
         this.context = context;
     }
 
-    next(): Observable<this>|null {
+    next(actor: SignedInUser): Observable<this>|null {
         switch (this.context.scene) {
         case SignOut.userStartsSignOutProcess: {
             return this.just({ scene: SignOut.serviceClosesSession });

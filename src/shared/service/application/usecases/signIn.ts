@@ -1,7 +1,8 @@
 
 import type { SignInValidationResult, User } from "@models/user";
 import UserModel from "@models/user";
-import { Usecase } from "robustive-ts";
+import { Anyone, Usecase } from "robustive-ts";
+import { IActor } from "robustive-ts/types/actor";
 import { catchError, map, Observable } from "rxjs";
 
 /**
@@ -27,7 +28,7 @@ export type SignInContext = { scene: SignIn.userStartsSignInProcess; id: string|
     | { scene: SignIn.onFailureThenServicePresentsError; error: Error; }
 ;
 
-export class SignInUsecase extends Usecase<SignInContext> {
+export class SignInUsecase extends Usecase<SignInContext, Anyone> {
     context: SignInContext;
 
     constructor(context: SignInContext) {
@@ -35,7 +36,7 @@ export class SignInUsecase extends Usecase<SignInContext> {
         this.context = context;
     }
 
-    next(): Observable<this>|null {
+    next(actor: Anyone): Observable<this>|null {
         switch (this.context.scene) {
         case SignIn.userStartsSignInProcess: {
             return this.just({ scene: SignIn.serviceValidateInputs, id: this.context.id, password: this.context.password });
