@@ -1,41 +1,46 @@
 import type { SignUpValidationResult } from "@models/user";
 import type { User } from "@models/user";
 import UserModel from "@models/user";
-import { Anyone, Usecase } from "robustive-ts";
+import { boundary, Boundary, Usecase, UsecaseScenario } from "robustive-ts";
 import { first, map, Observable } from "rxjs";
 
 /**
  * usecase: サインアップする
  */
-export const enum SignUp {
-    /* 基本コース */
-    userStartsSignUpProcess = "ユーザはサインアップを開始する"
-    , serviceValidateInputs = "サービスは入力項目に問題がないかを確認する"
-    , onSuccessInValidatingThenServicePublishNewAccount = "入力項目に問題がない場合_サービスはアカウントは新規に発行する"
-    , onSuccessInPublishingThenServicePresentsHomeView = "アカウントの発行に成功した場合_サービスはホーム画面を表示する"
+export const SignUp = {
+    /* Basic Courses */
+    userStartsSignUpProcess : "ユーザはサインアップを開始する"
+    , serviceValidateInputs : "サービスは入力項目に問題がないかを確認する"
+    , onSuccessInValidatingThenServicePublishNewAccount : "入力項目に問題がない場合_サービスはアカウントは新規に発行する"
 
-    /* 代替コース */
-    , onFailureInValidatingThenServicePresentsError = "入力項目に問題がある場合_サービスはエラーを表示する"
-    , onFailureInPublishingThenServicePresentsError = "アカウントの発行に失敗した場合_サービスはエラーを表示する"
-}
-
-export type SignUpContext = { scene: SignUp.userStartsSignUpProcess; id: string|null; password: string|null; }
-    | { scene: SignUp.serviceValidateInputs; id: string|null; password: string|null; }
-    | { scene: SignUp.onSuccessInValidatingThenServicePublishNewAccount; id: string; password: string; }
-    | { scene: SignUp.onSuccessInPublishingThenServicePresentsHomeView; user: User; }
-    | { scene: SignUp.onFailureInValidatingThenServicePresentsError; result: SignUpValidationResult; }
-    | { scene: SignUp.onFailureInPublishingThenServicePresentsError; error: Error; }
-    ;
-
-export class SignUpUsecase extends Usecase<SignUpContext, Anyone> {
-    context: SignUpContext;
-
-    constructor(context: SignUpContext) {
-        super();
-        this.context = context;
+    /* Boundaries */
+    , goals : {
+        onSuccessInPublishingThenServicePresentsHomeView : "アカウントの発行に成功した場合_サービスはホーム画面を表示する"
+        , onFailureInValidatingThenServicePresentsError : "入力項目に問題がある場合_サービスはエラーを表示する"
+        , onFailureInPublishingThenServicePresentsError : "アカウントの発行に失敗した場合_サービスはエラーを表示する"
     }
+} as const;
 
-    next(actor: Anyone): Observable<this>|null {
+type SignUp = typeof SignUp[keyof typeof SignUp];
+
+export type SignUpGoal = UsecaseScenario<{
+    [SignUp.goals.onSuccessInPublishingThenServicePresentsHomeView] : { user: User; };
+    [SignUp.goals.onFailureInValidatingThenServicePresentsError] : { result: SignUpValidationResult; };
+    [SignUp.goals.onFailureInPublishingThenServicePresentsError] : { error: Error; };
+}>;
+
+export type SignUpScenario = UsecaseScenario<{
+    [SignUp.userStartsSignUpProcess] : { id: string|null; password: string|null; };
+    [SignUp.serviceValidateInputs]: { id: string|null; password: string|null; };
+    [SignUp.onSuccessInValidatingThenServicePublishNewAccount]: { id: string; password: string; };
+}> | SignUpGoal;
+
+export const isSignUpGoal = (context: SignUpScenario): context is SignUpGoal => context.scene !== undefined && Object.values(SignUp.goals).find(c => { return c === context.scene; }) !== undefined;
+
+
+export class SignUpUsecase extends Usecase<SignUpScenario> {
+
+    next(): Observable<this>|Boundary {
         switch (this.context.scene) {
         case SignUp.userStartsSignUpProcess: {
             return this.just({ scene: SignUp.serviceValidateInputs, id: this.context.id, password: this.context.password });
@@ -46,15 +51,10 @@ export class SignUpUsecase extends Usecase<SignUpContext, Anyone> {
         case SignUp.onSuccessInValidatingThenServicePublishNewAccount: {
             return this.publishNewAccount(this.context.id, this.context.password);
         }
-        case SignUp.onSuccessInPublishingThenServicePresentsHomeView: {
-            // TODO
-            return null;
-        }
-        case SignUp.onFailureInValidatingThenServicePresentsError: {
-            return null;
-        }
-        case SignUp.onFailureInPublishingThenServicePresentsError: {
-            return null;
+        case SignUp.goals.onSuccessInPublishingThenServicePresentsHomeView:
+        case SignUp.goals.onFailureInValidatingThenServicePresentsError:
+        case SignUp.goals.onFailureInPublishingThenServicePresentsError: {
+            return boundary;
         }
         }
     }
@@ -64,7 +64,7 @@ export class SignUpUsecase extends Usecase<SignUpContext, Anyone> {
         if (result === true && id !== null && password != null) {
             return this.just({ scene: SignUp.onSuccessInValidatingThenServicePublishNewAccount, id, password });
         } else {
-            return this.just({ scene: SignUp.onFailureInValidatingThenServicePresentsError, result });
+            return this.just({ scene: SignUp.goals.onFailureInValidatingThenServicePresentsError, result });
         }
     }
 
@@ -73,7 +73,7 @@ export class SignUpUsecase extends Usecase<SignUpContext, Anyone> {
             .create(id, password)
             .pipe(
                 map(user => {
-                    return this.instantiate({ scene: SignUp.onSuccessInPublishingThenServicePresentsHomeView, user });
+                    return this.instantiate({ scene: SignUp.goals.onSuccessInPublishingThenServicePresentsHomeView, user });
                 })
                 , first() // 一度観測したらsubscriptionを終わらせる
             );

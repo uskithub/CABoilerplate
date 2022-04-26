@@ -1,91 +1,91 @@
-import { SignUp, SignUpUsecase } from "@/shared/service/application/usecases/signUp";
-import { SignOut, SignOutUsecase } from "@/shared/service/application/usecases/signOut";
+import { isSignUpGoal, SignUp, SignUpUsecase } from "@/shared/service/application/usecases/signUp";
+import { isSignOutGoal, SignOut, SignOutUsecase } from "@/shared/service/application/usecases/signOut";
 import { Subscription } from "rxjs";
 import { inject, reactive } from "vue";
-import { State, Store, ViewModel } from ".";
+import { LocalStore, Mutable, SharedStore, ViewModel } from ".";
 import { DICTIONARY_KEY } from "@/shared/system/localizations";
 import type { Dictionary } from "@/shared/system/localizations";
 import { useRouter } from "vue-router";
-import { Anyone, UserNotAuthorizedToInteractIn } from "robustive-ts";
 import { SignedInUser } from "../../application/actors/signedInUser";
+import { Anyone, UserNotAuthorizedToInteractIn } from "robustive-ts";
 
-export interface SignUpState extends State {
-    isPresentDialog: boolean;
-    email: string|null;
-    password: string|null;
-    isValid: boolean;
-    idInvalidMessage: string|string[]|null;
-    passwordInvalidMessage: string|string[]|null;
+export interface SignUpStore extends LocalStore {
+    readonly isPresentDialog: boolean;
+    readonly isValid: boolean;
+    readonly idInvalidMessage: string|string[]|null;
+    readonly passwordInvalidMessage: string|string[]|null;
 }
 
-export interface SignUpViewModel extends ViewModel<SignUpState> {
-    state: SignUpState
+export interface SignUpViewModel extends ViewModel<SignUpStore> {
+    readonly local: SignUpStore
     signUp: (id: string|null, password: string|null)=>void
     signOut: ()=>void
     goHome: ()=>void
 }
 
-export function createSignUpViewModel(store: Store): SignUpViewModel {
+export function createSignUpViewModel(shared: SharedStore): SignUpViewModel {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
-    const state = reactive<SignUpState>({
-        isPresentDialog: false
-        , email: null
-        , password: null
+    const local = reactive<SignUpStore>({
+        isPresentDialog: (shared.user !== null)
         , isValid: true
-        , idInvalidMessage: null
-        , passwordInvalidMessage: null
+        , idInvalidMessage: ""
+        , passwordInvalidMessage: ""
     });
 
+    const _shared = shared as Mutable<SharedStore>;
+    const _local = local as Mutable<SignUpStore>;
+
     return {
-        state
+        local
         , signUp: (id: string|null, password: string|null) => {
             let subscription: Subscription|null = null;
-            subscription = new Anyone()
-                .interactIn(new SignUpUsecase({ scene: SignUp.userStartsSignUpProcess, id, password }))
+            subscription = new SignUpUsecase({ scene: SignUp.userStartsSignUpProcess, id, password })
+                .interactedBy(new Anyone())
                 .subscribe({
                     next: (performedSenario) => {
                         const lastContext = performedSenario.slice(-1)[0];
+                        if (!isSignUpGoal(lastContext)) { return; }
                         switch(lastContext.scene){
-                        case SignUp.onSuccessInPublishingThenServicePresentsHomeView:
-                            store.user = lastContext.user;
+                        case SignUp.goals.onSuccessInPublishingThenServicePresentsHomeView:
+                            _shared.user = lastContext.user;
                             router.replace("/");
                             break;
 
-                        case SignUp.onFailureInValidatingThenServicePresentsError: {
+                        case SignUp.goals.onFailureInValidatingThenServicePresentsError: {
                             if (lastContext.result === true){ return; }
                             const labelMailAddress = t.common.labels.mailAddress;
                             const labelPassword = t.common.labels.password;
 
                             switch (lastContext.result.id) {
                             case "isRequired":
-                                state.idInvalidMessage = t.common.validations.isRequired(labelMailAddress);
+                                _local.idInvalidMessage = t.common.validations.isRequired(labelMailAddress);
                                 break;
                             case "isMalformed":
-                                state.idInvalidMessage = t.common.validations.isMalformed(labelMailAddress);
+                                _local.idInvalidMessage = t.common.validations.isMalformed(labelMailAddress);
                                 break;
                             case null:
-                                state.idInvalidMessage = null;
+                                _local.idInvalidMessage = null;
                                 break;
                             }
 
                             switch (lastContext.result.password) {
                             case "isRequired":
-                                state.passwordInvalidMessage = t.common.validations.isRequired(labelPassword);
+                                _local.passwordInvalidMessage = t.common.validations.isRequired(labelPassword);
                                 break;
                             case "isTooShort":
-                                state.passwordInvalidMessage = t.common.validations.isTooShort(labelPassword, 8);
+                                _local.passwordInvalidMessage = t.common.validations.isTooShort(labelPassword, 8);
                                 break;
                             case "isTooLong":
-                                state.passwordInvalidMessage = t.common.validations.isTooLong(labelPassword, 20);
+                                _local.passwordInvalidMessage = t.common.validations.isTooLong(labelPassword, 20);
                                 break;
                             case null:
-                                state.passwordInvalidMessage = null;
+                                _local.passwordInvalidMessage = null;
                                 break;
                             }
                             break;
                         }
-                        case SignUp.onFailureInPublishingThenServicePresentsError:
+                        case SignUp.goals.onFailureInPublishingThenServicePresentsError:
                             console.log("SERVICE ERROR:", lastContext.error);
                             break;
                         }
@@ -104,18 +104,19 @@ export function createSignUpViewModel(store: Store): SignUpViewModel {
                 });
         }
         , signOut: () => {
-            if (store.user === null) { return; }
+            if (shared.user === null) { return; }
             let subscription: Subscription|null = null;
-            subscription = new SignedInUser(store.user)
-                .interactIn(new SignOutUsecase())
+            subscription = new SignOutUsecase()
+                .interactedBy(new SignedInUser(shared.user))
                 .subscribe({
                     next: (performedSenario) => {
                         const lastContext = performedSenario.slice(-1)[0];
+                        if (!isSignOutGoal(lastContext)) { return; }
                         switch(lastContext.scene){
-                        case SignOut.onSuccessThenServicePresentsSignInView:
-                            state.isPresentDialog = false;
+                        case SignOut.goals.onSuccessThenServicePresentsSignInView:
+                            _local.isPresentDialog = false;
                             break;
-                        case SignOut.onFailureThenServicePresentsError:
+                        case SignOut.goals.onFailureThenServicePresentsError:
                             console.log("SERVICE ERROR:", lastContext.error);
                             break;
                         }
@@ -134,7 +135,7 @@ export function createSignUpViewModel(store: Store): SignUpViewModel {
                 });
         }
         , goHome: () => {
-            state.isPresentDialog = false;
+            _local.isPresentDialog = false;
             router.replace("/");
         }
     };

@@ -1,42 +1,45 @@
 
 import type { SignInValidationResult, User } from "@models/user";
 import UserModel from "@models/user";
-import { Anyone, Usecase } from "robustive-ts";
-import { IActor } from "robustive-ts/types/actor";
+import { boundary, Boundary, Usecase, UsecaseScenario } from "robustive-ts";
 import { catchError, map, Observable } from "rxjs";
 
 /**
  * usecase: サインインする
  */
-export const enum SignIn {
-    /* 基本コース */
-    userStartsSignInProcess = "ユーザはサインインを開始する"
-    , serviceValidateInputs = "サービスは入力項目に問題がないかを確認する"
-    , onSuccessInValidatingThenServiceTrySigningIn = "入力項目に問題がない場合_サービスはサインインを試行する"
-    , onSuccessThenServicePresentsHomeView = "成功した場合_サービスはホーム画面を表示する"
-
-    /* 代替コース */
-    , onFailureInValidatingThenServicePresentsError = "入力項目に問題がある場合_サービスはエラーを表示する"
-    , onFailureThenServicePresentsError = "失敗した場合_サービスはエラーを表示する"
-}
-
-export type SignInContext = { scene: SignIn.userStartsSignInProcess; id: string|null; password: string|null; }
-    | { scene: SignIn.serviceValidateInputs; id: string|null; password: string|null; }
-    | { scene: SignIn.onSuccessInValidatingThenServiceTrySigningIn; id: string; password: string; }
-    | { scene: SignIn.onSuccessThenServicePresentsHomeView; user: User; }
-    | { scene: SignIn.onFailureInValidatingThenServicePresentsError; result: SignInValidationResult; }
-    | { scene: SignIn.onFailureThenServicePresentsError; error: Error; }
-;
-
-export class SignInUsecase extends Usecase<SignInContext, Anyone> {
-    context: SignInContext;
-
-    constructor(context: SignInContext) {
-        super();
-        this.context = context;
+export const SignIn = {
+    /* Basic Courses */
+    userStartsSignInProcess : "ユーザはサインインを開始する"
+    , serviceValidateInputs : "サービスは入力項目に問題がないかを確認する"
+    , onSuccessInValidatingThenServiceTrySigningIn : "入力項目に問題がない場合_サービスはサインインを試行する"
+    
+    /* Boundaries */
+    , goals : {
+        onSuccessThenServicePresentsHomeView : "成功した場合_サービスはホーム画面を表示する"
+        , onFailureInValidatingThenServicePresentsError : "入力項目に問題がある場合_サービスはエラーを表示する"
+        , onFailureThenServicePresentsError : "失敗した場合_サービスはエラーを表示する"
     }
+} as const;
 
-    next(actor: Anyone): Observable<this>|null {
+type SignIn = typeof SignIn[keyof typeof SignIn];
+
+export type SignInGoal = UsecaseScenario<{
+    [SignIn.goals.onSuccessThenServicePresentsHomeView] : { user: User; };
+    [SignIn.goals.onFailureInValidatingThenServicePresentsError] : { result: SignInValidationResult; };
+    [SignIn.goals.onFailureThenServicePresentsError] : { error: Error; };
+}>;
+
+export type SignInScenario = UsecaseScenario<{
+    [SignIn.userStartsSignInProcess] : { id: string|null; password: string|null; };
+    [SignIn.serviceValidateInputs] : { id: string|null; password: string|null; };
+    [SignIn.onSuccessInValidatingThenServiceTrySigningIn] : { id: string; password: string; };
+}> | SignInGoal;
+
+export const isSignInGoal = (context: SignInScenario): context is SignInGoal => context.scene !== undefined && Object.values(SignIn.goals).find(c => { return c === context.scene; }) !== undefined;
+
+export class SignInUsecase extends Usecase<SignInScenario> {
+
+    next(): Observable<this>|Boundary {
         switch (this.context.scene) {
         case SignIn.userStartsSignInProcess: {
             return this.just({ scene: SignIn.serviceValidateInputs, id: this.context.id, password: this.context.password });
@@ -47,14 +50,10 @@ export class SignInUsecase extends Usecase<SignInContext, Anyone> {
         case SignIn.onSuccessInValidatingThenServiceTrySigningIn : {
             return this.signIn(this.context.id, this.context.password);
         }
-        case SignIn.onSuccessThenServicePresentsHomeView: {
-            return null;
-        }
-        case SignIn.onFailureInValidatingThenServicePresentsError: {
-            return null;
-        }
-        case SignIn.onFailureThenServicePresentsError: {
-            return null;
+        case SignIn.goals.onSuccessThenServicePresentsHomeView:
+        case SignIn.goals.onFailureInValidatingThenServicePresentsError:
+        case SignIn.goals.onFailureThenServicePresentsError: {
+            return boundary;
         }
         }
     }
@@ -64,7 +63,7 @@ export class SignInUsecase extends Usecase<SignInContext, Anyone> {
         if (result === true && id !== null && password != null) {
             return this.just({ scene: SignIn.onSuccessInValidatingThenServiceTrySigningIn, id, password });
         } else {
-            return this.just({ scene: SignIn.onFailureInValidatingThenServicePresentsError, result });
+            return this.just({ scene: SignIn.goals.onFailureInValidatingThenServicePresentsError, result });
         }
     }
 
@@ -73,9 +72,9 @@ export class SignInUsecase extends Usecase<SignInContext, Anyone> {
             .signIn(id, password)
             .pipe(
                 map(user => {
-                    return this.instantiate({ scene: SignIn.onSuccessThenServicePresentsHomeView, user });
+                    return this.instantiate({ scene: SignIn.goals.onSuccessThenServicePresentsHomeView, user });
                 })
-                , catchError(error => this.just({ scene: SignIn.onFailureThenServicePresentsError, error }))
+                , catchError(error => this.just({ scene: SignIn.goals.onFailureThenServicePresentsError, error }))
             );
     }
 }

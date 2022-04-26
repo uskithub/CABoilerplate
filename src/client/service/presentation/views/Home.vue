@@ -4,10 +4,10 @@ import { inject } from "vue";
 import type { ViewModels } from "../viewModels";
 import { VIEW_MODELS_KEY } from "../viewModels";
 
-const { store, createHomeViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-const { state, boot } = createHomeViewModel(store);
+const { shared, createHomeViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
+const { local, boot } = createHomeViewModel(shared);
 
-if (store.user === null) {
+if (shared.user === null) {
     boot();
 }
 
@@ -15,7 +15,7 @@ if (store.user === null) {
 
 <template lang="pug">
 v-container
-  h1 Home {{ store.user?.mailAddress }}
+  h1 Home {{ shared.user?.mailAddress }}
   ul
     li
       router-link(to="/signin") -> SignIn

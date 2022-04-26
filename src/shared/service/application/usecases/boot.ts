@@ -1,29 +1,39 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import ServiceModel from "@models/service";
 import { User } from "@models/user";
-import { Anyone, Usecase } from "robustive-ts";
 import { first, map, Observable } from "rxjs";
-import { IActor } from "robustive-ts/types/actor";
+import { Boundary, boundary, Empty, Usecase, UsecaseScenario } from "robustive-ts";
 
 /**
  * usecase: アプリを起動する
  */
-export const enum Boot {
-    /* 基本コース */
-    userOpensSite = "ユーザはサイトを開く"
-    , serviceChecksSession = "サービスはセッションがあるかを確認する"
-    , sessionExistsThenServicePresentsHome = "セッションがある場合_サービスはホーム画面を表示する"
+export const Boot = {
+    /* Basic Courses */
+    userOpensSite : "ユーザはサイトを開く"
+    , serviceChecksSession : "サービスはセッションがあるかを確認する"
 
-    /* 代替コース */
-    , sessionNotExistsThenServicePresentsSignin = "セッションがない場合_サービスはサインイン画面を表示する"
-}
+    /* Boundaries */
+    , goals : {
+        sessionExistsThenServicePresentsHome : "セッションがある場合_サービスはホーム画面を表示する"
+        , sessionNotExistsThenServicePresentsSignin : "セッションがない場合_サービスはサインイン画面を表示する"
+    }
+} as const;
+
+type Boot = typeof Boot[keyof typeof Boot];
 
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
-export type BootContext = { scene: Boot.userOpensSite }
-    | { scene: Boot.serviceChecksSession }
-    | { scene: Boot.sessionExistsThenServicePresentsHome; user: User; }
-    | { scene: Boot.sessionNotExistsThenServicePresentsSignin }
-;
+// https://zenn.dev/eagle/articles/ts-coproduct-introduction
+export type BootGoal = UsecaseScenario<{
+    [Boot.goals.sessionExistsThenServicePresentsHome]: { user: User; };
+    [Boot.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
+}>;
+
+export type BootScenario = UsecaseScenario<{
+    [Boot.userOpensSite]: Empty;
+    [Boot.serviceChecksSession]: Empty;
+}> | BootGoal;
+
+export const isBootGoal = (context: BootScenario): context is BootGoal => context.scene !== undefined && Object.values(Boot.goals).find(c => { return c === context.scene; }) !== undefined;
 
 /**
  * コンストラクタでSceneが保持するContextを設定します。
@@ -31,15 +41,13 @@ export type BootContext = { scene: Boot.userOpensSite }
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class BootUsecase extends Usecase<BootContext, Anyone> {
-    context: BootContext;
+export class BootUsecase extends Usecase<BootScenario> {
 
-    constructor(context: BootContext = { scene: Boot.userOpensSite }) {
-        super();
-        this.context = context;
+    constructor(initialContext: BootScenario = { scene: Boot.userOpensSite }) {
+        super(initialContext);
     }
 
-    next(actor: Anyone): Observable<this>|null {
+    next(): Observable<this>|Boundary {
         switch (this.context.scene) {
         case Boot.userOpensSite: {
             return this.just({ scene: Boot.serviceChecksSession });
@@ -47,11 +55,9 @@ export class BootUsecase extends Usecase<BootContext, Anyone> {
         case Boot.serviceChecksSession : {
             return this.check();
         }
-        case Boot.sessionExistsThenServicePresentsHome: {
-            return null;
-        }
-        case Boot.sessionNotExistsThenServicePresentsSignin: {
-            return null;
+        case Boot.goals.sessionExistsThenServicePresentsHome:
+        case Boot.goals.sessionNotExistsThenServicePresentsSignin: {
+            return boundary;
         }
         }
     }
@@ -63,10 +69,10 @@ export class BootUsecase extends Usecase<BootContext, Anyone> {
                 map((signInStatusContext) => {
                     switch(signInStatusContext.kind) {
                     case SignInStatus.signIn: {
-                        return this.instantiate({ scene: Boot.sessionExistsThenServicePresentsHome, user: signInStatusContext.user });
+                        return this.instantiate({ scene: Boot.goals.sessionExistsThenServicePresentsHome, user: signInStatusContext.user });
                     }
                     default: {
-                        return this.instantiate({ scene: Boot.sessionNotExistsThenServicePresentsSignin });
+                        return this.instantiate({ scene: Boot.goals.sessionNotExistsThenServicePresentsSignin });
                     }
                     }
                 })

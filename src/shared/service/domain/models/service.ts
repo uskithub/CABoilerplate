@@ -7,9 +7,9 @@ import { SignUpUsecase } from "../../application/usecases/signUp";
 import { SignInStatusContext } from "../interfaces/authenticator";
 
 import { SignedInUser } from "@/client/service/application/actors/signedInUser";
-import { User } from "./user";
-import { Usecase, Anyone, Actor } from "robustive-ts";
+// import { Usecase, Anyone, Actor } from "robustive-ts";
 import { Observable } from "rxjs";
+import { Actor, Usecase } from "robustive-ts";
 
 
 export default {
@@ -17,9 +17,8 @@ export default {
         return dependencies.auth.signInStatus();
     }
 
-    , authorize: <V extends Actor<User>, T, U extends Usecase<T>>(actor: V|null, usecase: U): boolean => {
+    , authorize: <T extends Actor<T>, Context, U extends Usecase<Context>>(actor: T, usecase: U): boolean => {
 
-        const isAnyone = (actor: any): actor is Anyone => actor.constructor === Anyone;
         const isSignedInUser = (actor: any): actor is SignedInUser => actor.constructor === SignedInUser;
 
         switch (usecase.constructor) {

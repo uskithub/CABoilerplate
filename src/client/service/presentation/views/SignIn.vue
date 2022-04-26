@@ -5,12 +5,19 @@ import { useRouter } from "vue-router";
 import type { ViewModels } from "../viewModels";
 import { VIEW_MODELS_KEY } from "../viewModels";
 
-const { store, createSignInViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-const { state, signIn, signOut, goHome } = createSignInViewModel(store);
+const { shared, createSignInViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
+const { local, signIn, signOut, goHome } = createSignInViewModel(shared);
 
-if (store.user !== null) {
-    state.isPresentDialog = true;
-}
+const state = {
+    isPresentDialog: local.isPresentDialog
+    , email: null
+    , password: null
+} as {
+  isPresentDialog: boolean;
+  email: string|null;
+  password: string|null;
+};
+
 </script>
 
 <template lang="pug">
@@ -18,23 +25,23 @@ v-container
   v-app-bar(app)
     v-toolbar-title ホーム
   h1 SignIn
-  v-form(ref="form", v-model="state.isValid", lazy-validation)
+  v-form(ref="form", v-model="local.isValid", lazy-validation)
     v-text-field(
       v-model="state.email",
-      :rules="emailRules",
+      :error-messages="local.idInvalidMessage",
       label="Mail Address",
       required
     )
-    span(v-if="state.idInvalidMessage !== null") {{ state.idInvalidMessage }}
+    span(v-if="local.idInvalidMessage !== null") {{ local.idInvalidMessage }}
     v-text-field(
       v-model="state.password",
-      :rules="passwordRules",
+      :error-messages="local.passwordInvalidMessage",
       label="Password",
       required
     )
-    span(v-if="state.passwordInvalidMessage !== null") {{ state.passwordInvalidMessage }}
+    span(v-if="local.passwordInvalidMessage !== null") {{ local.passwordInvalidMessage }}
     v-btn.mr-4(
-      :disabled="!state.isValid",
+      :disabled="!local.isValid",
       color="success",
       @click="signIn(state.email, state.password)"
     ) Sign In

@@ -5,14 +5,21 @@ import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
 import { VIEW_MODELS_KEY } from "../viewModels";
 import type { ViewModels } from "../viewModels";
+import { share } from "rxjs";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
-const { store, createSignUpViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-const { state, signUp, signOut, goHome } = createSignUpViewModel(store);
+const { shared, createSignUpViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
+const { local, signUp, signOut, goHome } = createSignUpViewModel(shared);
 
-if (store.user !== null) {
-    state.isPresentDialog = true;
-}
+const state = {
+    isPresentDialog: local.isPresentDialog
+    , email: null
+    , password: null
+} as {
+  isPresentDialog: boolean;
+  email: string|null;
+  password: string|null;
+};
 
 </script>
 
@@ -22,23 +29,23 @@ v-container
     v-toolbar-title {{ t.signUp.title }}
   h1 {{ t.signUp.title }}
 
-  v-form(ref="form", v-model="state.isValid", lazy-validation)
+  v-form(ref="form", v-model="local.isValid", lazy-validation)
     v-text-field(
       v-model="state.email",
-      :error-messages="state.idInvalidMessage",
+      :error-messages="local.idInvalidMessage",
       :label="t.common.labels.mailAddress",
       required
     )
-    span(v-if="state.idInvalidMessage !== null") {{ state.idInvalidMessage }}
+    span(v-if="local.idInvalidMessage !== null") {{ local.idInvalidMessage }}
     v-text-field(
       v-model="state.password",
-      :error-messages="state.passwordInvalidMessage",
+      :error-messages="local.passwordInvalidMessage",
       :label="t.common.labels.password",
       required
     )
-    span(v-if="state.passwordInvalidMessage !== null") {{ state.passwordInvalidMessage }}
+    span(v-if="local.passwordInvalidMessage !== null") {{ local.passwordInvalidMessage }}
     v-btn.mr-4(
-      :disabled="!state.isValid",
+      :disabled="!local.isValid",
       color="success",
       @click="signUp(state.email, state.password)"
     ) {{ t.signUp.buttons.signUp }}

@@ -1,39 +1,43 @@
 // service
-import { Boot, BootUsecase } from "@usecases/boot";
+import { Boot, BootUsecase, isBootGoal } from "@usecases/boot";
 
 // system
 import { reactive } from "vue";
-import { State, Store, ViewModel } from ".";
+import { LocalStore, Mutable, SharedStore, ViewModel } from ".";
 import { useRouter } from "vue-router";
-import { Anyone, UserNotAuthorizedToInteractIn } from "robustive-ts";
 import { Subscription } from "rxjs";
+import { Anyone, UserNotAuthorizedToInteractIn } from "robustive-ts";
 
-export type HomeState = State;
+export type HomeStore = LocalStore;
 
-export interface HomeViewModel extends ViewModel<HomeState> {
-    state: HomeState;
+export interface HomeViewModel extends ViewModel<HomeStore> {
+    readonly local: HomeStore;
     boot: ()=>void;
 }
 
-export function createHomeViewModel(store: Store): HomeViewModel {
+export function createHomeViewModel(shared: SharedStore): HomeViewModel {
     const router = useRouter();
-    const state = reactive<HomeState>({});
+    const local = reactive<HomeStore>({});
+
+    const _shared = shared as Mutable<SharedStore>;
+    const _local = local as Mutable<HomeStore>;
 
     return {
-        state
+        local
         , boot: () => {
             let subscription: Subscription|null = null;
-            subscription = new Anyone()
-                .interactIn(new BootUsecase())
+            subscription = new BootUsecase()
+                .interactedBy(new Anyone())
                 .subscribe({
                     next: performedSenario => {
                         console.log("boot:", performedSenario);
                         const lastContext = performedSenario.slice(-1)[0];
+                        if (!isBootGoal(lastContext)) { return; }
                         switch (lastContext.scene) {
-                        case Boot.sessionExistsThenServicePresentsHome:
-                            store.user = { ...lastContext.user };
+                        case Boot.goals.sessionExistsThenServicePresentsHome:
+                            _shared.user = { ...lastContext.user };
                             break;
-                        case Boot.sessionNotExistsThenServicePresentsSignin:
+                        case Boot.goals.sessionNotExistsThenServicePresentsSignin:
                             router.replace("/signin");
                             break;
                         }
