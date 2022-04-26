@@ -7,7 +7,7 @@ module.exports = {
     , extends: [
         "eslint:recommended"
         , "plugin:vue/vue3-recommended"
-        , "plugin:@typescript-eslint/recommended"
+        , "@vue/typescript/recommended"
     ]
     , parser: "vue-eslint-parser"
     , parserOptions: {
@@ -15,7 +15,7 @@ module.exports = {
         , parser: "@typescript-eslint/parser"
         , sourceType: "module"
     }
-    , plugins: ["vue", "@typescript-eslint"]
+    , plugins: ["@typescript-eslint", "vue"]
     , rules: {
         indent: ["error", 4]
         , quotes: ["warn", "double"]
@@ -25,7 +25,6 @@ module.exports = {
         , "comma-dangle": ["warn", "never"]
         , "no-var": ["error"]
         , "no-console": ["off"]
-        , "no-unused-vars": ["off"]
         , "no-mixed-spaces-and-tabs": ["warn"]
         , "no-warning-comments": ["warn", { terms: ["todo"], location: "anywhere" }]
     }
