@@ -1,22 +1,22 @@
 <script setup lang="ts">
 // system
-import { inject } from "vue";
+import { inject, reactive } from "vue";
 import { useRouter } from "vue-router";
 import type { ViewModels } from "../viewModels";
 import { VIEW_MODELS_KEY } from "../viewModels";
 
 const { shared, createSignInViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-const { local, signIn, signOut, goHome } = createSignInViewModel(shared);
+const { local, isPresentDialog, signIn, signOut, goHome } = createSignInViewModel(shared);
 
-const state = {
-    isPresentDialog: local.isPresentDialog
-    , email: null
-    , password: null
-} as {
+const state = reactive<{
   isPresentDialog: boolean;
   email: string|null;
   password: string|null;
-};
+}>({
+    isPresentDialog
+    , email: null
+    , password: null
+});
 
 </script>
 
@@ -32,14 +32,12 @@ v-container
       label="Mail Address",
       required
     )
-    span(v-if="local.idInvalidMessage !== null") {{ local.idInvalidMessage }}
     v-text-field(
       v-model="state.password",
       :error-messages="local.passwordInvalidMessage",
       label="Password",
       required
     )
-    span(v-if="local.passwordInvalidMessage !== null") {{ local.passwordInvalidMessage }}
     v-btn.mr-4(
       :disabled="!local.isValid",
       color="success",
@@ -55,6 +53,14 @@ v-container
         v-card-text Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.
         v-card-actions
           v-spacer
-          v-btn(color="warning", text, @click="signOut()") Sign Out
-          v-btn(color="success", text, @click="goHome()") Go Home
+          v-btn(
+            color="warning",
+            text,
+            @click="signOut().then((isSuccess: boolean) => { state.isPresentDialog = !isSuccess; })"
+          ) Sign Out
+          v-btn(
+            color="success",
+            text,
+            @click="() => { state.isPresentDialog = false; goHome(); }"
+          ) Go Home
 </template>

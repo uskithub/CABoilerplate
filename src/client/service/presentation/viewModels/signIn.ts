@@ -10,41 +10,41 @@ import { LocalStore, Mutable, SharedStore, ViewModel } from ".";
 import { SignedInUser } from "../../application/actors/signedInUser";
 
 export interface SignInStore extends LocalStore {
-    readonly isPresentDialog: boolean;
     readonly isValid: boolean;
     readonly idInvalidMessage: string|string[]|null;
     readonly passwordInvalidMessage: string|string[]|null;
 }
 
 export interface SignInViewModel extends ViewModel<SignInStore> {
-    readonly local: SignInStore
-    signIn: (id: string|null, password: string|null)=>void
-    signOut: ()=>void
-    goHome: ()=>void
+    readonly local: SignInStore;
+    readonly isPresentDialog: boolean;
+    signIn: (id: string|null, password: string|null)=>void;
+    signOut: ()=>Promise<boolean>;
+    goHome: ()=>void;
 }
 
 export function createSignInViewModel(shared: SharedStore): SignInViewModel {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
     const local = reactive<SignInStore>({
-        isPresentDialog: (shared.user !== null)
-        , isValid: true
-        , idInvalidMessage: null
-        , passwordInvalidMessage: null
+        isValid: true
+        , idInvalidMessage: "" // ホントは null でいいはずが...
+        , passwordInvalidMessage: "" // ホントは null でいいはずが...
     });
     const _local = local as Mutable<SignInStore>;
 
     return {
         local
+        , isPresentDialog: (shared.user !== null)
         , signIn: (id: string|null, password: string|null) => {
             _local.idInvalidMessage = null;
             _local.passwordInvalidMessage = null;
             let subscription: Subscription|null = null;
-            subscription = new SignInUsecase({ scene: SignIn.userStartsSignInProcess, id, password})
+            subscription = new SignInUsecase({ scene: SignIn.userStartsSignInProcess, id, password })
                 .interactedBy(new Anyone())
                 .subscribe({
-                    next: (performedSenario) => {
-                        const lastContext = performedSenario.slice(-1)[0];
+                    next: (performedScenario) => {
+                        const lastContext = performedScenario.slice(-1)[0];
                         if (!isSignInGoal(lastContext)) { return; }
                         switch(lastContext.scene){
                         case SignIn.goals.onSuccessThenServicePresentsHomeView:
@@ -103,39 +103,43 @@ export function createSignInViewModel(shared: SharedStore): SignInViewModel {
                     }
                 });
         }
-        , signOut: () => {
-            if (shared.user === null) { return; }
-            let subscription: Subscription|null = null;
-            subscription = new SignOutUsecase()
-                .interactedBy(new SignedInUser(shared.user))
-                .subscribe({
-                    next: (performedSenario) => {
-                        const lastContext = performedSenario.slice(-1)[0];
-                        if (!isSignOutGoal(lastContext)) { return; }
-                        switch(lastContext.scene){
-                        case SignOut.goals.onSuccessThenServicePresentsSignInView:
-                            _local.isPresentDialog = false;
-                            break;
-                        case SignOut.goals.onFailureThenServicePresentsError:
-                            console.log("SERVICE ERROR:", lastContext.error);
-                            break;
+        , signOut: (): Promise<boolean> => {
+            return new Promise((resolve, reject) => {
+                if (shared.user === null) { return resolve(false); }
+                let subscription: Subscription|null = null;
+                subscription = new SignOutUsecase()
+                    .interactedBy(new SignedInUser(shared.user))
+                    .subscribe({
+                        next: (performedScenario) => {
+                            console.log("signOut:", performedScenario);
+                            const lastContext = performedScenario.slice(-1)[0];
+                            if (!isSignOutGoal(lastContext)) { return reject(); }
+                            switch(lastContext.scene){
+                            case SignOut.goals.onSuccessThenServicePresentsSignInView:
+                                resolve(true);
+                                break;
+                            case SignOut.goals.onFailureThenServicePresentsError:
+                                console.log("SERVICE ERROR:", lastContext.error);
+                                reject();
+                                break;
+                            }
                         }
-                    }
-                    , error: (e) => {
-                        if (e instanceof UserNotAuthorizedToInteractIn) {
-                            console.error(e);
-                        } else {
-                            console.error(e);
+                        , error: (e) => {
+                            if (e instanceof UserNotAuthorizedToInteractIn) {
+                                console.error(e);
+                            } else {
+                                console.error(e);
+                            }
+                            reject();
                         }
-                    }
-                    , complete: () => {
-                        console.info("complete");
-                        subscription?.unsubscribe();
-                    }
-                });
+                        , complete: () => {
+                            console.info("complete");
+                            subscription?.unsubscribe();
+                        }
+                    });
+            });
         }
         , goHome: () => {
-            _local.isPresentDialog = false;
             router.replace("/");
         }
     };

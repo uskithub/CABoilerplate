@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // system
-import { inject } from "vue";
+import { inject, reactive } from "vue";
 import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
 import { VIEW_MODELS_KEY } from "../viewModels";
@@ -9,17 +9,17 @@ import { share } from "rxjs";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { shared, createSignUpViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-const { local, signUp, signOut, goHome } = createSignUpViewModel(shared);
+const { local, isPresentDialog, signUp, signOut, goHome } = createSignUpViewModel(shared);
 
-const state = {
-    isPresentDialog: local.isPresentDialog
-    , email: null
-    , password: null
-} as {
+const state = reactive<{
   isPresentDialog: boolean;
   email: string|null;
   password: string|null;
-};
+}>({
+    isPresentDialog
+    , email: null
+    , password: null
+});
 
 </script>
 
@@ -36,14 +36,12 @@ v-container
       :label="t.common.labels.mailAddress",
       required
     )
-    span(v-if="local.idInvalidMessage !== null") {{ local.idInvalidMessage }}
     v-text-field(
       v-model="state.password",
       :error-messages="local.passwordInvalidMessage",
       :label="t.common.labels.password",
       required
     )
-    span(v-if="local.passwordInvalidMessage !== null") {{ local.passwordInvalidMessage }}
     v-btn.mr-4(
       :disabled="!local.isValid",
       color="success",
@@ -57,6 +55,10 @@ v-container
         v-card-text Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.
         v-card-actions
           v-spacer
-          v-btn(color="warning", text, @click="signOut()") Sign Out
+          v-btn(
+            color="warning",
+            text,
+            @click="signOut().then((isSuccess: boolean) => { state.isPresentDialog = !isSuccess; })"
+          ) Sign Out
           v-btn(color="success", text, @click="goHome()") Go Home
 </template>

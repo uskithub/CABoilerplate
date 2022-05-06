@@ -29,9 +29,9 @@ export function createHomeViewModel(shared: SharedStore): HomeViewModel {
             subscription = new BootUsecase()
                 .interactedBy(new Anyone())
                 .subscribe({
-                    next: performedSenario => {
-                        console.log("boot:", performedSenario);
-                        const lastContext = performedSenario.slice(-1)[0];
+                    next: performedScenario => {
+                        console.log("boot:", performedScenario);
+                        const lastContext = performedScenario.slice(-1)[0];
                         if (!isBootGoal(lastContext)) { return; }
                         switch (lastContext.scene) {
                         case Boot.goals.sessionExistsThenServicePresentsHome:
