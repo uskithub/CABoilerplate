@@ -17,7 +17,7 @@ export const SignIn = {
     , goals : {
         onSuccessThenServicePresentsHomeView : "成功した場合_サービスはホーム画面を表示する"
         , onFailureInValidatingThenServicePresentsError : "入力項目に問題がある場合_サービスはエラーを表示する"
-        , onFailureThenServicePresentsError : "失敗した場合_サービスはエラーを表示する"
+        , onFailureInSigningInThenServicePresentsError : "サインインに失敗した場合_サービスはエラーを表示する"
     }
 } as const;
 
@@ -26,7 +26,7 @@ type SignIn = typeof SignIn[keyof typeof SignIn];
 export type SignInGoal = UsecaseScenario<{
     [SignIn.goals.onSuccessThenServicePresentsHomeView] : { user: User; };
     [SignIn.goals.onFailureInValidatingThenServicePresentsError] : { result: SignInValidationResult; };
-    [SignIn.goals.onFailureThenServicePresentsError] : { error: Error; };
+    [SignIn.goals.onFailureInSigningInThenServicePresentsError] : { error: Error; };
 }>;
 
 export type SignInScenario = UsecaseScenario<{
@@ -52,7 +52,7 @@ export class SignInUsecase extends Usecase<SignInScenario> {
         }
         case SignIn.goals.onSuccessThenServicePresentsHomeView:
         case SignIn.goals.onFailureInValidatingThenServicePresentsError:
-        case SignIn.goals.onFailureThenServicePresentsError: {
+        case SignIn.goals.onFailureInSigningInThenServicePresentsError: {
             return boundary;
         }
         }
@@ -74,7 +74,7 @@ export class SignInUsecase extends Usecase<SignInScenario> {
                 map(user => {
                     return this.instantiate({ scene: SignIn.goals.onSuccessThenServicePresentsHomeView, user });
                 })
-                , catchError(error => this.just({ scene: SignIn.goals.onFailureThenServicePresentsError, error }))
+                , catchError(error => this.just({ scene: SignIn.goals.onFailureInSigningInThenServicePresentsError, error }))
             );
     }
 }

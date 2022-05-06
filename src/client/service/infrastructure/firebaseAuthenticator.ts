@@ -71,17 +71,27 @@ export class FirebaseAuthenticator implements Authenticator {
                 })
                 .catch((error: FirebaseError) => {
                     switch (error.code) {
-                    case "auth/user-not-found": {
-                        // TODO: SystemErrorに変換する
-                        subscriber.error(error);
-                        return;
-                    }
+                    // case "auth/user-not-found": {
+                    //     // TODO: SystemErrorに変換する
+                    //     subscriber.error(error);
+                    //     return;
+                    // }
+                    // case "auth/wrong-password": {
+                    //     // TODO: SystemErrorに変換する
+                    //     subscriber.error(error);
+                    //     return;
+                    // }
+                    // case "auth/too-many-requests": {
+                    //     // TODO: SystemErrorに変換する
+                    //     subscriber.error(error);
+                    //     return;
+                    // }
                     default: {
-                        console.log("EEE code:", error.code);
-                        console.log("EEE customData:", error.customData);
-                        console.log("EEE message:", error.message);
-                        console.log("EEE name:", error.name);
-                        console.log("EEE stack:", error.stack);
+                        console.error(`ロジック未登録の FirebaseAuthentication エラー。以下のcodeを fireabaseAuthenticatorのsignInメソッド内、catch句の switch文に追加すること（code: ${ error.code }）`);
+                        // console.log("EEE customData:", error.customData);
+                        // console.log("EEE message:", error.message);
+                        // console.log("EEE name:", error.name);
+                        // console.log("EEE stack:", error.stack);
                         subscriber.error(error);
                         break;
                     }

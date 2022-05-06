@@ -1,10 +1,13 @@
 <script setup lang="ts">
 // system
+import { DICTIONARY_KEY } from "@shared/system/localizations";
+import type { Dictionary } from "@shared/system/localizations";
 import { inject, reactive } from "vue";
 import { useRouter } from "vue-router";
 import type { ViewModels } from "../viewModels";
 import { VIEW_MODELS_KEY } from "../viewModels";
 
+const t = inject(DICTIONARY_KEY) as Dictionary;
 const { shared, createSignInViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
 const { local, isPresentDialog, signIn, signOut, goHome } = createSignInViewModel(shared);
 
@@ -26,16 +29,18 @@ v-container
     v-toolbar-title ホーム
   h1 SignIn
   v-form(ref="form", v-model="local.isValid", lazy-validation)
+    span(v-if="local.signInFailureMessage !== null") {{ local.signInFailureMessage }}
     v-text-field(
       v-model="state.email",
+      :label="t.common.labels.mailAddress",
       :error-messages="local.idInvalidMessage",
-      label="Mail Address",
       required
     )
     v-text-field(
       v-model="state.password",
+      type="password",
+      :label="t.common.labels.password",
       :error-messages="local.passwordInvalidMessage",
-      label="Password",
       required
     )
     v-btn.mr-4(

@@ -13,6 +13,7 @@ export interface SignInStore extends LocalStore {
     readonly isValid: boolean;
     readonly idInvalidMessage: string|string[]|null;
     readonly passwordInvalidMessage: string|string[]|null;
+    readonly signInFailureMessage: string|null;
 }
 
 export interface SignInViewModel extends ViewModel<SignInStore> {
@@ -30,6 +31,7 @@ export function createSignInViewModel(shared: SharedStore): SignInViewModel {
         isValid: true
         , idInvalidMessage: "" // ホントは null でいいはずが...
         , passwordInvalidMessage: "" // ホントは null でいいはずが...
+        , signInFailureMessage: null
     });
     const _local = local as Mutable<SignInStore>;
 
@@ -37,8 +39,8 @@ export function createSignInViewModel(shared: SharedStore): SignInViewModel {
         local
         , isPresentDialog: (shared.user !== null)
         , signIn: (id: string|null, password: string|null) => {
-            _local.idInvalidMessage = null;
-            _local.passwordInvalidMessage = null;
+            // _local.idInvalidMessage = null;
+            // _local.passwordInvalidMessage = null;
             let subscription: Subscription|null = null;
             subscription = new SignInUsecase({ scene: SignIn.userStartsSignInProcess, id, password })
                 .interactedBy(new Anyone())
@@ -84,8 +86,9 @@ export function createSignInViewModel(shared: SharedStore): SignInViewModel {
                             }
                             break;
                         }
-                        case SignIn.goals.onFailureThenServicePresentsError: {
+                        case SignIn.goals.onFailureInSigningInThenServicePresentsError: {
                             console.log("SERVICE ERROR:", lastContext.error);
+                            _local.signInFailureMessage = lastContext.error.message;
                             break;
                         }
                         }
@@ -96,6 +99,7 @@ export function createSignInViewModel(shared: SharedStore): SignInViewModel {
                         } else {
                             console.error(e);
                         }
+                        _local.signInFailureMessage = e.message;
                     }
                     , complete: () => {
                         console.info("complete");

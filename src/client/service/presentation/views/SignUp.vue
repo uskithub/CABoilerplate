@@ -32,14 +32,15 @@ v-container
   v-form(ref="form", v-model="local.isValid", lazy-validation)
     v-text-field(
       v-model="state.email",
-      :error-messages="local.idInvalidMessage",
       :label="t.common.labels.mailAddress",
+      :error-messages="local.idInvalidMessage",
       required
     )
     v-text-field(
       v-model="state.password",
-      :error-messages="local.passwordInvalidMessage",
+      type="password",
       :label="t.common.labels.password",
+      :error-messages="local.passwordInvalidMessage",
       required
     )
     v-btn.mr-4(
