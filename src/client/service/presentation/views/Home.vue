@@ -1,14 +1,16 @@
 <script setup lang="ts">
+// service
+import { Boot } from "@/shared/service/application/usecases/boot";
+import type { BootScenario } from "@/shared/service/application/usecases/boot";
 // system
 import { inject } from "vue";
-import type { ViewModels } from "../viewModels";
-import { VIEW_MODELS_KEY } from "../viewModels";
+import type { ViewModels } from "../models";
+import { VIEW_MODELS_KEY } from "../models";
 
-const { shared, createHomeViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-const { local, boot } = createHomeViewModel(shared);
+const { shared, dispatch } = inject(VIEW_MODELS_KEY) as ViewModels;
 
 if (shared.user === null) {
-    boot();
+    dispatch({ scene: Boot.userOpensSite } as BootScenario);
 }
 
 </script>

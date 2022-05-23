@@ -1,7 +1,8 @@
 import type { SignUpValidationResult } from "@models/user";
 import type { User } from "@models/user";
 import UserModel from "@models/user";
-import { boundary, Boundary, Usecase, UsecaseScenario } from "robustive-ts";
+import ServiceModel from "@models/service";
+import { Actor, boundary, Boundary, Usecase, UsecaseScenario } from "robustive-ts";
 import { first, map, Observable } from "rxjs";
 
 /**
@@ -35,10 +36,15 @@ export type SignUpScenario = UsecaseScenario<{
     [SignUp.onSuccessInValidatingThenServicePublishNewAccount]: { id: string; password: string; };
 }> | SignUpGoal;
 
-export const isSignUpGoal = (context: SignUpScenario): context is SignUpGoal => context.scene !== undefined && Object.values(SignUp.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isSignUpGoal = (context: any): context is SignUpGoal => context.scene !== undefined && Object.values(SignUp.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isSignUpScene = (context: any): context is SignUpScenario => context.scene !== undefined && Object.values(SignUp).find(c => { return c === context.scene; }) !== undefined;
 
 
 export class SignUpUsecase extends Usecase<SignUpScenario> {
+
+    override authorize<T extends Actor<T>>(actor: T): boolean {
+        return ServiceModel.authorize(actor, this);
+    }
 
     next(): Observable<this>|Boundary {
         switch (this.context.scene) {

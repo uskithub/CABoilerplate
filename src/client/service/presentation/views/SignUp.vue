@@ -1,25 +1,30 @@
 <script setup lang="ts">
+// service
+import { SignUp } from "@/shared/service/application/usecases/signUp";
+import type { SignUpScenario } from "@/shared/service/application/usecases/signUp";
+import { SignOut } from "@/shared/service/application/usecases/signOut";
+import type { SignOutScenario } from "@/shared/service/application/usecases/signOut";
+
 // system
-import { inject, reactive } from "vue";
+import { computed, inject, reactive } from "vue";
 import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
-import { VIEW_MODELS_KEY } from "../viewModels";
-import type { ViewModels } from "../viewModels";
-import { share } from "rxjs";
+import { VIEW_MODELS_KEY } from "../models";
+import type { ViewModels } from "../models";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
-const { shared, createSignUpViewModel } = inject(VIEW_MODELS_KEY) as ViewModels;
-const { local, isPresentDialog, signUp, signOut, goHome } = createSignUpViewModel(shared);
+const { shared, user, dispatch } = inject(VIEW_MODELS_KEY) as ViewModels;
 
 const state = reactive<{
-  isPresentDialog: boolean;
   email: string|null;
   password: string|null;
 }>({
-    isPresentDialog
-    , email: null
+    email: null
     , password: null
 });
+
+const isPresentDialog = computed(() => shared.user !== null);
+const isFormValid = computed(() => state.email !== null && state.password !== null);
 
 </script>
 
@@ -29,28 +34,28 @@ v-container
     v-toolbar-title {{ t.signUp.title }}
   h1 {{ t.signUp.title }}
 
-  v-form(ref="form", v-model="local.isValid", lazy-validation)
+  v-form(ref="form", v-model="isFormValid", lazy-validation)
     v-text-field(
       v-model="state.email",
       :label="t.common.labels.mailAddress",
-      :error-messages="local.idInvalidMessage",
+      :error-messages="user.store.idInvalidMessage",
       required
     )
     v-text-field(
       v-model="state.password",
       type="password",
       :label="t.common.labels.password",
-      :error-messages="local.passwordInvalidMessage",
+      :error-messages="user.store.passwordInvalidMessage",
       required
     )
     v-btn.mr-4(
-      :disabled="!local.isValid",
+      :disabled="!isFormValid",
       color="success",
-      @click="signUp(state.email, state.password)"
+      @click="dispatch({ scene: SignUp.userStartsSignUpProcess, id: state.email, password: state.password })"
     ) {{ t.signUp.buttons.signUp }}
 
   v-row(justify="center")
-    v-dialog(v-model="state.isPresentDialog", persistent, max-width="290")
+    v-dialog(v-model="isPresentDialog", persistent, max-width="290")
       v-card
         v-card-title.text-h5 Use Google's location service?
         v-card-text Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.
@@ -59,7 +64,11 @@ v-container
           v-btn(
             color="warning",
             text,
-            @click="signOut().then((isSuccess: boolean) => { state.isPresentDialog = !isSuccess; })"
+            @click="dispatch({ scene: SignOut.userStartsSignOutProcess, id: state.email, password: state.password })"
           ) Sign Out
-          v-btn(color="success", text, @click="goHome()") Go Home
+          v-btn(
+            color="success",
+            text,
+            @click="dispatch({ scene: SignOut.userResignSignOut })"
+          ) Go Home
 </template>

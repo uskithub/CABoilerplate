@@ -22,7 +22,7 @@
     "rxjs": "^7.5.5",
     "vue": "^3.2.31",
     "vue-router": "4.0.15",
-    "vuetify": "^v3.0.0-beta.1",
+    "vuetify": "^v3.0.0-beta.2",
     "webfontloader": "^1.0.0"
   },
   "devDependencies": {

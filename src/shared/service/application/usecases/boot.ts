@@ -2,7 +2,7 @@ import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import ServiceModel from "@models/service";
 import { User } from "@models/user";
 import { first, map, Observable } from "rxjs";
-import { Boundary, boundary, Empty, Usecase, UsecaseScenario } from "robustive-ts";
+import { Actor, Boundary, boundary, Empty, Usecase, UsecaseScenario } from "robustive-ts";
 
 /**
  * usecase: アプリを起動する
@@ -33,7 +33,8 @@ export type BootScenario = UsecaseScenario<{
     [Boot.serviceChecksSession]: Empty;
 }> | BootGoal;
 
-export const isBootGoal = (context: BootScenario): context is BootGoal => context.scene !== undefined && Object.values(Boot.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isBootGoal = (context: any): context is BootGoal => context.scene !== undefined && Object.values(Boot.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isBootScene = (context: any): context is BootScenario => context.scene !== undefined && Object.values(Boot).find(c => { return c === context.scene; }) !== undefined;
 
 /**
  * コンストラクタでSceneが保持するContextを設定します。
@@ -43,8 +44,8 @@ export const isBootGoal = (context: BootScenario): context is BootGoal => contex
  */
 export class BootUsecase extends Usecase<BootScenario> {
 
-    constructor(initialContext: BootScenario = { scene: Boot.userOpensSite }) {
-        super(initialContext);
+    override authorize<T extends Actor<T>>(actor: T): boolean {
+        return ServiceModel.authorize(actor, this);
     }
 
     next(): Observable<this>|Boundary {

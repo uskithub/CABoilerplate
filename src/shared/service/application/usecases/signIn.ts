@@ -1,7 +1,8 @@
 
 import type { SignInValidationResult, User } from "@models/user";
+import ServiceModel from "@models/service";
 import UserModel from "@models/user";
-import { boundary, Boundary, Usecase, UsecaseScenario } from "robustive-ts";
+import { Actor, boundary, Boundary, Usecase, UsecaseScenario } from "robustive-ts";
 import { catchError, map, Observable } from "rxjs";
 
 /**
@@ -12,7 +13,7 @@ export const SignIn = {
     userStartsSignInProcess : "ユーザはサインインを開始する"
     , serviceValidateInputs : "サービスは入力項目に問題がないかを確認する"
     , onSuccessInValidatingThenServiceTrySigningIn : "入力項目に問題がない場合_サービスはサインインを試行する"
-    
+
     /* Boundaries */
     , goals : {
         onSuccessThenServicePresentsHomeView : "成功した場合_サービスはホーム画面を表示する"
@@ -35,9 +36,14 @@ export type SignInScenario = UsecaseScenario<{
     [SignIn.onSuccessInValidatingThenServiceTrySigningIn] : { id: string; password: string; };
 }> | SignInGoal;
 
-export const isSignInGoal = (context: SignInScenario): context is SignInGoal => context.scene !== undefined && Object.values(SignIn.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isSignInGoal = (context: any): context is SignInGoal => context.scene !== undefined && Object.values(SignIn.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isSignInScene = (context: any): context is SignInScenario => context.scene !== undefined && Object.values(SignIn).find(c => { return c === context.scene; }) !== undefined;
 
 export class SignInUsecase extends Usecase<SignInScenario> {
+
+    override authorize<T extends Actor<T>>(actor: T): boolean {
+        return ServiceModel.authorize(actor, this);
+    }
 
     next(): Observable<this>|Boundary {
         switch (this.context.scene) {

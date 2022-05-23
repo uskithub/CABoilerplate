@@ -7,9 +7,10 @@ import { SignUpUsecase } from "../../application/usecases/signUp";
 import { SignInStatusContext } from "../interfaces/authenticator";
 
 import { SignedInUser } from "@/client/service/application/actors/signedInUser";
-// import { Usecase, Anyone, Actor } from "robustive-ts";
+// import { Usecase, Nobody, Actor } from "robustive-ts";
 import { Observable } from "rxjs";
 import { Actor, Usecase } from "robustive-ts";
+import { isNobody } from "robustive-ts";
 
 
 export default {
@@ -26,10 +27,10 @@ export default {
             return true;
         }
         case SignUpUsecase: {
-            return actor === null;
+            return isNobody(actor);
         }
         case SignInUsecase: {
-            return actor === null;
+            return isNobody(actor);
         }
         case SignOutUsecase: {
             return isSignedInUser(actor);
