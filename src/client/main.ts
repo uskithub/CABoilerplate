@@ -14,11 +14,13 @@ import { initializeApp } from "firebase/app";
 import firebaseConfig from "@client/system/config/firebase.config.json";
 import { FirebaseAuthenticator } from "@client/service/infrastructure/firebaseAuthenticator";
 import { DICTIONARY_KEY, i18n } from "@/shared/system/localizations";
+import { FirestoreBackend } from "./service/infrastructure/firestoreBackend";
 // import { GraphqlAuthenticator } from "./service/infrastructure/graphqlAuthenticator";
 
 const firebaseApp = initializeApp(firebaseConfig);
 dependencies.auth = new FirebaseAuthenticator(firebaseApp);
 // dependencies.auth = new GraphqlAuthenticator();
+dependencies.backend = new FirestoreBackend(firebaseApp.firestore());
 
 const routes = [
     { path: "/", component: Home }

@@ -52,7 +52,7 @@ export function createUserModel(shared: SharedStore): UserModel {
                         const lastSceneContext = performedScenario.slice(-1)[0];
                         if (!isBootGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
-                        case Boot.goals.sessionExistsThenServicePresentsHome:
+                        case Boot.goals.servicePresentsHome:
                             _shared.user = { ...lastSceneContext.user };
                             break;
                         case Boot.goals.sessionNotExistsThenServicePresentsSignin:

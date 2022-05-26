@@ -11,10 +11,11 @@ export const Boot = {
     /* Basic Courses */
     userOpensSite : "ユーザはサイトを開く"
     , serviceChecksSession : "サービスはセッションがあるかを確認する"
+    , sessionExistsThenServiceStartObservingUsersTasks : "セッションがある場合_サービスはユーザのタスクの観測を開始する"
 
     /* Boundaries */
     , goals : {
-        sessionExistsThenServicePresentsHome : "セッションがある場合_サービスはホーム画面を表示する"
+        servicePresentsHome : "サービスはホーム画面を表示する"
         , sessionNotExistsThenServicePresentsSignin : "セッションがない場合_サービスはサインイン画面を表示する"
     }
 } as const;
@@ -24,13 +25,14 @@ type Boot = typeof Boot[keyof typeof Boot];
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
 // https://zenn.dev/eagle/articles/ts-coproduct-introduction
 export type BootGoal = UsecaseScenario<{
-    [Boot.goals.sessionExistsThenServicePresentsHome]: { user: User; };
+    [Boot.goals.servicePresentsHome]: { user: User; };
     [Boot.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
 }>;
 
 export type BootScenario = UsecaseScenario<{
     [Boot.userOpensSite]: Empty;
     [Boot.serviceChecksSession]: Empty;
+    [Boot.sessionExistsThenServiceStartObservingUsersTasks]: { user: User; };
 }> | BootGoal;
 
 export const isBootGoal = (context: any): context is BootGoal => context.scene !== undefined && Object.values(Boot.goals).find(c => { return c === context.scene; }) !== undefined;
@@ -56,7 +58,10 @@ export class BootUsecase extends Usecase<BootScenario> {
         case Boot.serviceChecksSession : {
             return this.check();
         }
-        case Boot.goals.sessionExistsThenServicePresentsHome:
+        case Boot.sessionExistsThenServiceStartObservingUsersTasks : {
+
+        }
+        case Boot.goals.servicePresentsHome:
         case Boot.goals.sessionNotExistsThenServicePresentsSignin: {
             return boundary;
         }
@@ -70,7 +75,7 @@ export class BootUsecase extends Usecase<BootScenario> {
                 map((signInStatusContext) => {
                     switch(signInStatusContext.kind) {
                     case SignInStatus.signIn: {
-                        return this.instantiate({ scene: Boot.goals.sessionExistsThenServicePresentsHome, user: signInStatusContext.user });
+                        return this.instantiate({ scene: Boot.sessionExistsThenServiceStartObservingUsersTasks, user: signInStatusContext.user });
                     }
                     default: {
                         return this.instantiate({ scene: Boot.goals.sessionNotExistsThenServicePresentsSignin });
@@ -79,5 +84,9 @@ export class BootUsecase extends Usecase<BootScenario> {
                 })
                 , first() // 一度観測したらsubscriptionを終わらせる
             );
+    }
+
+    private startObservingUsersTasks(): Observable<this> {
+
     }
 }
