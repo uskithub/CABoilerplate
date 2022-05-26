@@ -12,6 +12,7 @@ import App from "./App.vue";
 import dependencies from "@shared/service/domain/dependencies";
 import { initializeApp } from "firebase/app";
 import firebaseConfig from "@client/system/config/firebase.config.json";
+import { getFirestore } from "firebase/firestore";
 import { FirebaseAuthenticator } from "@client/service/infrastructure/firebaseAuthenticator";
 import { DICTIONARY_KEY, i18n } from "@/shared/system/localizations";
 import { FirestoreBackend } from "./service/infrastructure/firestoreBackend";
@@ -20,7 +21,7 @@ import { FirestoreBackend } from "./service/infrastructure/firestoreBackend";
 const firebaseApp = initializeApp(firebaseConfig);
 dependencies.auth = new FirebaseAuthenticator(firebaseApp);
 // dependencies.auth = new GraphqlAuthenticator();
-dependencies.backend = new FirestoreBackend(firebaseApp.firestore());
+dependencies.backend = new FirestoreBackend(getFirestore(firebaseApp));
 
 const routes = [
     { path: "/", component: Home }

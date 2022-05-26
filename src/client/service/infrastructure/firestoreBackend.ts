@@ -1,13 +1,26 @@
 import { Backend, ChangedItem } from "@/shared/service/domain/interfaces/backend";
 import { Task } from "@/shared/service/domain/models/task";
-import firestore from "firebase/firestore";
+import { collection, addDoc, Firestore, onSnapshot } from "firebase/firestore";
 import { Observable } from "rxjs";
 
+const CollectionType = {
+    users : "users"
+    , rooms : "rooms"
+    , tasks : "tasks"
+    , templates : "templates"
+    , logs : "logs"
+    , deeds : "deeds"
+    , invitations : "invitations"
+    , notifications : "notifications"
+    , doings : "doings"
+    , messages : "messages"
+} as const;
+type CollectionType = typeof CollectionType[keyof typeof CollectionType];
 export class FirestoreBackend implements Backend {
-    #db: firestore.Firestore;
+    #db: Firestore;
     unsubscribers: Array<() => void>; // TODO: サインアウト時に unscribe する
 
-    constructor(db: firestore.Firestore) {
+    constructor(db: Firestore) {
         this.#db = db;
         this.unsubscribers = new Array<() => void>();
     }
@@ -19,6 +32,9 @@ export class FirestoreBackend implements Backend {
      */
     observeTasks(userId: string): Observable<ChangedItem<Task>[]> {
         return new Observable(subscriber => {
+
+            onSnapshot(doc(this.#db, CollectionType.tasks))
+
             const unsubscribe = this.#db
                 .collection(CollectionType.tasks)
                 // Closed含まない: A1 <= x < Z1

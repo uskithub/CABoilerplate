@@ -1,4 +1,5 @@
 import { Observable } from "rxjs";
+import { ChangedItem } from "../interfaces/backend";
 
 export interface Nodable {
     id: number;
@@ -48,6 +49,16 @@ export const TaskStatus = {
 
 type TaskStatus = typeof TaskStatus[keyof typeof TaskStatus];
 
+export interface Log {
+    id: string;
+    ancestorIds: string;
+    userIds: { [userId: string]: { isActive: boolean; doingId: string }};
+    type: string;
+    message: string|null;
+    startedAt: Date;
+    finishedAt: Date|null;
+}
+
 // アプリケーションで使用するデータ(参照を追加)
 export interface Task {
     id: string;
@@ -81,5 +92,5 @@ export interface Task {
 
 export default {
 
-    observeUserTasks: (userId: String): Observable
+    observeUserTasks: (userId: String): Observable<ChangedItem<Task>[]>
 }
