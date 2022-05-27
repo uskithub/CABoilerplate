@@ -1,6 +1,7 @@
 import { ValidationResult as r, AbstructValidation } from "@/shared/system/interfaces/validation";
 import { Observable } from "rxjs";
 import dependencies from "../dependencies";
+
 export interface User {
     uid: string;
     mailAddress: string|null;

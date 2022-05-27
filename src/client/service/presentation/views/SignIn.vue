@@ -19,13 +19,15 @@ const { shared, user, dispatch } = inject(VIEW_MODELS_KEY) as ViewModels;
 const state = reactive<{
   email: string|null;
   password: string|null;
+  isValid: boolean;
 }>({
     email: null
     , password: null
+    , isValid: true
 });
 
 const isPresentDialog = computed(() => shared.user !== null);
-const isFormValid = computed(() => state.email !== null && state.password !== null);
+// const isFormValid = computed(() => state.email !== null && state.password !== null);
 
 </script>
 
@@ -34,7 +36,7 @@ v-container
   v-app-bar(app)
     v-toolbar-title ホーム
   h1 SignIn
-  v-form(ref="form", v-model="isFormValid", lazy-validation)
+  v-form(ref="form", v-model="state.isValid", lazy-validation)
     span(v-if="user.store.signInFailureMessage !== null") {{ user.store.signInFailureMessage }}
     v-text-field(
       v-model="state.email",
@@ -50,7 +52,7 @@ v-container
       required
     )
     v-btn.mr-4(
-      :disabled="!isFormValid",
+      :disabled="!state.isValid",
       color="success",
       @click="dispatch({ scene: SignIn.userStartsSignInProcess, id: state.email, password: state.password })"
     ) Sign In

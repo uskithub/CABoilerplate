@@ -16,5 +16,8 @@ export type ChangedItem<T> = AddedItem<T>|ModifiedItem<T>|RemovedItem;
 
 export interface Backend {
 
+    /**
+     * ユーザのタスクを観測し、変更を通知します。
+     */
     observeTasks: (userId: string) => Observable<ChangedItem<Task>[]>;
 }

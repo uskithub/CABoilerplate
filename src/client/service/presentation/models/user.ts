@@ -12,12 +12,19 @@ import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Nobody, UserNotAuthorizedToInteractIn } from "robustive-ts";
 import { isSignUpGoal, SignUp, SignUpScenario, SignUpUsecase } from "@/shared/service/application/usecases/signUp";
+import { browserPopupRedirectResolver } from "firebase/auth";
+import { Task } from "@/shared/service/domain/models/task";
+import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 
+
+type ImmutableTask = Readonly<Task>;
 
 export interface UserStore extends LocalStore {
     readonly idInvalidMessage: string|string[]|null;
     readonly passwordInvalidMessage: string|string[]|null;
     readonly signInFailureMessage: string|null;
+    
+    readonly userTasks: ImmutableTask[];
 }
 
 export interface UserModel extends ViewModel<UserStore> {
@@ -35,6 +42,8 @@ export function createUserModel(shared: SharedStore): UserModel {
         idInvalidMessage: "" // ホントは null でいいはずが...
         , passwordInvalidMessage: "" // ホントは null でいいはずが...
         , signInFailureMessage: null
+
+        , userTasks: []
     });
 
     const _shared = shared as Mutable<SharedStore>;
@@ -47,7 +56,7 @@ export function createUserModel(shared: SharedStore): UserModel {
             subscription = new BootUsecase(context)
                 .interactedBy(new Nobody())
                 .subscribe({
-                    next: performedScenario => {
+                    next: (performedScenario: BootScenario[]) => {
                         console.log("boot:", performedScenario);
                         const lastSceneContext = performedScenario.slice(-1)[0];
                         if (!isBootGoal(lastSceneContext)) { return; }
@@ -58,6 +67,39 @@ export function createUserModel(shared: SharedStore): UserModel {
                         case Boot.goals.sessionNotExistsThenServicePresentsSignin:
                             router.replace("/signin");
                             break;
+                        case Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList:
+                            const mutableUserTasks = _store.userTasks as Task[];
+                            lastSceneContext.changedTasks.forEach(changedTask => {
+                                switch (changedTask.kind) {
+                                case ItemChangeType.added: {
+                                    mutableUserTasks.push(changedTask.item);
+                                    break;
+                                }
+                                case ItemChangeType.modified: {
+                                    // doingかどうかを調べ、そうなら更新する
+                                    // if (self.#stores.currentUser._doingTask && self.#stores.currentUser._doingTask.id === changedTask.id) {
+                                    //     self.#stores.currentUser._doingTask = changedTask.item;
+                                    // }
+                                    for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
+                                        if (mutableUserTasks[i].id === changedTask.id) {
+                                            mutableUserTasks.splice(i, 1, changedTask.item);
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                                case ItemChangeType.removed: {
+                                    for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
+                                        if (mutableUserTasks[i].id === changedTask.id) {
+                                            mutableUserTasks.splice(i, 0);
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                                }
+                            });
+                            console.log("user's tasks: ", _store.userTasks);
                         }
                     }
                     , error: (e) => {
@@ -78,7 +120,7 @@ export function createUserModel(shared: SharedStore): UserModel {
             subscription = new SignUpUsecase(context)
                 .interactedBy(new Nobody())
                 .subscribe({
-                    next: (performedScenario) => {
+                    next: (performedScenario: SignUpScenario[]) => {
                         const lastSceneContext = performedScenario.slice(-1)[0];
                         if (!isSignUpGoal(lastSceneContext)) { return; }
                         switch(lastSceneContext.scene){
@@ -145,7 +187,7 @@ export function createUserModel(shared: SharedStore): UserModel {
             subscription = new SignInUsecase(context)
                 .interactedBy(new Nobody())
                 .subscribe({
-                    next: (performedScenario) => {
+                    next: (performedScenario: SignInScenario[]) => {
                         const lastSceneContext = performedScenario.slice(-1)[0];
                         if (!isSignInGoal(lastSceneContext)) { return; }
                         switch(lastSceneContext.scene){
@@ -213,7 +255,7 @@ export function createUserModel(shared: SharedStore): UserModel {
             subscription = new SignOutUsecase(context)
                 .interactedBy(new SignedInUser(shared.user))
                 .subscribe({
-                    next: (performedScenario) => {
+                    next: (performedScenario: SignOutScenario[]) => {
                         console.log("signOut:", performedScenario);
                         const lastSceneContext = performedScenario.slice(-1)[0];
                         if (!isSignOutGoal(lastSceneContext)) { return; }

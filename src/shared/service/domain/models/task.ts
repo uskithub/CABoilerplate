@@ -1,4 +1,5 @@
 import { Observable } from "rxjs";
+import dependencies from "../dependencies";
 import { ChangedItem } from "../interfaces/backend";
 
 export interface Nodable {
@@ -36,7 +37,7 @@ export const TaskType = {
     , unkown : "unkown"
 } as const;
 
-type TaskType = typeof TaskType[keyof typeof TaskType];
+export type TaskType = typeof TaskType[keyof typeof TaskType];
 
 // タスク状態
 export const TaskStatus = {
@@ -47,7 +48,7 @@ export const TaskStatus = {
     , unkown : "unkown"
 } as const;
 
-type TaskStatus = typeof TaskStatus[keyof typeof TaskStatus];
+export type TaskStatus = typeof TaskStatus[keyof typeof TaskStatus];
 
 export interface Log {
     id: string;
@@ -66,8 +67,8 @@ export interface Task {
     status: TaskStatus;
 
     title: string;
-    purpose: string;
-    goal: string;
+    purpose: string|null;
+    goal: string|null;
     instractions: string|null;
 
     author: string;            // タスクを作ったユーザ
@@ -77,7 +78,7 @@ export interface Task {
     involved: Array<string>;   // このタスクの全関係者（author, member）
 
     ancestorIds: string|null;
-    _children?: Array<string>;
+    _children: Array<string>;
     children: Array<Task>;
 
     startedAt: Date|null;
@@ -92,5 +93,7 @@ export interface Task {
 
 export default {
 
-    observeUserTasks: (userId: String): Observable<ChangedItem<Task>[]>
+    observeUserTasks: (userId: string): Observable<ChangedItem<Task>[]> => {
+        return dependencies.backend.observeTasks(userId);
+    }
 }

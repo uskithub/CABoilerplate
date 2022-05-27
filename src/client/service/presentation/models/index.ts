@@ -16,7 +16,7 @@ export interface ViewModel<T extends LocalStore> { readonly store: T; }
 
 type ImmutableUser = Readonly<User>;
 export interface SharedStore {
-    readonly user: ImmutableUser|null
+    readonly user: ImmutableUser|null;
 }
 
 export type ViewModels = {

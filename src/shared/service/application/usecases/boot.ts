@@ -1,8 +1,10 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import ServiceModel from "@models/service";
+import TaskModel, { Task } from "@models/task";
 import { User } from "@models/user";
 import { first, map, Observable } from "rxjs";
 import { Actor, Boundary, boundary, Empty, Usecase, UsecaseScenario } from "robustive-ts";
+import { ChangedItem } from "../../domain/interfaces/backend";
 
 /**
  * usecase: アプリを起動する
@@ -17,6 +19,7 @@ export const Boot = {
     , goals : {
         servicePresentsHome : "サービスはホーム画面を表示する"
         , sessionNotExistsThenServicePresentsSignin : "セッションがない場合_サービスはサインイン画面を表示する"
+        , onUpdateUsersThenServiceUpdateUsersTaskList : "ユーザのタスクが更新された時_サービスはユーザのタスク一覧を更新する"
     }
 } as const;
 
@@ -27,6 +30,7 @@ type Boot = typeof Boot[keyof typeof Boot];
 export type BootGoal = UsecaseScenario<{
     [Boot.goals.servicePresentsHome]: { user: User; };
     [Boot.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
+    [Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
 }>;
 
 export type BootScenario = UsecaseScenario<{
@@ -59,10 +63,11 @@ export class BootUsecase extends Usecase<BootScenario> {
             return this.check();
         }
         case Boot.sessionExistsThenServiceStartObservingUsersTasks : {
-
+            return this.startObservingUsersTasks(this.context.user);
         }
         case Boot.goals.servicePresentsHome:
-        case Boot.goals.sessionNotExistsThenServicePresentsSignin: {
+        case Boot.goals.sessionNotExistsThenServicePresentsSignin:
+        case Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList: {
             return boundary;
         }
         }
@@ -86,7 +91,12 @@ export class BootUsecase extends Usecase<BootScenario> {
             );
     }
 
-    private startObservingUsersTasks(): Observable<this> {
-
+    private startObservingUsersTasks(user: User): Observable<this> {
+        return TaskModel.observeUserTasks(user.uid)
+            .pipe(
+                map(changedTasks =>
+                    this.instantiate({ scene: Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList, changedTasks })
+                )
+            );
     }
 }
