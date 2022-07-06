@@ -12,7 +12,7 @@ export const SignUp = {
     /* Basic Courses */
     userStartsSignUpProcess : "ユーザはサインアップを開始する"
     , serviceValidateInputs : "サービスは入力項目に問題がないかを確認する"
-    , onSuccessInValidatingThenServicePublishNewAccount : "入力項目に問題がない場合_サービスはアカウントは新規に発行する"
+    , onSuccessInValidatingThenServicePublishNewAccount : "入力項目に問題がない場合_サービスはアカウントを新規に発行する"
 
     /* Boundaries */
     , goals : {

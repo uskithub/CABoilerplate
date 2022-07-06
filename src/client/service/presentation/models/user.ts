@@ -191,7 +191,7 @@ export function createUserModel(shared: SharedStore): UserModel {
                         const lastSceneContext = performedScenario.slice(-1)[0];
                         if (!isSignInGoal(lastSceneContext)) { return; }
                         switch(lastSceneContext.scene){
-                        case SignIn.goals.onSuccessThenServicePresentsHomeView:
+                        case SignIn.goals.onSuccessInSigningInThenServicePresentsHomeView:
                             router.replace("/");
                             break;
 
