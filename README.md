@@ -728,3 +728,25 @@ export default (_req: Request, res: Response) => {
   t.common.labels.password;
 };
 ```
+
+# PassportJS
+
+[公式インストール手順](https://github.com/jaredhanson/passport#install)
+
+```shell
+$ yarn add passport passport-local
+$ yarn add @types/passport @types/passport-local --dev
+```
+
+server/system 以下に middlewares フォルダを作成し、passport.ts を新規作成。
+
+```ts
+
+```
+
+## セッションの追加
+
+```shell
+$ yarn add express-session
+$ yarn add @types/express-session --dev
+```
