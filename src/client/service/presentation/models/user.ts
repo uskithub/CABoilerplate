@@ -1,6 +1,6 @@
 // service
-import { Boot, BootScenario, BootUsecase, isBootGoal } from "@usecases/boot";
-import { isSignInGoal, SignIn, SignInScenario, SignInUsecase } from "@/shared/service/application/usecases/signIn";
+import { Boot, BootScenario, BootUsecase, isBootGoal, isBootScene } from "@usecases/boot";
+import { isSignInGoal, isSignInScene, SignIn, SignInScenario, SignInUsecase } from "@/shared/service/application/usecases/signIn";
 import { isSignOutGoal, SignOut, SignOutScenario, SignOutUsecase } from "@/shared/service/application/usecases/signOut";
 import { SignedInUser } from "../../application/actors/signedInUser";
 
@@ -57,6 +57,13 @@ export function createUserModel(shared: SharedStore): UserModel {
                 .interactedBy(new Nobody())
                 .subscribe({
                     next: (performedScenario: BootScenario[]) => {
+                        // bootはタスクの監視が後ろにくっ付くので complete が呼ばれないためここで計測する
+                        const executingUsecase = _shared.executingUsecase;
+                        if (executingUsecase && isBootScene(executingUsecase.executing)) {
+                            const elapsedTime = (new Date().getTime() - executingUsecase.startAt.getTime());
+                            _shared.executingUsecase = null;
+                            console.info(`The BootScenerio takes ${elapsedTime } ms.`);
+                        }
                         console.log("boot:", performedScenario);
                         const lastSceneContext = performedScenario.slice(-1)[0];
                         if (!isBootGoal(lastSceneContext)) { return; }
@@ -110,7 +117,14 @@ export function createUserModel(shared: SharedStore): UserModel {
                         }
                     }
                     , complete: () => {
-                        console.info("complete");
+                        const executingUsecase = _shared.executingUsecase;
+                        if (executingUsecase && executingUsecase instanceof BootUsecase) {
+                            const elapsedTime = (new Date().getTime() - executingUsecase.startAt.getTime());
+                            _shared.executingUsecase = null;
+                            console.info(`complete - BootUsecase takes ${elapsedTime } ms`);
+                        } else {
+                            console.info("complete");
+                        }
                         subscription?.unsubscribe();
                     }
                 });
@@ -244,6 +258,12 @@ export function createUserModel(shared: SharedStore): UserModel {
                         _store.signInFailureMessage = e.message;
                     }
                     , complete: () => {
+                        const executingUsecase = _shared.executingUsecase;
+                        if (executingUsecase && isSignInScene(executingUsecase.executing)) {
+                            const elapsedTime = (new Date().getTime() - executingUsecase.startAt.getTime());
+                            _shared.executingUsecase = null;
+                            console.log(`The SignInScenerio takes ${elapsedTime } ms.`);
+                        }
                         console.info("complete");
                         subscription?.unsubscribe();
                     }
