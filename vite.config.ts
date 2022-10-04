@@ -25,4 +25,7 @@ export default defineConfig({
             , "@views": path.resolve(__dirname, "src/client/service/presentation/views")
         }
     }
+    , server: {
+        port : 3001
+    }
 });
