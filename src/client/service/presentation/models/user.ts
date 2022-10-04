@@ -15,11 +15,13 @@ import { isSignUpGoal, SignUp, SignUpScenario, SignUpUsecase } from "@/shared/se
 import { browserPopupRedirectResolver } from "firebase/auth";
 import { Task } from "@/shared/service/domain/models/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
+import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 
 
 type ImmutableTask = Readonly<Task>;
 
 export interface UserStore extends LocalStore {
+    readonly signInStatus: SignInStatus|null;
     readonly idInvalidMessage: string|string[]|null;
     readonly passwordInvalidMessage: string|string[]|null;
     readonly signInFailureMessage: string|null;
@@ -39,7 +41,9 @@ export function createUserModel(shared: SharedStore): UserModel {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
     const store = reactive<UserStore>({
-        idInvalidMessage: "" // ホントは null でいいはずが...
+        signInStatus: null
+        
+        , idInvalidMessage: "" // ホントは null でいいはずが...
         , passwordInvalidMessage: "" // ホントは null でいいはずが...
         , signInFailureMessage: null
 
@@ -68,18 +72,28 @@ export function createUserModel(shared: SharedStore): UserModel {
                         const lastSceneContext = performedScenario.slice(-1)[0];
                         if (!isBootGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
-                        case Boot.goals.servicePresentsHome:
+                        case Boot.goals.sessionExistsThenServicePresentsHome:
                             _shared.user = { ...lastSceneContext.user };
+                            _store.signInStatus = SignInStatus.signIn;
+                            console.log("hhhh", _shared.user, _store.signInStatus);
                             break;
                         case Boot.goals.sessionNotExistsThenServicePresentsSignin:
+                            _store.signInStatus = SignInStatus.signOut;
                             router.replace("/signin");
                             break;
                         case Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList:
-                            const mutableUserTasks = _store.userTasks as Task[];
+                            let mutableUserTasks = _store.userTasks as Task[];
                             lastSceneContext.changedTasks.forEach(changedTask => {
                                 switch (changedTask.kind) {
                                 case ItemChangeType.added: {
-                                    mutableUserTasks.push(changedTask.item);
+                                    // hot reloadで増えてしまうので、同じものを予め削除しておく
+                                    for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
+                                        if (mutableUserTasks[i].id === changedTask.id) {
+                                            mutableUserTasks.splice(i, 0);
+                                            break;
+                                        }
+                                    }
+                                    mutableUserTasks.unshift(changedTask.item);
                                     break;
                                 }
                                 case ItemChangeType.modified: {
