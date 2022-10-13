@@ -2,7 +2,7 @@ import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import ServiceModel from "@models/service";
 import TaskModel, { Task } from "@models/task";
 import { User } from "@models/user";
-import { first, map, Observable } from "rxjs";
+import { concat, first, map, Observable } from "rxjs";
 import { Actor, Boundary, boundary, Empty, Usecase, UsecaseScenario } from "robustive-ts";
 import { ChangedItem } from "../../domain/interfaces/backend";
 
@@ -17,7 +17,7 @@ export const Boot = {
 
     /* Boundaries */
     , goals : {
-        sessionExistsThenServicePresentsHome : "セッションがある場合_サービスはホーム画面を表示する"
+        servicePresentsHome : "サービスはホーム画面を表示する"
         , sessionNotExistsThenServicePresentsSignin : "セッションがない場合_サービスはサインイン画面を表示する"
         , onUpdateUsersThenServiceUpdateUsersTaskList : "ユーザのタスクが更新された時_サービスはユーザのタスク一覧を更新する"
     }
@@ -28,7 +28,7 @@ type Boot = typeof Boot[keyof typeof Boot];
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
 // https://zenn.dev/eagle/articles/ts-coproduct-introduction
 export type BootGoal = UsecaseScenario<{
-    [Boot.goals.sessionExistsThenServicePresentsHome]: { user: User; };
+    [Boot.goals.servicePresentsHome]: { user: User; };
     [Boot.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
     [Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
 }>;
@@ -65,7 +65,7 @@ export class BootUsecase extends Usecase<BootScenario> {
         case Boot.sessionExistsThenServiceStartObservingUsersTasks : {
             return this.startObservingUsersTasks(this.context.user);
         }
-        case Boot.goals.sessionExistsThenServicePresentsHome:
+        case Boot.goals.servicePresentsHome:
         case Boot.goals.sessionNotExistsThenServicePresentsSignin:
         case Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList: {
             return boundary;
@@ -92,11 +92,15 @@ export class BootUsecase extends Usecase<BootScenario> {
     }
 
     private startObservingUsersTasks(user: User): Observable<this> {
-        return TaskModel.observeUserTasks(user.uid)
-            .pipe(
-                map(changedTasks =>
-                    this.instantiate({ scene: Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList, changedTasks })
+        // ユースケースの終わり（バウンダリー）に、オブザーバ（タスクの観測）を結合している
+        return concat(
+            this.just({ scene: Boot.goals.servicePresentsHome, user: user }) as Observable<this>
+            , TaskModel.observeUserTasks(user.uid)
+                .pipe(
+                    map(changedTasks =>
+                        this.instantiate({ scene: Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList, changedTasks })
+                    )
                 )
-            );
+        );
     }
 }
