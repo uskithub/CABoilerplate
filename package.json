@@ -20,7 +20,7 @@
     "react": "^18.1.0",
     "roboto-fontface": "*",
     "rxjs": "^7.5.5",
-    "vue": "^3.2.31",
+    "vue": "^3.2.45",
     "vue-router": "4.0.15",
     "vuetify": "^v3.0.5",
     "webfontloader": "^1.0.0"
@@ -32,6 +32,7 @@
     "@typescript-eslint/eslint-plugin": "^5.22.0",
     "@typescript-eslint/parser": "^5.22.0",
     "@vitejs/plugin-vue": "^2.3.2",
+    "@volar/vue-language-plugin-pug": "^1.0.14",
     "@vue/cli-plugin-babel": "5.0.4",
     "@vue/cli-service": "5.0.4",
     "@vuetify/vite-plugin": "^1.0.0-alpha.3",

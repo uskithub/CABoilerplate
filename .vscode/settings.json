@@ -14,10 +14,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[vue]": {
-    "editor.defaultFormatter": "octref.vetur",
+    "editor.defaultFormatter": "Vue.volar",
   },
-  "vetur.format.enable": true,
-  "vetur.format.defaultFormatter.ts": "none",
-  "vetur.format.defaultFormatter.pug": "prettier",
   "editor.formatOnSave": true,
 }

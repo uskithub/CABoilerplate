@@ -423,10 +423,12 @@ v-app
 # コードフォーマット
 
 ゴール：TypeScript と vue ファイル内の Pug に対し、保存時に自動でフォーマットがなされるようにする。
+
 実現方法：
 
 - .ts/.vue の TypeScript は ESLint に、
-- .vue の pug は Vetur 経由で Prettier に、
+- ~~.vue の pug は Vetur 経由で Prettier に、~~
+- .vue の pug は Volar に、
 - .json は Prettier に
 
 任せる（ESLint で pug 向けの plugin がないため）。
@@ -507,6 +509,28 @@ module.exports = {
 }
 ```
 
+## Volar の採用
+
+Volar は Vetur の代替品（Vetur が \<script setup\> に対応していなかったので乗り換え）。
+VSCode 拡張機能タブで以下を Disable(Workspace) にする。
+
+- Vetur
+- @builtin typescript
+
+### pug に対応させる
+
+[公式](https://www.npmjs.com/package/@volar/vue-language-plugin-pug)
+
+```shell
+$ yarn add --dev @volar/vue-language-plugin-pug
+```
+
+```tsconfig.json
+  "vueCompilerOptions": {
+    "plugins": ["@volar/vue-language-plugin-pug"]
+  }
+```
+
 ## Pritter
 
 ```shell
@@ -515,9 +539,10 @@ $ yarn add --dev prettier @prettier/plugin-pug
 
 ### VSCode プラグイン
 
-"octref.vetur", "esbenp.prettier-vscode" をインストール。
+~~"octref.vetur", "esbenp.prettier-vscode" をインストール。~~
+"Volar", "esbenp.prettier-vscode" をインストール。
 
-"vetur.format.defaultFormatter.ts": "none" として、prettier を抑制し、ESLint のみが利くようにする。
+~~"vetur.format.defaultFormatter.ts": "none" として、prettier を抑制し、ESLint のみが利くようにする。~~
 
 ```.vscode/settings.json
 {
@@ -526,11 +551,8 @@ $ yarn add --dev prettier @prettier/plugin-pug
     "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[vue]": {
-    "editor.defaultFormatter": "octref.vetur",
+    "editor.defaultFormatter": "Vue.volar",
   },
-  "vetur.format.enable": true,
-  "vetur.format.defaultFormatter.ts": "none",
-  "vetur.format.defaultFormatter.pug": "prettier",
   "editor.formatOnSave": true,
 }
 ```
