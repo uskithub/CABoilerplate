@@ -77,9 +77,7 @@ export class SignInUsecase extends Usecase<SignInScenario> {
         return UserModel
             .signIn(id, password)
             .pipe(
-                map(user => {
-                    return this.instantiate({ scene: SignIn.goals.onSuccessInSigningInThenServicePresentsHomeView, user });
-                })
+                map(user => this.instantiate({ scene: SignIn.goals.onSuccessInSigningInThenServicePresentsHomeView, user }))
                 , catchError(error => this.just({ scene: SignIn.goals.onFailureInSigningInThenServicePresentsError, error }))
             );
     }
