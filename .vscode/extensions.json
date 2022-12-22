@@ -1,7 +1,6 @@
 {
   "recommendations": [
-    "octref.vetur"
-    , "johnsoncodehk.volar"
+    "johnsoncodehk.volar"
     , "dbaeumer.vscode-eslint"
     , "esbenp.prettier-vscode"
     , "apollographql.vscode-apollo"
