@@ -252,6 +252,7 @@ ul.tree(
     :key="childnode.id", 
     :data-id="childnode.id", 
     :draggable="childnode.isDraggable"
+    :class="{ freeze : !childnode.isDraggable }"
     @dragstart="onDragstart($event, props.node, childnode)"
     @dragend="onDragend($event)"
   )
@@ -271,7 +272,6 @@ ul.tree(
   list-style-type: none
   margin: 0
   padding: 0 0 0 1em !important
-  //background: #eee
   border-top: 3px solid transparent
   border-left: 3px solid transparent
 
@@ -285,7 +285,6 @@ ul.tree(
     position: relative
     min-height: 2.5em
     overflow: hidden
-    background: #fff
 
     &.dragging
       opacity: 0.5
@@ -293,6 +292,8 @@ ul.tree(
       opacity: 0.5
       color: #f00
 
+    &.freeze
+      background: #eee
     .tree-item
       height: 2.5em
       padding: 0.5em 0.5em 0 0em
@@ -302,7 +303,6 @@ ul.tree(
       margin: 0 0 0 1em
       padding: 0.5em 0 0 0.5em
       min-height: 50px
-      //background: #eee
       border-top: 3px solid transparent
       border-left: 3px solid transparent
 

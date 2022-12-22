@@ -92,7 +92,7 @@ const treeContent = {
       id: "13"
       , name: "subtree3"
       , subtrees: []
-      , isDraggable: true
+      , isDraggable: false
       , isFolding: true
     } as Treenode
   ]
