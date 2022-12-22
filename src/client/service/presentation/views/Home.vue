@@ -3,7 +3,7 @@
 import { Boot } from "@/shared/service/application/usecases/boot";
 import type { BootScenario } from "@/shared/service/application/usecases/boot";
 // view
-import tree from "./components/molescules/tree.vue";
+import tree from "./components/organisms/tree.vue";
 
 // system
 import { inject, reactive } from "vue";
@@ -96,8 +96,36 @@ const treeContent = {
       , isFolding: true
     } as Treenode
   ]
+  , isDraggable: true
   , isFolding: true
 } as Treenode;
+
+const state = reactive<{
+  treeContent: Treenode;
+}>({
+  treeContent
+});
+
+const onArrange = (
+  node: Treenode
+  , from: {
+    type: string
+    , id: string
+    , node: Treenode
+  }
+  , to: {
+    type: string
+    , id: string
+    , node: Treenode
+  }
+  , index: number
+) => {
+  // 元親から削除
+  from.node.subtrees = from.node.subtrees.filter((subtree) => subtree.id !== node.id);
+  // 新親に追加
+  to.node.subtrees.splice(index, 0, node);
+
+}
 
 </script>
 
@@ -119,5 +147,8 @@ v-container
   //-     li(v-for="task in user.store.userTasks", :key="task.id")
   //-       | {{ task.title }}
   //- br
-  tree(:node="treeContent")
+  tree(
+    :node="state.treeContent"
+    @arrange="onArrange"
+  )
 </template>
