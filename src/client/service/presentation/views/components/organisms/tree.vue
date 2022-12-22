@@ -1,26 +1,13 @@
 <script setup lang="ts">
-
 // view
 import treenode from "../molescules/treenode.vue";
 
 import type { Treenode } from "@/shared/system/interfaces/treenode";
-import { TreenodeType } from "@/shared/system/interfaces/treenode";
-import { computed, nextTick, reactive } from "vue";
-// import type { PropType } from "vue";
+import { nextTick, reactive } from "vue";
 
 const props = defineProps<{
   node: Treenode
 }>();
-
-// ↓の書き方でもOK
-// const props = defineProps({
-//   parent: {
-//     type: Object as PropType<Treenode>|undefined
-//   }
-//   , node: {
-//     type: Object as PropType<Treenode>
-//   }
-// });
 
 // @note: stateを一箇所に集めないと処理上の様々なな判断が困難なため、stateの保持および処理はRootコンポーネント（tree）で行い、
 //        子ノード（treenode）ではイベントを発火させるだけとする。記述を簡潔にするためにコンポーネントを分けて実装する。
@@ -30,13 +17,11 @@ const emit = defineEmits<{
     e: "arrange",
     node: Treenode
     , from: {
-      type: string
-      , id: string
+      id: string
       , node: Treenode
     }
     , to: {
-      type: string
-      , id: string
+      id: string
       , node: Treenode
     }
     , index: number
@@ -95,7 +80,6 @@ const state = reactive<{
   } | null;
   draggingOn: {
     elem: HTMLElement;
-    type: string;
     id: string;
     node: Treenode;
     siblings: [HTMLElement | null, HTMLElement | null] | null;
@@ -124,8 +108,6 @@ const onDragstart = (e: MouseEvent, parent: Treenode, node: Treenode) => {
     , node
     , mirage
   };
-
-  console.log("ondragstart", node);
 }
 
 /**
@@ -137,7 +119,6 @@ const onDragstart = (e: MouseEvent, parent: Treenode, node: Treenode) => {
 const onDragenter = (e: DragEvent, node: Treenode) => {
 
   const elem = e.target as HTMLElement
-    , type = elem.dataset.type
     , id = elem.dataset.id
     , y = e.clientY
     ;
@@ -146,7 +127,7 @@ const onDragenter = (e: DragEvent, node: Treenode) => {
   // イベントを発火させたnodeを拾うため、各ULにdragenterを仕込んでいて何重にもdragenterが呼ばれている
   if (id !== node.id) return;
 
-  if (type === undefined || id === undefined || state.dragging === null) return;
+  if (id === undefined || state.dragging === null) return;
 
   // dragenterした対象がmirage（drop targetの虚像）または自身（dragging）の子孫のULの場合は何もしない
   if (isMyselfOrDescendant(elem, state.dragging.mirage) || isMyselfOrDescendant(elem, state.dragging.elem)) return;
@@ -162,7 +143,6 @@ const onDragenter = (e: DragEvent, node: Treenode) => {
 
   state.draggingOn = {
     elem
-    , type
     , id
     , node
     , siblings: null
@@ -174,9 +154,7 @@ const onDragenter = (e: DragEvent, node: Treenode) => {
   // 既にmirageがある場合は何もしない
   if (siblings.includes(mirage)) return;
 
-  if (mirage.parentNode) {
-    mirage.parentNode.removeChild(mirage);
-  }
+  if (mirage.parentNode) mirage.parentNode.removeChild(mirage);
   if (siblings.includes(state.dragging.elem)) return;
 
   elem.insertBefore(mirage, siblings[1]);
@@ -189,11 +167,10 @@ const onDragenter = (e: DragEvent, node: Treenode) => {
  */
 const onDragover = (e: MouseEvent) => {
   const elem = e.currentTarget as HTMLElement
-    , type = elem.dataset.type
     , y = e.clientY
     ;
 
-  if (type === undefined || state.dragging === null) return;
+  if (state.dragging === null) return;
 
   // dragenterした対象がmirage（drop targetの虚像）または自身（dragging）の子孫のULの場合は何もしない
   if (isMyselfOrDescendant(elem, state.dragging.mirage) || isMyselfOrDescendant(elem, state.dragging.elem)) return;
@@ -230,7 +207,7 @@ const onDragend = (e: MouseEvent) => {
 
   console.log(state.draggingOn)
 
-  if (exParent.dataset.type === undefined || exParent.dataset.id === undefined) return;
+  if (exParent.dataset.id === undefined) return;
 
   let index = 0;
   for (let i = 0, len = newParent.children.length; i < len; i++) {
@@ -241,13 +218,11 @@ const onDragend = (e: MouseEvent) => {
 
   emit("arrange", node
     , {
-      type: exParent.dataset.type
-      , id: exParent.dataset.id
+      id: exParent.dataset.id
       , node: exPrarentNode
     }
     , {
-      type: state.draggingOn.type
-      , id: state.draggingOn.id
+      id: state.draggingOn.id
       , node: state.draggingOn.node
     }
     , index
@@ -269,7 +244,6 @@ const onDragend = (e: MouseEvent) => {
 
 <template lang="pug">
 ul.tree(
-  :data-type="TreenodeType.root"
   :data-id="props.node.id"
   @dragenter="onDragenter($event, props.node)"
 )

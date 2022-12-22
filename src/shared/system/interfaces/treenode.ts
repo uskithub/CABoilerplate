@@ -1,10 +1,3 @@
-export const TreenodeType = {
-    root: "root" 
-    , descendant : "descendants"
-} as const;
-
-export type TreenodeType = typeof TreenodeType[keyof typeof TreenodeType];
-
 export interface Treenode {
     id: string;
     name: string;
