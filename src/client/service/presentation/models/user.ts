@@ -81,7 +81,7 @@ export function createUserModel(shared: SharedStore): UserModel {
                             _store.signInStatus = SignInStatus.signOut;
                             router.replace("/signin");
                             break;
-                        case Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList:
+                        case Boot.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList:
                             let mutableUserTasks = _store.userTasks as Task[];
                             lastSceneContext.changedTasks.forEach(changedTask => {
                                 switch (changedTask.kind) {

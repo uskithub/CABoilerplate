@@ -19,7 +19,7 @@ export const Boot = {
     , goals : {
         servicePresentsHome : "サービスはホーム画面を表示する"
         , sessionNotExistsThenServicePresentsSignin : "セッションがない場合_サービスはサインイン画面を表示する"
-        , onUpdateUsersThenServiceUpdateUsersTaskList : "ユーザのタスクが更新された時_サービスはユーザのタスク一覧を更新する"
+        , onUpdateUsersTasksThenServiceUpdateUsersTaskList : "ユーザのタスクが更新された時_サービスはユーザのタスク一覧を更新する"
     }
 } as const;
 
@@ -30,7 +30,7 @@ type Boot = typeof Boot[keyof typeof Boot];
 export type BootGoal = UsecaseScenario<{
     [Boot.goals.servicePresentsHome]: { user: User; };
     [Boot.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
-    [Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
+    [Boot.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
 }>;
 
 export type BootScenario = UsecaseScenario<{
@@ -67,7 +67,7 @@ export class BootUsecase extends Usecase<BootScenario> {
         }
         case Boot.goals.servicePresentsHome:
         case Boot.goals.sessionNotExistsThenServicePresentsSignin:
-        case Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList: {
+        case Boot.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList: {
             return boundary;
         }
         }
@@ -98,7 +98,7 @@ export class BootUsecase extends Usecase<BootScenario> {
             , TaskModel.observeUserTasks(user.uid)
                 .pipe(
                     map(changedTasks =>
-                        this.instantiate({ scene: Boot.goals.onUpdateUsersThenServiceUpdateUsersTaskList, changedTasks })
+                        this.instantiate({ scene: Boot.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList, changedTasks })
                     )
                 )
         );
