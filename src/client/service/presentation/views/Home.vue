@@ -148,4 +148,6 @@ v-container
     :node="state.treeContent"
     @arrange="onArrange"
   )
+    template(v-slot="slotProps")
+      span {{ slotProps.node.id }}
 </template>

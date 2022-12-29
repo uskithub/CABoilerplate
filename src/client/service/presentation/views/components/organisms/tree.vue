@@ -3,11 +3,13 @@
 import treenode from "../molescules/treenode.vue";
 
 import type { Treenode } from "@/shared/system/interfaces/treenode";
-import { nextTick, reactive } from "vue";
+import { nextTick, reactive, useSlots } from "vue";
 
 const props = defineProps<{
   node: Treenode
 }>();
+
+const slots = useSlots();
 
 // @note: stateを一箇所に集めないと処理上の様々なな判断が困難なため、stateの保持および処理はRootコンポーネント（tree）で行い、
 //        子ノード（treenode）ではイベントを発火させるだけとする。記述を簡潔にするためにコンポーネントを分けて実装する。
@@ -256,7 +258,8 @@ ul.tree(
     @dragstart="onDragstart($event, props.node, childnode)"
     @dragend="onDragend($event)"
   )
-    .tree-item
+    slot(:node="childnode", :parent="props.node", :isTopLevel="true")
+    .tree-item(v-if="slots.default === undefined")
       span {{ childnode.name + '(' + childnode.id + ')' }}
     treenode(
       :parent="props.node",
@@ -265,6 +268,8 @@ ul.tree(
       @dragend="onDragend"
       @dragenter="onDragenter"
     )
+      template(v-if="slots.default !== undefined" v-slot="slotProps")
+        slot(:node="slotProps.node", :parent="slotProps.parent", :isTopLevel="false")
 </template>
 
 <style lang="sass" scoped>
