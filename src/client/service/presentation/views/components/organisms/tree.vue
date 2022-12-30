@@ -15,20 +15,25 @@ const slots = useSlots();
 //        子ノード（treenode）ではイベントを発火させるだけとする。記述を簡潔にするためにコンポーネントを分けて実装する。
 
 const emit = defineEmits<{
-  (
-    e: "arrange",
-    node: Treenode
-    , from: {
-      id: string
-      , node: Treenode
-    }
-    , to: {
-      id: string
-      , node: Treenode
-    }
-    , index: number
-  ): void
+  (e: "dragenter", event: MouseEvent, node: Treenode): void,
+  (e: "arrange", node: Treenode, from: { id: string, node: Treenode }, to: { id: string, node: Treenode }, index: number): void
+  (e: "toggle-folding", node: Treenode): void
 }>();
+
+const getNodeById = (id: string, node: Treenode): Treenode | null => {
+  // 終了条件
+  if (node.id === id) return node;
+  if (node.subtrees.length === 0) {
+    return null;
+  }
+
+  for (let i = 0; i < node.subtrees.length; i++) {
+    const n = node.subtrees[i];
+    const ret = getNodeById(id, n);
+    if (ret !== null) return ret;
+  }
+  return null;
+};
 
 /**
  * targetUl が ofElem 自身かその子孫の場合 true を返します。
@@ -219,14 +224,8 @@ const onDragend = (e: MouseEvent) => {
   }
 
   emit("arrange", node
-    , {
-      id: exParent.dataset.id
-      , node: exPrarentNode
-    }
-    , {
-      id: state.draggingOn.id
-      , node: state.draggingOn.node
-    }
+    , { id: exParent.dataset.id, node: exPrarentNode }
+    , { id: state.draggingOn.id, node: state.draggingOn.node }
     , index
   );
 
@@ -242,6 +241,11 @@ const onDragend = (e: MouseEvent) => {
   state.draggingOn = null;
 }
 
+const onToggleCaret = (e: MouseEvent, id: string) => {
+  const node = getNodeById(id, props.node);
+  if (node === null) return;
+  emit("toggle-folding", node);
+};
 </script>
 
 <template lang="pug">
@@ -258,15 +262,19 @@ ul.tree(
     @dragstart="onDragstart($event, props.node, childnode)"
     @dragend="onDragend($event)"
   )
-    slot(:node="childnode", :parent="props.node", :isTopLevel="true")
-    .tree-item(v-if="slots.default === undefined")
-      span {{ childnode.name + '(' + childnode.id + ')' }}
+    .tree-item
+      v-icon(v-if="childnode.subtrees.length > 0" @click.prevent="onToggleCaret($event, childnode.id)") {{ childnode.isFolding ? "mdi-menu-down" : "mdi-menu-right" }}
+      v-icon(v-else) {{ "mdi-circle-small" }}
+      slot(:node="childnode", :parent="props.node", :isTopLevel="true")
+      span(v-if="slots.default === undefined") {{ childnode.name + '(' + childnode.id + ')' }}
     treenode(
+      v-if="childnode.isFolding"
       :parent="props.node",
       :node="childnode"
       @dragstart="onDragstart"
       @dragend="onDragend"
       @dragenter="onDragenter"
+      @toggle-caret="onToggleCaret"
     )
       template(v-if="slots.default !== undefined" v-slot="slotProps")
         slot(:node="slotProps.node", :parent="slotProps.parent", :isTopLevel="false")

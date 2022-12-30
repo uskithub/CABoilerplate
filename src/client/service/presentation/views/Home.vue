@@ -37,14 +37,14 @@ const treeContent = {
           , name: "subtree1-1"
           , subtrees: []
           , isDraggable: true
-          , isFolding: true
+          , isFolding: false
         } as Treenode
         , {
           id: "112"
           , name: "subtree1-2"
           , subtrees: []
           , isDraggable: true
-          , isFolding: true
+          , isFolding: false
         } as Treenode
         , {
           id: "113"
@@ -74,7 +74,7 @@ const treeContent = {
 
           ]
           , isDraggable: true
-          , isFolding: true
+          , isFolding: false
         } as Treenode
 
       ]
@@ -122,7 +122,11 @@ const onArrange = (
   from.node.subtrees = from.node.subtrees.filter((subtree) => subtree.id !== node.id);
   // 新親に追加
   to.node.subtrees.splice(index, 0, node);
-}
+};
+
+const onToggleFolding = (node: Treenode) => {
+  node.isFolding = !node.isFolding;
+};
 
 </script>
 
@@ -147,6 +151,7 @@ v-container
   tree(
     :node="state.treeContent"
     @arrange="onArrange"
+    @toggle-folding="onToggleFolding"
   )
     template(v-slot="slotProps")
       span {{ slotProps.node.id }}

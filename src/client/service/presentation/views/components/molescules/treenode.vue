@@ -16,6 +16,7 @@ const emit = defineEmits<{
   (e: "dragenter", event: MouseEvent, node: Treenode): void,
   (e: "dragstart", event: MouseEvent, parent: Treenode, node: Treenode): void,
   (e: "dragend", event: MouseEvent, node: Treenode): void,
+  (e: "toggle-caret", event: MouseEvent, id: string): void
 }>();
 
 const onDragenter = (e: MouseEvent, treenode: Treenode) => {
@@ -30,6 +31,11 @@ const onDragstart = (e: MouseEvent, parent: Treenode, treenode: Treenode) => {
 
 const onDragend = (e: MouseEvent, treenode: Treenode) => {
   emit("dragend", e, treenode);
+  e.stopPropagation();
+};
+
+const onToggleCaret = (e: MouseEvent, id: string) => {
+  emit("toggle-caret", e, id);
   e.stopPropagation();
 };
 </script>
@@ -48,15 +54,19 @@ ul.subtree(
     @dragstart="onDragstart($event, props.node, childnode)"
     @dragend="onDragend($event, childnode)"
   )
-    slot(:node="childnode", :parent="props.node", :isTopLevel="false")
-    .tree-item(v-if="slots.default === undefined")
-      span {{ childnode.name + '(' + childnode.id + ')' }}
+    .tree-item
+      v-icon(v-if="childnode.subtrees.length > 0" @click.prevent="emit('toggle-caret', $event, childnode.id)") {{ childnode.isFolding ? "mdi-menu-down" : "mdi-menu-right" }}
+      v-icon(v-else) {{ "mdi-circle-small" }}
+      slot(:node="childnode", :parent="props.node", :isTopLevel="false")
+      span(v-if="slots.default === undefined") {{ childnode.name + '(' + childnode.id + ')' }}
     treenode(
+      v-if="childnode.isFolding"
       :parent="props.node",
       :node="childnode"
       @dragstart="onDragstart"
       @dragend="onDragend"
       @dragenter="onDragenter"
+      @toggle-caret="onToggleCaret"
     )
       template(v-if="slots.default !== undefined" v-slot="slotProps")
         slot(:node="slotProps.node", :parent="slotProps.parent", :isTopLevel="false")
