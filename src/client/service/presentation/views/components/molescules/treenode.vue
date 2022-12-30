@@ -70,4 +70,8 @@ ul.subtree(
     )
       template(v-if="slots.default !== undefined" v-slot="slotProps")
         slot(:node="slotProps.node", :parent="slotProps.parent", :isTopLevel="false")
+    ul.subtree(v-else
+      :data-id="childnode.id"
+      @dragenter="onDragenter($event, childnode)"
+    )
 </template>
