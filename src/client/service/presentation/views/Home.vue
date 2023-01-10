@@ -4,6 +4,7 @@ import { Boot } from "@/shared/service/application/usecases/boot";
 import type { BootScenario } from "@/shared/service/application/usecases/boot";
 // view
 import tree from "./components/organisms/tree.vue";
+// import tree from "vue3-tree";
 
 // system
 import { inject, reactive } from "vue";
@@ -27,14 +28,17 @@ if (user.store.signInStatus === null && shared.user === null) {
 const treeContent = {
   id: "1"
   , name: "root"
+  , styleClass: null
   , subtrees: [
     {
       id: "11"
-      , name: "subtree1"
+      , name: "treeコンポーネントの実装"
+      , styleClass: { milestone: true }
       , subtrees: [
         {
           id: "111"
-          , name: "subtree1-1"
+          , name: "SassでのFontAwesome利用"
+          , styleClass: { requirement: true }
           , subtrees: []
           , isDraggable: true
           , isFolding: false
@@ -42,6 +46,7 @@ const treeContent = {
         , {
           id: "112"
           , name: "subtree1-2"
+          , styleClass: null
           , subtrees: []
           , isDraggable: true
           , isFolding: false
@@ -53,6 +58,7 @@ const treeContent = {
             {
               id: "1131"
               , name: "subtree1-3-1"
+              , styleClass: null
               , subtrees: []
               , isDraggable: true
               , isFolding: true
@@ -60,6 +66,7 @@ const treeContent = {
             , {
               id: "1132"
               , name: "subtree1-3-2"
+              , styleClass: null
               , subtrees: []
               , isDraggable: true
               , isFolding: true
@@ -67,6 +74,7 @@ const treeContent = {
             , {
               id: "1133"
               , name: "subtree1-3-3"
+              , styleClass: null
               , subtrees: []
               , isDraggable: true
               , isFolding: true
@@ -84,6 +92,7 @@ const treeContent = {
     , {
       id: "12"
       , name: "subtree2"
+      , styleClass: null
       , subtrees: []
       , isDraggable: true
       , isFolding: true
@@ -91,6 +100,7 @@ const treeContent = {
     , {
       id: "13"
       , name: "subtree3"
+      , styleClass: null
       , subtrees: []
       , isDraggable: false
       , isFolding: true
@@ -133,6 +143,8 @@ const onToggleFolding = (node: Treenode) => {
 
 <template lang="pug">
 v-container
+  v-icon(icon="fas fa-plus")
+  v-icon(icon="mdi:mdi-minus")
   //- div [{{ user.store.signInStatus }}]
   //- div [{{ shared.user?.mailAddress }}]
   //- template(v-if="user.store.signInStatus === null")
@@ -155,5 +167,22 @@ v-container
     @toggle-folding="onToggleFolding"
   )
     template(v-slot="slotProps")
-      span {{ slotProps.node.id }}
+      span.title {{ slotProps.node.name }}
 </template>
+
+<style lang="sass" scoped>
+.tree
+  :deep(li)
+    .tree-item
+      border-left: 5px solid transparent
+    &.milestone
+      color: #22559c
+      > .tree-item
+        border-left: 5px solid #ede862
+        > .title:before
+          font-family: "Font Awesome 5 Free"
+          content: "\f024"
+    &.requirement
+      > .tree-item
+        border-left: 5px solid #f27370
+</style>

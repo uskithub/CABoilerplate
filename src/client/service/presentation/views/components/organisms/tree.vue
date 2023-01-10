@@ -258,30 +258,30 @@ ul.tree(
     :key="childnode.id", 
     :data-id="childnode.id", 
     :draggable="childnode.isDraggable"
-    :class="{ freeze : !childnode.isDraggable }"
+    :class="{ freeze : !childnode.isDraggable, ...childnode.styleClass }"
     @dragstart="onDragstart($event, props.node, childnode)"
     @dragend="onDragend($event)"
   )
     .tree-item
-      v-icon(v-if="childnode.subtrees.length > 0" @click.prevent="onToggleCaret($event, childnode.id)") {{ childnode.isFolding ? "mdi-menu-down" : "mdi-menu-right" }}
-      v-icon(v-else) {{ "mdi-circle-small" }}
+      v-icon(v-if="childnode.subtrees.length > 0" :icon="childnode.isFolding ? 'mdi:mdi-menu-down' : 'mdi:mdi-menu-right'" @click.prevent="onToggleCaret($event, childnode.id)")
+      v-icon(v-else icon="mdi:mdi-circle-small")
       slot(:node="childnode", :parent="props.node", :isTopLevel="true")
       span(v-if="slots.default === undefined") {{ childnode.name + '(' + childnode.id + ')' }}
-    treenode(
-      v-if="childnode.isFolding"
-      :parent="props.node",
-      :node="childnode"
-      @dragstart="onDragstart"
-      @dragend="onDragend"
-      @dragenter="onDragenter"
-      @toggle-caret="onToggleCaret"
-    )
-      template(v-if="slots.default !== undefined" v-slot="slotProps")
-        slot(:node="slotProps.node", :parent="slotProps.parent", :isTopLevel="false")
-    ul.subtree(v-else
-      :data-id="childnode.id"
-      @dragenter="onDragenter($event, childnode)"
-    )
+      treenode(
+        v-if="childnode.isFolding"
+        :parent="props.node",
+        :node="childnode"
+        @dragstart="onDragstart"
+        @dragend="onDragend"
+        @dragenter="onDragenter"
+        @toggle-caret="onToggleCaret"
+      )
+        template(v-if="slots.default !== undefined" v-slot="slotProps")
+          slot(:node="slotProps.node", :parent="slotProps.parent", :isTopLevel="false")
+      ul.subtree(v-else
+        :data-id="childnode.id"
+        @dragenter="onDragenter($event, childnode)"
+      )
 </template>
 
 <style lang="sass" scoped>
@@ -312,7 +312,7 @@ ul.tree(
     &.freeze
       background: #eee
     .tree-item
-      height: 2.5em
+      min-height: 2.5em
       padding: 0.5em 0.5em 0 0em
       
     .subtree
