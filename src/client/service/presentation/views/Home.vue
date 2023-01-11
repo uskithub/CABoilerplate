@@ -12,6 +12,7 @@ import type { ViewModels } from "../models";
 import { VIEW_MODELS_KEY } from "../models";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import type { Treenode } from "vue3-tree";
+import "vue3-tree/style.css";
 
 // stubs
 import donedleTree from "../../../../../test/stubs/donedle";
