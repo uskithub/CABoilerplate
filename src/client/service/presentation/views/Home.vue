@@ -3,15 +3,19 @@
 import { Boot } from "@/shared/service/application/usecases/boot";
 import type { BootScenario } from "@/shared/service/application/usecases/boot";
 // view
-import tree from "./components/organisms/tree.vue";
-// import tree from "vue3-tree";
+import treelocal from "./components/organisms/tree.vue";
+import { tree, findNodeById } from "vue3-tree";
 
 // system
-import { inject, reactive } from "vue";
+import { inject, reactive, ref } from "vue";
 import type { ViewModels } from "../models";
 import { VIEW_MODELS_KEY } from "../models";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
-import type { Treenode } from "@/shared/system/interfaces/treenode";
+import type { Treenode } from "vue3-tree";
+
+// stubs
+import donedleTree from "../../../../../test/stubs/donedle";
+import swtTree from "../../../../../test/stubs/swt";
 
 const { shared, user, dispatch } = inject(VIEW_MODELS_KEY) as ViewModels;
 
@@ -25,95 +29,12 @@ if (user.store.signInStatus === null && shared.user === null) {
   dispatch({ scene: Boot.userOpensSite } as BootScenario);
 }
 
-const treeContent = {
-  id: "1"
-  , name: "root"
-  , styleClass: null
-  , subtrees: [
-    {
-      id: "11"
-      , name: "treeコンポーネントの実装"
-      , styleClass: { milestone: true }
-      , subtrees: [
-        {
-          id: "111"
-          , name: "SassでのFontAwesome利用"
-          , styleClass: { requirement: true }
-          , subtrees: []
-          , isDraggable: true
-          , isFolding: false
-        } as Treenode
-        , {
-          id: "112"
-          , name: "subtree1-2"
-          , styleClass: null
-          , subtrees: []
-          , isDraggable: true
-          , isFolding: false
-        } as Treenode
-        , {
-          id: "113"
-          , name: "subtree1-3"
-          , subtrees: [
-            {
-              id: "1131"
-              , name: "subtree1-3-1"
-              , styleClass: null
-              , subtrees: []
-              , isDraggable: true
-              , isFolding: true
-            } as Treenode
-            , {
-              id: "1132"
-              , name: "subtree1-3-2"
-              , styleClass: null
-              , subtrees: []
-              , isDraggable: true
-              , isFolding: true
-            } as Treenode
-            , {
-              id: "1133"
-              , name: "subtree1-3-3"
-              , styleClass: null
-              , subtrees: []
-              , isDraggable: true
-              , isFolding: true
-            } as Treenode
-
-          ]
-          , isDraggable: true
-          , isFolding: false
-        } as Treenode
-
-      ]
-      , isDraggable: true
-      , isFolding: true
-    } as Treenode
-    , {
-      id: "12"
-      , name: "subtree2"
-      , styleClass: null
-      , subtrees: []
-      , isDraggable: true
-      , isFolding: true
-    } as Treenode
-    , {
-      id: "13"
-      , name: "subtree3"
-      , styleClass: null
-      , subtrees: []
-      , isDraggable: false
-      , isFolding: true
-    } as Treenode
-  ]
-  , isDraggable: true
-  , isFolding: true
-} as Treenode;
-
 const state = reactive<{
-  treeContent: Treenode;
+  donedleTree: Treenode;
+  swtTree: Treenode;
 }>({
-  treeContent
+  donedleTree: donedleTree as Treenode
+  , swtTree: swtTree as Treenode
 });
 
 const onArrange = (
@@ -143,8 +64,6 @@ const onToggleFolding = (node: Treenode) => {
 
 <template lang="pug">
 v-container
-  v-icon(icon="fas fa-plus")
-  v-icon(icon="mdi:mdi-minus")
   //- div [{{ user.store.signInStatus }}]
   //- div [{{ shared.user?.mailAddress }}]
   //- template(v-if="user.store.signInStatus === null")
@@ -162,7 +81,15 @@ v-container
   //-       | {{ task.title }}
   //- br
   tree(
-    :node="state.treeContent"
+    :node="state.donedleTree"
+    @arrange="onArrange"
+    @toggle-folding="onToggleFolding"
+  )
+    template(v-slot="slotProps")
+      span.title {{ slotProps.node.name }}
+
+  treelocal(
+    :node="state.swtTree"
     @arrange="onArrange"
     @toggle-folding="onToggleFolding"
   )
@@ -180,8 +107,9 @@ v-container
       > .tree-item
         border-left: 5px solid #ede862
         > .title:before
-          font-family: "Font Awesome 5 Free"
-          content: "\f024"
+          font-family: "Material Design Icons"  
+          color: #ede862
+          content: "\F023B  "
     &.requirement
       > .tree-item
         border-left: 5px solid #f27370
