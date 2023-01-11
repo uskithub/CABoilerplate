@@ -86,20 +86,25 @@ v-container
     @toggle-folding="onToggleFolding"
   )
     template(v-slot="slotProps")
-      span.title {{ slotProps.node.name }}
-
-  treelocal(
+      span.header(v-if="slotProps.depth === 0") {{ slotProps.node.name }}
+      span.title(v-else) {{ slotProps.node.name }}
+  br
+  tree(
     :node="state.swtTree"
     @arrange="onArrange"
     @toggle-folding="onToggleFolding"
   )
     template(v-slot="slotProps")
-      span.title {{ slotProps.node.name }}
+      span.header(v-if="slotProps.depth === 0") {{ slotProps.node.name }}
+      span.title(v-else) {{ slotProps.node.name }}
 </template>
 
 <style lang="sass" scoped>
 .tree
   :deep(li)
+    .tree-header
+      > .header
+        font-weight: bold
     .tree-item
       border-left: 5px solid transparent
     &.milestone
