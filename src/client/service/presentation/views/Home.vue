@@ -61,6 +61,23 @@ const onToggleFolding = (node: Treenode) => {
   node.isFolding = !node.isFolding;
 };
 
+const onHover = (node: Treenode, isHovering: boolean) => {
+  node.isHovering = isHovering;
+};
+
+const onClickExport = (event: MouseEvent, node: Treenode) => {
+  console.log("export", node);
+  if (navigator.clipboard) {
+    navigator.clipboard
+      .writeText(JSON.stringify(node))
+      .then(function () {
+        alert('done!');
+      });
+  } else {
+    alert('failed!');
+  }
+};
+
 </script>
 
 <template lang="pug">
@@ -85,18 +102,32 @@ v-container
     :node="state.donedleTree"
     @arrange="onArrange"
     @toggle-folding="onToggleFolding"
+    @hover="onHover"
   )
     template(v-slot="slotProps")
-      span.header(v-if="slotProps.depth === 0") {{ slotProps.node.name }}
+      template(v-if="slotProps.depth === 0")
+        span.header {{ slotProps.node.name }}
+        v-icon(
+          v-show="slotProps.node.isHovering" 
+          icon="mdi:mdi-export-variant"
+          @click.prevent="onClickExport($event, slotProps.node)"
+        )
       span.title(v-else) {{ slotProps.node.name }}
   br
   tree(
     :node="state.swtTree"
     @arrange="onArrange"
     @toggle-folding="onToggleFolding"
+    @hover="onHover"
   )
     template(v-slot="slotProps")
-      span.header(v-if="slotProps.depth === 0") {{ slotProps.node.name }}
+      template(v-if="slotProps.depth === 0")
+        span.header {{ slotProps.node.name }}
+        v-icon(
+          v-show="slotProps.node.isHovering" 
+          icon="mdi:mdi-export-variant"
+          @click.prevent="onClickExport($event, slotProps.node)"
+        )
       span.title(v-else) {{ slotProps.node.name }}
 </template>
 
@@ -108,15 +139,15 @@ v-container
         font-weight: bold
     .tree-item
       border-left: 5px solid transparent
-    &.milestone
+    .tree-item:hover
       color: #22559c
+    &.milestone
+      border-left: 5px solid #ede862
       > .tree-item
-        border-left: 5px solid #ede862
         > .title:before
           font-family: "Material Design Icons"  
           color: #ede862
           content: "\F023B  "
     &.requirement
-      > .tree-item
-        border-left: 5px solid #f27370
+      border-left: 5px solid #f27370
 </style>
