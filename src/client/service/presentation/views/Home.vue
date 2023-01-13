@@ -57,12 +57,16 @@ const onArrange = (
   to.node.isFolding = true;
 };
 
-const onToggleFolding = (node: Treenode) => {
+const onToggleFolding1 = (id: string) => {
+  const node = findNodeById(id, state.donedleTree);
+  if (node === null) return;
   node.isFolding = !node.isFolding;
 };
 
-const onHover = (node: Treenode, isHovering: boolean) => {
-  node.isHovering = isHovering;
+const onToggleFolding2 = (id: string) => {
+  const node = findNodeById(id, state.swtTree);
+  if (node === null) return;
+  node.isFolding = !node.isFolding;
 };
 
 const onClickExport = (event: MouseEvent, node: Treenode) => {
@@ -101,14 +105,13 @@ v-container
   tree(
     :node="state.donedleTree"
     @arrange="onArrange"
-    @toggle-folding="onToggleFolding"
-    @hover="onHover"
+    @toggle-folding="onToggleFolding1"
   )
     template(v-slot="slotProps")
-      template(v-if="slotProps.depth === 0")
+      template(v-if="slotProps.depth===0")
         span.header {{ slotProps.node.name }}
         v-icon(
-          v-show="slotProps.node.isHovering" 
+          v-show="slotProps.isHovering" 
           icon="mdi:mdi-export-variant"
           @click.prevent="onClickExport($event, slotProps.node)"
         )
@@ -117,14 +120,13 @@ v-container
   tree(
     :node="state.swtTree"
     @arrange="onArrange"
-    @toggle-folding="onToggleFolding"
-    @hover="onHover"
+    @toggle-folding="onToggleFolding2"
   )
     template(v-slot="slotProps")
       template(v-if="slotProps.depth === 0")
         span.header {{ slotProps.node.name }}
         v-icon(
-          v-show="slotProps.node.isHovering" 
+          v-show="slotProps.isHovering" 
           icon="mdi:mdi-export-variant"
           @click.prevent="onClickExport($event, slotProps.node)"
         )
