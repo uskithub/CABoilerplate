@@ -54,7 +54,7 @@ const onArrange = (
   from.node.subtrees = from.node.subtrees.filter((subtree) => subtree.id !== node.id);
   // 新親に追加
   to.node.subtrees.splice(index, 0, node);
-  to.node.isFolding = true;
+  to.node.isFolding = false;
 };
 
 const onToggleFolding1 = (id: string) => {
