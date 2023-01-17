@@ -38,7 +38,7 @@ const state = reactive<{
   , swtTree: swtTree as Treenode
 });
 
-const onArrange = (
+const onArrange1 = (
   node: Treenode
   , from: {
     id: string
@@ -50,11 +50,36 @@ const onArrange = (
   }
   , index: number
 ) => {
+  const _from = findNodeById(from.id, state.donedleTree);
+  const _to = findNodeById(to.id, state.donedleTree);
+  if (_from === null || _to === null) return;
   // 元親から削除
-  from.node.subtrees = from.node.subtrees.filter((subtree) => subtree.id !== node.id);
+  _from.subtrees = _from.subtrees.filter((subtree) => subtree.id !== node.id);
   // 新親に追加
-  to.node.subtrees.splice(index, 0, node);
-  to.node.isFolding = false;
+  _to.subtrees.splice(index, 0, node);
+  _to.isFolding = false;
+};
+
+const onArrange2 = (
+  node: Treenode
+  , from: {
+    id: string
+    , node: Treenode
+  }
+  , to: {
+    id: string
+    , node: Treenode
+  }
+  , index: number
+) => {
+  const _from = findNodeById(from.id, state.swtTree);
+  const _to = findNodeById(to.id, state.swtTree);
+  if (_from === null || _to === null) return;
+  // 元親から削除
+  _from.subtrees = _from.subtrees.filter((subtree) => subtree.id !== node.id);
+  // 新親に追加
+  _to.subtrees.splice(index, 0, node);
+  _to.isFolding = false;
 };
 
 const onToggleFolding1 = (id: string) => {
@@ -104,7 +129,7 @@ v-container
   //- br
   tree(
     :node="state.donedleTree"
-    @arrange="onArrange"
+    @arrange="onArrange1"
     @toggle-folding="onToggleFolding1"
   )
     template(v-slot="slotProps")
@@ -119,7 +144,7 @@ v-container
   br
   tree(
     :node="state.swtTree"
-    @arrange="onArrange"
+    @arrange="onArrange2"
     @toggle-folding="onToggleFolding2"
   )
     template(v-slot="slotProps")
@@ -136,11 +161,10 @@ v-container
 <style lang="sass" scoped>
 .tree
   :deep(li)
+    border-left: 5px solid transparent
     .tree-header
       > .header
         font-weight: bold
-    .tree-item
-      border-left: 5px solid transparent
     .tree-item:hover
       color: #22559c
     &.milestone

@@ -78,5 +78,5 @@ export default {
     }
   ],
   "isDraggable": true,
-  "isFolding": true
+  "isFolding": false
 }
