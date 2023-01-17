@@ -176,4 +176,9 @@ v-container
           content: "\F023B  "
     &.requirement
       border-left: 5px solid #f27370
+      > .tree-item
+        > .title:before
+          font-family: "Material Design Icons"  
+          color: #f27370
+          content: "\F0306  "
 </style>
