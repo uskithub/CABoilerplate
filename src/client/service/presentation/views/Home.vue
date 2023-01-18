@@ -20,6 +20,11 @@ import swtTree from "../../../../../test/stubs/swt";
 
 const { shared, user, dispatch } = inject(VIEW_MODELS_KEY) as ViewModels;
 
+// custom directive for autofocus
+const vFocus = {
+  mounted: (el: HTMLElement) => el.focus()
+};
+
 // const state = reactive<{
 //     signInStatus: SignInStatus|null;
 // }>({
@@ -107,6 +112,18 @@ const onClickExport = (event: MouseEvent, node: Treenode) => {
   }
 };
 
+const onUpdateName1 = (id: string, newName: string) => {
+  const node = findNodeById(id, state.donedleTree);
+  if (node === null) return;
+  node.name = newName;
+};
+
+const onUpdateName2 = (id: string, newName: string) => {
+  const node = findNodeById(id, state.swtTree);
+  if (node === null) return;
+  node.name = newName;
+};
+
 </script>
 
 <template lang="pug">
@@ -131,9 +148,16 @@ v-container
     :node="state.donedleTree"
     @arrange="onArrange1"
     @toggle-folding="onToggleFolding1"
+    @update-name="onUpdateName1"
   )
     template(v-slot="slotProps")
-      template(v-if="slotProps.depth===0")
+      input(
+        v-if="slotProps.isEditing"
+        v-model="slotProps.node.name"
+        v-focus
+        @blur="() => { if (slotProps.endEditing) slotProps.endEditing(slotProps.node.name); }"
+      )
+      template(v-else-if="slotProps.depth===0")
         span.header {{ slotProps.node.name }}
         v-icon(
           v-show="slotProps.isHovering" 
@@ -146,9 +170,16 @@ v-container
     :node="state.swtTree"
     @arrange="onArrange2"
     @toggle-folding="onToggleFolding2"
+    @update-name="onUpdateName2"
   )
     template(v-slot="slotProps")
-      template(v-if="slotProps.depth === 0")
+      input(
+        v-if="slotProps.isEditing"
+        v-model="slotProps.node.name"
+        v-focus
+        @blur="() => { if (slotProps.endEditing) slotProps.endEditing(slotProps.node.name); }"
+      )
+      template(v-else-if="slotProps.depth === 0")
         span.header {{ slotProps.node.name }}
         v-icon(
           v-show="slotProps.isHovering" 
@@ -180,5 +211,5 @@ v-container
         > .title:before
           font-family: "Material Design Icons"  
           color: #f27370
-          content: "\F0306  "
+          content: "\F0306（）  "
 </style>
