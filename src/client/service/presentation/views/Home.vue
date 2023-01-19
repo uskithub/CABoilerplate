@@ -1,9 +1,10 @@
 <script setup lang="ts">
 // service
+import type { Task } from "@/shared/service/domain/models/task";
 import { Boot } from "@/shared/service/application/usecases/boot";
 import type { BootScenario } from "@/shared/service/application/usecases/boot";
+
 // view
-import treelocal from "./components/organisms/tree.vue";
 import { tree, findNodeById } from "vue3-tree";
 
 // system
@@ -17,6 +18,7 @@ import "vue3-tree/style.css";
 // stubs
 import donedleTree from "../../../../../test/stubs/donedle";
 import swtTree from "../../../../../test/stubs/swt";
+import taskTree from "../../../../../test/stubs/task";
 
 const { shared, user, dispatch } = inject(VIEW_MODELS_KEY) as ViewModels;
 
@@ -24,6 +26,22 @@ const { shared, user, dispatch } = inject(VIEW_MODELS_KEY) as ViewModels;
 const vFocus = {
   mounted: (el: HTMLElement) => el.focus()
 };
+
+class TaskTreenode implements Treenode {
+  _task: Task;
+  isFolding: boolean;
+
+  constructor(task: Task) {
+    this._task = task;
+    this.isFolding = false;
+  }
+
+  get id(): string { return this._task.id; }
+  get name(): string { return this._task.title; }
+  get styleClass(): object | null { return { [this._task.type]: true }; }
+  get subtrees(): TaskTreenode[] { return this._task.children.map(c => new TaskTreenode(c)); }
+  get isDraggable(): boolean { return true; }
+}
 
 // const state = reactive<{
 //     signInStatus: SignInStatus|null;
@@ -38,10 +56,15 @@ if (user.store.signInStatus === null && shared.user === null) {
 const state = reactive<{
   donedleTree: Treenode;
   swtTree: Treenode;
+  isEditing: boolean;
 }>({
   donedleTree: donedleTree as Treenode
+  // , swtTree: new TaskTreenode(taskTree as Task)
   , swtTree: swtTree as Treenode
+  , isEditing: false
 });
+
+// console.log("iii", state.swtTree, state.swtTree.subtrees, state.swtTree.subtrees.length);
 
 const onArrange1 = (
   node: Treenode
@@ -124,6 +147,12 @@ const onUpdateName2 = (id: string, newName: string) => {
   node.name = newName;
 };
 
+const onToggleEditing = (id: string, isEditing: boolean) => {
+  const node = findNodeById(id, state.swtTree);
+  if (node === null) return;
+  state.isEditing = isEditing;
+};
+
 </script>
 
 <template lang="pug">
@@ -171,8 +200,19 @@ v-container
     @arrange="onArrange2"
     @toggle-folding="onToggleFolding2"
     @update-name="onUpdateName2"
+    @toggle-editing="onToggleEditing"
   )
     template(v-slot="slotProps")
+      v-dialog(v-model="state.isEditing")
+        v-card
+          v-form
+            v-card-text {{ slotProps.node.name }}
+            v-card-actions
+              v-btn(
+                color="primary" 
+                block 
+                @click="state.isEditing = false"
+              ) Close Dialog
       input(
         v-if="slotProps.isEditing"
         v-model="slotProps.node.name"
@@ -211,5 +251,5 @@ v-container
         > .title:before
           font-family: "Material Design Icons"  
           color: #f27370
-          content: "\F0306（）  "
+          content: "\F0306  "
 </style>
