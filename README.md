@@ -750,3 +750,29 @@ export default (_req: Request, res: Response) => {
   t.common.labels.password;
 };
 ```
+
+# Icon Font
+
+## Material Design Iconsを採用
+
+```shell
+$ yarn add @mdi/font -D
+```
+
+```vuetify.js
+import "@mdi/font/css/materialdesignicons.css";
+
+export default createVuetify(
+  // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
+  {
+    components,
+    directives,
+    icons: {
+      defaultSet: "mdi",
+      sets: {
+        mdi,
+      }
+    },
+  }
+);
+```

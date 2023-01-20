@@ -59,6 +59,7 @@ const state = reactive<{
   isEditing: boolean;
 }>({
   donedleTree: donedleTree as Treenode
+  // TODO: TaskTreenodeでの表示。JSON.stringifyを使ったdeepCopyではgetterはコピーされないのでsubtreesが見つからないで落ちる
   // , swtTree: new TaskTreenode(taskTree as Task)
   , swtTree: swtTree as Treenode
   , isEditing: false
@@ -203,23 +204,58 @@ v-container
     @toggle-editing="onToggleEditing"
   )
     template(v-slot="slotProps")
-      v-dialog(v-model="state.isEditing")
+      v-dialog(v-model="slotProps.isEditing" persistent)
         v-card
-          v-form
-            v-card-text {{ slotProps.node.name }}
-            v-card-actions
-              v-btn(
-                color="primary" 
-                block 
-                @click="state.isEditing = false"
-              ) Close Dialog
-      input(
-        v-if="slotProps.isEditing"
-        v-model="slotProps.node.name"
-        v-focus
-        @blur="() => { if (slotProps.endEditing) slotProps.endEditing(slotProps.node.name); }"
-      )
-      template(v-else-if="slotProps.depth === 0")
+          v-card-text
+            v-container
+              v-row
+                v-col(cols="12" sm="6" md="4")
+                  v-text-field(label="Legal first name*" required)
+                v-col(cols="12" sm="6" md="4")
+                  v-text-field(label="Legal middle name" hint="example of helper text only on focus")
+                v-col(cols="12" sm="6" md="4")
+                  v-text-field(
+                    label="Legal last name*"
+                    hint="example of persistent helper text"
+                    persistent-hint
+                    required
+                  )
+                v-col(cols="12")
+                  v-text-field(
+                    label="Email*"
+                    required
+                  )
+                v-col(cols="12")
+                  v-text-field(
+                    label="Password*"
+                    type="password"
+                    required
+                  )
+                v-col(cols="12" sm="6")
+                  v-select(
+                    :items="['0-17', '18-29', '30-54', '54+']"
+                    label="Age*"
+                    required
+                  )
+                v-col(cols="12" sm="6")
+                  v-autocomplete(
+                    :items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']"
+                    label="Interests"
+                    multiple
+                  )
+            small *indicates required field
+          v-card-actions
+            v-btn(
+              color="blue-darken-1"
+              variant="text"
+              @click="() => slotProps.endEditing(slotProps.node.name)"
+            ) Cancel
+            v-btn(
+              color="blue-darken-1"
+              variant="text"
+              @click="() => slotProps.endEditing(slotProps.node.name)"
+            ) Save
+      template(v-if="slotProps.depth === 0")
         span.header {{ slotProps.node.name }}
         v-icon(
           v-show="slotProps.isHovering" 

@@ -5,7 +5,7 @@ import SignUp from "@views/SignUp.vue";
 
 // system
 import { createApp } from "vue";
-import vuetify from "@client/system/plugins/vuetify";
+import { loadVuetify } from "@client/system/plugins/vuetify";
 import { loadFonts } from "@client/system/plugins/webfontloader";
 import { createRouter, createWebHashHistory } from "vue-router";
 import App from "./App.vue";
@@ -39,7 +39,9 @@ loadFonts();
 const dictionary = i18n(navigator.language);
 
 const app = createApp(App);
-app.use(vuetify);
+
+loadVuetify(app);
+
 app.use(router);
 app.mount("#app");
 app.provide(DICTIONARY_KEY, dictionary);
