@@ -92,7 +92,29 @@ export interface Task {
 }
 
 export default {
-
+    getAvailableTaskTypes: (task: Task, parent: Task): TaskType[] => {
+        switch (parent.type) {
+            case TaskType.todo, TaskType.issue:
+                return [
+                    TaskType.todo
+                ];
+            case TaskType.requirement:
+                return [
+                    TaskType.issue,
+                    TaskType.todo
+                ];
+            default:
+            // case TaskType.milestone:
+            // case TaskType.publicProject, TaskType.publicSubproject, TaskType.privateProject, TaskType.privateSubproject:
+            // case TaskType.publicNpo, TaskType.publicEdu, TaskType.publicOrganizationSubscribing, TaskType.publicOrganization:
+                return [
+                    TaskType.milestone,
+                    TaskType.requirement,
+                    TaskType.issue,
+                    TaskType.todo
+                ];
+        }
+    },
     observeUserTasks: (userId: string): Observable<ChangedItem<Task>[]> => {
         return dependencies.backend.observeTasks(userId);
     }

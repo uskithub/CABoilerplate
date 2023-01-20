@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // service
 import type { Task } from "@/shared/service/domain/models/task";
+import TaskModel from "@/shared/service/domain/models/task";
 import { Boot } from "@/shared/service/application/usecases/boot";
 import type { BootScenario } from "@/shared/service/application/usecases/boot";
 
@@ -209,8 +210,15 @@ v-container
           v-card-text
             v-container
               v-row
-                v-col(cols="12" sm="6" md="4")
-                  v-text-field(label="Legal first name*" required)
+                v-col(cols="12" sm="8")
+                  v-text-field(v-model="slotProps.node.name" label="Task Name" required)
+                v-col(cols="12" sm="4")
+                  v-select(
+                    v-model="slotProps.node.type"
+                    :items="TaskModel.getAvailableTaskTypes(slotProps.node, slotProps.parent)"
+                    label="TaskType"
+                    required
+                  )
                 v-col(cols="12" sm="6" md="4")
                   v-text-field(label="Legal middle name" hint="example of helper text only on focus")
                 v-col(cols="12" sm="6" md="4")
@@ -229,12 +237,6 @@ v-container
                   v-text-field(
                     label="Password*"
                     type="password"
-                    required
-                  )
-                v-col(cols="12" sm="6")
-                  v-select(
-                    :items="['0-17', '18-29', '30-54', '54+']"
-                    label="Age*"
                     required
                   )
                 v-col(cols="12" sm="6")
