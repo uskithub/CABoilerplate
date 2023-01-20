@@ -1,9 +1,10 @@
 <script setup lang="ts">
 // service
+import type { Task } from "@/shared/service/domain/models/task";
 import { Boot } from "@/shared/service/application/usecases/boot";
 import type { BootScenario } from "@/shared/service/application/usecases/boot";
+
 // view
-import treelocal from "./components/organisms/tree.vue";
 import { tree, findNodeById } from "vue3-tree";
 
 // system
@@ -17,8 +18,30 @@ import "vue3-tree/style.css";
 // stubs
 import donedleTree from "../../../../../test/stubs/donedle";
 import swtTree from "../../../../../test/stubs/swt";
+import taskTree from "../../../../../test/stubs/task";
 
 const { shared, user, dispatch } = inject(VIEW_MODELS_KEY) as ViewModels;
+
+// custom directive for autofocus
+const vFocus = {
+  mounted: (el: HTMLElement) => el.focus()
+};
+
+class TaskTreenode implements Treenode {
+  _task: Task;
+  isFolding: boolean;
+
+  constructor(task: Task) {
+    this._task = task;
+    this.isFolding = false;
+  }
+
+  get id(): string { return this._task.id; }
+  get name(): string { return this._task.title; }
+  get styleClass(): object | null { return { [this._task.type]: true }; }
+  get subtrees(): TaskTreenode[] { return this._task.children.map(c => new TaskTreenode(c)); }
+  get isDraggable(): boolean { return true; }
+}
 
 // const state = reactive<{
 //     signInStatus: SignInStatus|null;
@@ -33,12 +56,17 @@ if (user.store.signInStatus === null && shared.user === null) {
 const state = reactive<{
   donedleTree: Treenode;
   swtTree: Treenode;
+  isEditing: boolean;
 }>({
   donedleTree: donedleTree as Treenode
+  // , swtTree: new TaskTreenode(taskTree as Task)
   , swtTree: swtTree as Treenode
+  , isEditing: false
 });
 
-const onArrange = (
+// console.log("iii", state.swtTree, state.swtTree.subtrees, state.swtTree.subtrees.length);
+
+const onArrange1 = (
   node: Treenode
   , from: {
     id: string
@@ -50,11 +78,36 @@ const onArrange = (
   }
   , index: number
 ) => {
+  const _from = findNodeById(from.id, state.donedleTree);
+  const _to = findNodeById(to.id, state.donedleTree);
+  if (_from === null || _to === null) return;
   // 元親から削除
-  from.node.subtrees = from.node.subtrees.filter((subtree) => subtree.id !== node.id);
+  _from.subtrees = _from.subtrees.filter((subtree) => subtree.id !== node.id);
   // 新親に追加
-  to.node.subtrees.splice(index, 0, node);
-  to.node.isFolding = true;
+  _to.subtrees.splice(index, 0, node);
+  _to.isFolding = false;
+};
+
+const onArrange2 = (
+  node: Treenode
+  , from: {
+    id: string
+    , node: Treenode
+  }
+  , to: {
+    id: string
+    , node: Treenode
+  }
+  , index: number
+) => {
+  const _from = findNodeById(from.id, state.swtTree);
+  const _to = findNodeById(to.id, state.swtTree);
+  if (_from === null || _to === null) return;
+  // 元親から削除
+  _from.subtrees = _from.subtrees.filter((subtree) => subtree.id !== node.id);
+  // 新親に追加
+  _to.subtrees.splice(index, 0, node);
+  _to.isFolding = false;
 };
 
 const onToggleFolding1 = (id: string) => {
@@ -82,6 +135,24 @@ const onClickExport = (event: MouseEvent, node: Treenode) => {
   }
 };
 
+const onUpdateName1 = (id: string, newName: string) => {
+  const node = findNodeById(id, state.donedleTree);
+  if (node === null) return;
+  node.name = newName;
+};
+
+const onUpdateName2 = (id: string, newName: string) => {
+  const node = findNodeById(id, state.swtTree);
+  if (node === null) return;
+  node.name = newName;
+};
+
+const onToggleEditing = (id: string, isEditing: boolean) => {
+  const node = findNodeById(id, state.swtTree);
+  if (node === null) return;
+  state.isEditing = isEditing;
+};
+
 </script>
 
 <template lang="pug">
@@ -104,11 +175,18 @@ v-container
   //- br
   tree(
     :node="state.donedleTree"
-    @arrange="onArrange"
+    @arrange="onArrange1"
     @toggle-folding="onToggleFolding1"
+    @update-name="onUpdateName1"
   )
     template(v-slot="slotProps")
-      template(v-if="slotProps.depth===0")
+      input(
+        v-if="slotProps.isEditing"
+        v-model="slotProps.node.name"
+        v-focus
+        @blur="() => { if (slotProps.endEditing) slotProps.endEditing(slotProps.node.name); }"
+      )
+      template(v-else-if="slotProps.depth===0")
         span.header {{ slotProps.node.name }}
         v-icon(
           v-show="slotProps.isHovering" 
@@ -119,11 +197,29 @@ v-container
   br
   tree(
     :node="state.swtTree"
-    @arrange="onArrange"
+    @arrange="onArrange2"
     @toggle-folding="onToggleFolding2"
+    @update-name="onUpdateName2"
+    @toggle-editing="onToggleEditing"
   )
     template(v-slot="slotProps")
-      template(v-if="slotProps.depth === 0")
+      v-dialog(v-model="state.isEditing")
+        v-card
+          v-form
+            v-card-text {{ slotProps.node.name }}
+            v-card-actions
+              v-btn(
+                color="primary" 
+                block 
+                @click="state.isEditing = false"
+              ) Close Dialog
+      input(
+        v-if="slotProps.isEditing"
+        v-model="slotProps.node.name"
+        v-focus
+        @blur="() => { if (slotProps.endEditing) slotProps.endEditing(slotProps.node.name); }"
+      )
+      template(v-else-if="slotProps.depth === 0")
         span.header {{ slotProps.node.name }}
         v-icon(
           v-show="slotProps.isHovering" 
@@ -136,11 +232,10 @@ v-container
 <style lang="sass" scoped>
 .tree
   :deep(li)
+    border-left: 5px solid transparent
     .tree-header
       > .header
         font-weight: bold
-    .tree-item
-      border-left: 5px solid transparent
     .tree-item:hover
       color: #22559c
     &.milestone
@@ -152,4 +247,9 @@ v-container
           content: "\F023B  "
     &.requirement
       border-left: 5px solid #f27370
+      > .tree-item
+        > .title:before
+          font-family: "Material Design Icons"  
+          color: #f27370
+          content: "\F0306  "
 </style>
