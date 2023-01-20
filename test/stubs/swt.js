@@ -1,18 +1,18 @@
 export default {
   "id": "1",
-  "name": "root",
+  "name": "SWT",
   "styleClass": {},
   "subtrees": [
     {
       "id": "11",
-      "name": "treeコンポーネントの実装",
+      "name": "EWデータ出力",
       "styleClass": {
         "milestone": true
       },
       "subtrees": [
         {
           "id": "111",
-          "name": "SassでのFontAwesome利用",
+          "name": "SQLを見直す（SWT家電のテストデータを抜粋して検証）",
           "styleClass": {
             "requirement": true
           },
@@ -66,7 +66,7 @@ export default {
     },
     {
       "id": "12",
-      "name": "subtree2",
+      "name": "BS残高差額の調査",
       "styleClass": null,
       "subtrees": [],
       "isDraggable": true,
@@ -74,7 +74,7 @@ export default {
     },
     {
       "id": "13",
-      "name": "subtree3",
+      "name": "ヤマダ家電保などの図を作る",
       "styleClass": null,
       "subtrees": [],
       "isDraggable": false,
