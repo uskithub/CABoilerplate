@@ -40,7 +40,10 @@ class TaskTreenode implements Treenode {
   get id(): string { return this._task.id; }
   get name(): string { return this._task.title; }
   get styleClass(): object | null { return { [this._task.type]: true }; }
-  get subtrees(): TaskTreenode[] { return this._task.children.map(c => new TaskTreenode(c)); }
+  get subtrees(): this[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this._task.children.map(c => new (this.constructor as any)(c));
+  }
   get isDraggable(): boolean { return true; }
 }
 
@@ -211,7 +214,7 @@ v-container
             v-container
               v-row
                 v-col(cols="12" sm="8")
-                  v-text-field(v-model="slotProps.node.name" label="Task Name" required)
+                  v-text-field(v-model="slotProps.node.name" label="Task Name" required autofocus)
                 v-col(cols="12" sm="4")
                   v-select(
                     v-model="slotProps.node.type"
@@ -219,44 +222,24 @@ v-container
                     label="TaskType"
                     required
                   )
-                v-col(cols="12" sm="6" md="4")
-                  v-text-field(label="Legal middle name" hint="example of helper text only on focus")
-                v-col(cols="12" sm="6" md="4")
-                  v-text-field(
-                    label="Legal last name*"
-                    hint="example of persistent helper text"
-                    persistent-hint
-                    required
-                  )
-                v-col(cols="12")
-                  v-text-field(
-                    label="Email*"
-                    required
-                  )
-                v-col(cols="12")
-                  v-text-field(
-                    label="Password*"
-                    type="password"
-                    required
-                  )
-                v-col(cols="12" sm="6")
-                  v-autocomplete(
-                    :items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']"
-                    label="Interests"
-                    multiple
-                  )
             small *indicates required field
           v-card-actions
-            v-btn(
-              color="blue-darken-1"
-              variant="text"
-              @click="() => slotProps.endEditing(slotProps.node.name)"
-            ) Cancel
-            v-btn(
-              color="blue-darken-1"
-              variant="text"
-              @click="() => slotProps.endEditing(slotProps.node.name)"
-            ) Save
+            v-container
+              v-row
+                v-col(cols="12" sm="6")
+                  v-btn(
+                    color="blue-darken-1"
+                    variant="text"
+                    block
+                    @click="() => slotProps.endEditing(false)"
+                  ) Cancel
+                v-col(cols="12" sm="6")
+                  v-btn(
+                    color="blue-darken-1"
+                    variant="text"
+                    block
+                    @click="() => slotProps.endEditing(true, slotProps.node)"
+                  ) Save
       template(v-if="slotProps.depth === 0")
         span.header {{ slotProps.node.name }}
         v-icon(
