@@ -28,8 +28,8 @@ const vFocus = {
   mounted: (el: HTMLElement) => el.focus()
 };
 
-class TaskTreenode implements Treenode {
-  _task: Task;
+class TaskTreenode implements Treenode<Task> {
+  private _task: Task;
   isFolding: boolean;
 
   constructor(task: Task) {
@@ -38,8 +38,13 @@ class TaskTreenode implements Treenode {
   }
 
   get id(): string { return this._task.id; }
+
   get name(): string { return this._task.title; }
+  set name(newName: string) { this._task.title = newName; }
+
   get styleClass(): object | null { return { [this._task.type]: true }; }
+
+  get content(): Task { return this._task; }
   get subtrees(): this[] {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this._task.children.map(c => new (this.constructor as any)(c));
@@ -58,28 +63,28 @@ if (user.store.signInStatus === null && shared.user === null) {
 }
 
 const state = reactive<{
-  donedleTree: Treenode;
-  swtTree: Treenode;
+  donedleTree: TaskTreenode;
+  swtTree: TaskTreenode;
   isEditing: boolean;
 }>({
-  donedleTree: donedleTree as Treenode
+  donedleTree: new TaskTreenode(donedleTree as Task)
   // TODO: TaskTreenodeでの表示。JSON.stringifyを使ったdeepCopyではgetterはコピーされないのでsubtreesが見つからないで落ちる
   // , swtTree: new TaskTreenode(taskTree as Task)
-  , swtTree: swtTree as Treenode
+  , swtTree: swtTree as TaskTreenode
   , isEditing: false
 });
 
 // console.log("iii", state.swtTree, state.swtTree.subtrees, state.swtTree.subtrees.length);
 
 const onArrange1 = (
-  node: Treenode
+  node: TaskTreenode
   , from: {
     id: string
-    , node: Treenode
+    , node: TaskTreenode
   }
   , to: {
     id: string
-    , node: Treenode
+    , node: TaskTreenode
   }
   , index: number
 ) => {
@@ -87,21 +92,21 @@ const onArrange1 = (
   const _to = findNodeById(to.id, state.donedleTree);
   if (_from === null || _to === null) return;
   // 元親から削除
-  _from.subtrees = _from.subtrees.filter((subtree) => subtree.id !== node.id);
+  _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
   // 新親に追加
-  _to.subtrees.splice(index, 0, node);
+  _to.content.children.splice(index, 0, node.content);
   _to.isFolding = false;
 };
 
 const onArrange2 = (
-  node: Treenode
+  node: TaskTreenode
   , from: {
     id: string
-    , node: Treenode
+    , node: TaskTreenode
   }
   , to: {
     id: string
-    , node: Treenode
+    , node: TaskTreenode
   }
   , index: number
 ) => {
@@ -127,7 +132,7 @@ const onToggleFolding2 = (id: string) => {
   node.isFolding = !node.isFolding;
 };
 
-const onClickExport = (event: MouseEvent, node: Treenode) => {
+const onClickExport = (event: MouseEvent, node: TaskTreenode) => {
   console.log("export", node);
   if (navigator.clipboard) {
     navigator.clipboard
