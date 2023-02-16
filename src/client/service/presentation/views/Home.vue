@@ -50,6 +50,10 @@ class TaskTreenode implements Treenode<Task> {
     return this._task.children.map(c => new (this.constructor as any)(c));
   }
   get isDraggable(): boolean { return true; }
+
+  update(newTask: Task) {
+    this._task = newTask;
+  }
 }
 
 // const state = reactive<{
@@ -70,7 +74,7 @@ const state = reactive<{
   donedleTree: new TaskTreenode(donedleTree as Task)
   // TODO: TaskTreenodeでの表示。JSON.stringifyを使ったdeepCopyではgetterはコピーされないのでsubtreesが見つからないで落ちる
   // , swtTree: new TaskTreenode(taskTree as Task)
-  , swtTree: swtTree as TaskTreenode
+  , swtTree: new TaskTreenode(swtTree as Task)
   , isEditing: false
 });
 
@@ -114,7 +118,7 @@ const onArrange2 = (
   const _to = findNodeById(to.id, state.swtTree);
   if (_from === null || _to === null) return;
   // 元親から削除
-  _from.subtrees = _from.subtrees.filter((subtree) => subtree.id !== node.id);
+  _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
   // 新親に追加
   _to.subtrees.splice(index, 0, node);
   _to.isFolding = false;
@@ -151,10 +155,12 @@ const onUpdateName1 = (id: string, newName: string) => {
   node.name = newName;
 };
 
-const onUpdateName2 = (id: string, newName: string) => {
-  const node = findNodeById(id, state.swtTree);
+const onUpdateName2 = (newValue: TaskTreenode) => {
+  const node = findNodeById(newValue.id, state.swtTree) as TaskTreenode;
   if (node === null) return;
-  node.name = newName;
+  console.log(node);
+  node.update(newValue.content);
+  // TODO reaciveを起こさないといけない
 };
 
 const onToggleEditing = (id: string, isEditing: boolean) => {
@@ -187,7 +193,7 @@ v-container
     :node="state.donedleTree"
     @arrange="onArrange1"
     @toggle-folding="onToggleFolding1"
-    @update-name="onUpdateName1"
+    @update-node="onUpdateName1"
   )
     template(v-slot="slotProps")
       input(
@@ -209,7 +215,7 @@ v-container
     :node="state.swtTree"
     @arrange="onArrange2"
     @toggle-folding="onToggleFolding2"
-    @update-name="onUpdateName2"
+    @update-node="onUpdateName2"
     @toggle-editing="onToggleEditing"
   )
     template(v-slot="slotProps")
