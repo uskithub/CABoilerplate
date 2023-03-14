@@ -10,8 +10,8 @@ import { tree, findNodeById } from "vue3-tree";
 
 // system
 import { inject, reactive, ref } from "vue";
-import type { ViewModels } from "../models";
-import { VIEW_MODELS_KEY } from "../models";
+import type { BehaviorModels } from "../models";
+import { BEHAVIOR_MODELS_KEY } from "../models";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import type { Treenode } from "vue3-tree";
 import "vue3-tree/style.css";
@@ -21,7 +21,7 @@ import donedleTree from "../../../../../test/stubs/donedle";
 import swtTree from "../../../../../test/stubs/swt";
 import taskTree from "../../../../../test/stubs/task";
 
-const { shared, user, dispatch } = inject(VIEW_MODELS_KEY) as ViewModels;
+const { shared, user, dispatch } = inject(BEHAVIOR_MODELS_KEY) as BehaviorModels;
 
 // custom directive for autofocus
 const vFocus = {
