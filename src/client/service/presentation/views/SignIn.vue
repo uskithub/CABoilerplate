@@ -10,20 +10,20 @@ import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
 import { computed, inject, reactive } from "vue";
 import { useRouter } from "vue-router";
-import type { ViewModels } from "../models";
-import { VIEW_MODELS_KEY } from "../models";
+import type { BehaviorModels } from "../models";
+import { BEHAVIOR_MODELS_KEY } from "../models";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
-const { shared, user, dispatch } = inject(VIEW_MODELS_KEY) as ViewModels;
+const { shared, user, dispatch } = inject(BEHAVIOR_MODELS_KEY) as BehaviorModels;
 
 const state = reactive<{
-  email: string|null;
-  password: string|null;
+  email: string | null;
+  password: string | null;
   isValid: boolean;
 }>({
-    email: null
-    , password: null
-    , isValid: true
+  email: null
+  , password: null
+  , isValid: true
 });
 
 const isPresentDialog = computed(() => shared.user !== null);
