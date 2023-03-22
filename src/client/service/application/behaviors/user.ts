@@ -2,12 +2,12 @@
 import { Boot, BootScenario, BootUsecase, isBootGoal, isBootScene } from "@usecases/boot";
 import { isSignInGoal, isSignInScene, SignIn, SignInScenario, SignInUsecase } from "@/shared/service/application/usecases/signIn";
 import { isSignOutGoal, SignOut, SignOutScenario, SignOutUsecase } from "@/shared/service/application/usecases/signOut";
-import { SignedInUser } from "../../application/actors/signedInUser";
+import { SignedInUser } from "../actors/signedInUser";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { inject, reactive } from "vue";
-import BehaviorModel, { LocalStore, Mutable, SharedStore } from ".";
+import { Behavior, LocalStore, Mutable, SharedStore } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Nobody, UserNotAuthorizedToInteractIn } from "robustive-ts";
@@ -29,15 +29,14 @@ export interface UserStore extends LocalStore {
     readonly userTasks: ImmutableTask[];
 }
 
-export interface UserModel extends BehaviorModel<UserStore> {
+export interface UserBehavior extends Behavior<UserStore> {
     readonly store: UserStore;
-    boot: (context: BootScenario) => void;
     signUp: (context: SignUpScenario) => void;
     signIn: (context: SignInScenario) => void;
     signOut: (context: SignOutScenario) => void;
 }
 
-export function createUserModel(shared: SharedStore): UserModel {
+export function createUserBehavior(shared: SharedStore): UserBehavior {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
     const store = reactive<UserStore>({
@@ -55,94 +54,6 @@ export function createUserModel(shared: SharedStore): UserModel {
 
     return {
         store
-        , boot: (context: BootScenario) => {
-            let subscription: Subscription | null = null;
-            subscription = new BootUsecase(context)
-                .interactedBy(new Nobody())
-                .subscribe({
-                    next: (performedScenario: BootScenario[]) => {
-                        // bootはタスクの監視が後ろにくっ付くので complete が呼ばれないためここで計測する
-                        const executingUsecase = _shared.executingUsecase;
-                        if (executingUsecase && isBootScene(executingUsecase.executing)) {
-                            const elapsedTime = (new Date().getTime() - executingUsecase.startAt.getTime());
-                            _shared.executingUsecase = null;
-                            console.info(`The BootScenerio takes ${elapsedTime} ms.`);
-                        }
-                        console.log("boot:", performedScenario);
-                        const lastSceneContext = performedScenario.slice(-1)[0];
-                        if (!isBootGoal(lastSceneContext)) { return; }
-                        switch (lastSceneContext.scene) {
-                            case Boot.goals.servicePresentsHome:
-                                _shared.user = { ...lastSceneContext.user };
-                                _store.signInStatus = SignInStatus.signIn;
-                                console.log("hhhh", _shared.user, _store.signInStatus);
-                                break;
-                            case Boot.goals.sessionNotExistsThenServicePresentsSignin:
-                                _store.signInStatus = SignInStatus.signOut;
-                                router.replace("/signin");
-                                break;
-                            case Boot.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList:
-                                let mutableUserTasks = _store.userTasks as Task[];
-                                lastSceneContext.changedTasks.forEach(changedTask => {
-                                    switch (changedTask.kind) {
-                                        case ItemChangeType.added: {
-                                            // hot reloadで増えてしまうので、同じものを予め削除しておく
-                                            for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                                if (mutableUserTasks[i].id === changedTask.id) {
-                                                    mutableUserTasks.splice(i, 0);
-                                                    break;
-                                                }
-                                            }
-                                            mutableUserTasks.unshift(changedTask.item);
-                                            break;
-                                        }
-                                        case ItemChangeType.modified: {
-                                            // doingかどうかを調べ、そうなら更新する
-                                            // if (self.#stores.currentUser._doingTask && self.#stores.currentUser._doingTask.id === changedTask.id) {
-                                            //     self.#stores.currentUser._doingTask = changedTask.item;
-                                            // }
-                                            for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                                if (mutableUserTasks[i].id === changedTask.id) {
-                                                    mutableUserTasks.splice(i, 1, changedTask.item);
-                                                    break;
-                                                }
-                                            }
-                                            break;
-                                        }
-                                        case ItemChangeType.removed: {
-                                            for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                                if (mutableUserTasks[i].id === changedTask.id) {
-                                                    mutableUserTasks.splice(i, 0);
-                                                    break;
-                                                }
-                                            }
-                                            break;
-                                        }
-                                    }
-                                });
-                                console.log("user's tasks: ", _store.userTasks);
-                        }
-                    }
-                    , error: (e) => {
-                        if (e instanceof UserNotAuthorizedToInteractIn) {
-                            console.error(e);
-                        } else {
-                            console.error(e);
-                        }
-                    }
-                    , complete: () => {
-                        const executingUsecase = _shared.executingUsecase;
-                        if (executingUsecase && executingUsecase instanceof BootUsecase) {
-                            const elapsedTime = (new Date().getTime() - executingUsecase.startAt.getTime());
-                            _shared.executingUsecase = null;
-                            console.info(`complete - BootUsecase takes ${elapsedTime} ms`);
-                        } else {
-                            console.info("complete");
-                        }
-                        subscription?.unsubscribe();
-                    }
-                });
-        }
         , signUp: (context: SignUpScenario) => {
             let subscription: Subscription | null = null;
             subscription = new SignUpUsecase(context)

@@ -10,8 +10,8 @@ import { tree, findNodeById } from "vue3-tree";
 
 // system
 import { inject, reactive, ref } from "vue";
-import type { BehaviorModels } from "../models";
-import { BEHAVIOR_MODELS_KEY } from "../models";
+import type { BehaviorController } from "../../application/behaviors";
+import { BEHAVIOR_CONTROLLER_KEY } from "../../application/behaviors";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import type { Treenode } from "vue3-tree";
 import "vue3-tree/style.css";
@@ -21,7 +21,7 @@ import donedleTree from "../../../../../test/stubs/donedle";
 import swtTree from "../../../../../test/stubs/swt";
 import taskTree from "../../../../../test/stubs/task";
 
-const { shared, user, dispatch } = inject(BEHAVIOR_MODELS_KEY) as BehaviorModels;
+const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
 
 // custom directive for autofocus
 const vFocus = {
@@ -62,7 +62,7 @@ class TaskTreenode implements Treenode<Task> {
 //     signInStatus: null
 // });
 
-if (user.store.signInStatus === null && shared.user === null) {
+if (stores.user.signInStatus === null && stores.shared.user === null) {
   dispatch({ scene: Boot.userOpensSite } as BootScenario);
 }
 

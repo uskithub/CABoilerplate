@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { provide } from "vue";
-import { BEHAVIOR_MODELS_KEY, createBehaviorModels } from "@client/service/presentation/models";
+import { BEHAVIOR_CONTROLLER_KEY, createBehaviorController } from "@/client/service/application/behaviors";
 
-const behaviorModels = createBehaviorModels();
-provide(BEHAVIOR_MODELS_KEY, behaviorModels);
+const controller = createBehaviorController();
+provide(BEHAVIOR_CONTROLLER_KEY, controller);
 </script>
 
 <template lang="pug">

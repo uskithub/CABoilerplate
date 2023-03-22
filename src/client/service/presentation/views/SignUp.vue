@@ -9,11 +9,11 @@ import type { SignOutScenario } from "@/shared/service/application/usecases/sign
 import { computed, inject, reactive } from "vue";
 import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
-import { BEHAVIOR_MODELS_KEY } from "../models";
-import type { BehaviorModels } from "../models";
+import { BEHAVIOR_CONTROLLER_KEY } from "../../application/behaviors";
+import type { BehaviorController } from "../../application/behaviors";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
-const { shared, user, dispatch } = inject(BEHAVIOR_MODELS_KEY) as BehaviorModels;
+const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
 
 const state = reactive<{
   email: string | null;
@@ -23,7 +23,7 @@ const state = reactive<{
   , password: null
 });
 
-const isPresentDialog = computed(() => shared.user !== null);
+const isPresentDialog = computed(() => stores.shared.user !== null);
 const isFormValid = computed(() => state.email !== null && state.password !== null);
 
 </script>
@@ -38,14 +38,14 @@ v-container
     v-text-field(
       v-model="state.email",
       :label="t.common.labels.mailAddress",
-      :error-messages="user.store.idInvalidMessage",
+      :error-messages="stores.user.idInvalidMessage",
       required
     )
     v-text-field(
       v-model="state.password",
       type="password",
       :label="t.common.labels.password",
-      :error-messages="user.store.passwordInvalidMessage",
+      :error-messages="stores.user.passwordInvalidMessage",
       required
     )
     v-btn.mr-4(

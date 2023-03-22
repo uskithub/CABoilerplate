@@ -8,18 +8,18 @@ import { Actor, boundary, Boundary, Empty, Usecase, UsecaseScenario } from "robu
  */
 export const SignOut = {
     /* Basic Courses */
-    userStartsSignOutProcess : "ユーザはサインアウトを開始する"
-    , serviceClosesSession : "サービスはセッションを終了する"
+    userStartsSignOutProcess: "ユーザはサインアウトを開始する"
+    , serviceClosesSession: "サービスはセッションを終了する"
 
     /* Alternate Courses */
-    , userResignSignOut : "ユーザはサインアウトをキャンセルする"
+    , userResignSignOut: "ユーザはサインアウトをキャンセルする"
 
     /* Boundaries */
-    , goals : {
+    , goals: {
         /* Basic Courses */
-        onSuccessThenServicePresentsSignInView : "成功した場合_サービスはサインイン画面を表示する"
+        onSuccessThenServicePresentsSignInView: "成功した場合_サービスはサインイン画面を表示する"
         /* Alternate Courses */
-        , onFailureThenServicePresentsError : "失敗した場合_サービスはエラーを表示する"
+        , onFailureThenServicePresentsError: "失敗した場合_サービスはエラーを表示する"
         , servicePresentsHomeView: "サービスはホーム画面を表示する"
     }
 } as const;
@@ -27,15 +27,15 @@ export const SignOut = {
 type SignOut = typeof SignOut[keyof typeof SignOut];
 
 export type SignOutGoal = UsecaseScenario<{
-    [SignOut.goals.onSuccessThenServicePresentsSignInView] : Empty
-    [SignOut.goals.onFailureThenServicePresentsError] : { error: Error; }
-    [SignOut.goals.servicePresentsHomeView] : Empty
+    [SignOut.goals.onSuccessThenServicePresentsSignInView]: Empty
+    [SignOut.goals.onFailureThenServicePresentsError]: { error: Error; }
+    [SignOut.goals.servicePresentsHomeView]: Empty
 }>;
 
 export type SignOutScenario = UsecaseScenario<{
-    [SignOut.userStartsSignOutProcess] : Empty
-    [SignOut.serviceClosesSession] : Empty
-    [SignOut.userResignSignOut] : Empty
+    [SignOut.userStartsSignOutProcess]: Empty
+    [SignOut.serviceClosesSession]: Empty
+    [SignOut.userResignSignOut]: Empty
 }> | SignOutGoal;
 
 export const isSignOutGoal = (context: any): context is SignOutGoal => context.scene !== undefined && Object.values(SignOut.goals).find(c => { return c === context.scene; }) !== undefined;
@@ -47,22 +47,22 @@ export class SignOutUsecase extends Usecase<SignOutScenario> {
         return ServiceModel.authorize(actor, this);
     }
 
-    next(): Observable<this>|Boundary {
+    next(): Observable<this> | Boundary {
         switch (this.context.scene) {
-        case SignOut.userStartsSignOutProcess: {
-            return this.just({ scene: SignOut.serviceClosesSession });
-        }
-        case SignOut.serviceClosesSession : {
-            return this.signOut();
-        }
-        case SignOut.userResignSignOut: {
-            return this.just({ scene: SignOut.goals.servicePresentsHomeView });
-        }
-        case SignOut.goals.onSuccessThenServicePresentsSignInView:
-        case SignOut.goals.onFailureThenServicePresentsError:
-        case SignOut.goals.servicePresentsHomeView: {
-            return boundary;
-        }
+            case SignOut.userStartsSignOutProcess: {
+                return this.just({ scene: SignOut.serviceClosesSession });
+            }
+            case SignOut.serviceClosesSession: {
+                return this.signOut();
+            }
+            case SignOut.userResignSignOut: {
+                return this.just({ scene: SignOut.goals.servicePresentsHomeView });
+            }
+            case SignOut.goals.onSuccessThenServicePresentsSignInView:
+            case SignOut.goals.onFailureThenServicePresentsError:
+            case SignOut.goals.servicePresentsHomeView: {
+                return boundary;
+            }
         }
     }
 
