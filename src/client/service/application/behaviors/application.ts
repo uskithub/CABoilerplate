@@ -11,6 +11,7 @@ import { Nobody, UserNotAuthorizedToInteractIn } from "robustive-ts";
 import { Task } from "@/shared/service/domain/models/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
+import { SignedInUser } from "../actors/signedInUser";
 
 
 export interface ApplicationBehavior extends Behavior<SharedStore> {
@@ -29,7 +30,7 @@ export function createApplicationBehavior(shared: SharedStore): ApplicationBehav
         , boot: (context: BootScenario) => {
             let subscription: Subscription | null = null;
             subscription = new BootUsecase(context)
-                .interactedBy(new Nobody())
+                .interactedBy(shared.actor)
                 .subscribe({
                     next: (performedScenario: BootScenario[]) => {
                         // bootはタスクの監視が後ろにくっ付くので complete が呼ばれないためここで計測する
@@ -44,54 +45,57 @@ export function createApplicationBehavior(shared: SharedStore): ApplicationBehav
                         if (!isBootGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                             case Boot.goals.servicePresentsHome:
-                                _shared.user = { ...lastSceneContext.user };
+                                const user = { ...lastSceneContext.user };
+                                const actor = new SignedInUser(user);
+                                _shared.actor = actor;
                                 _shared.signInStatus = SignInStatus.signIn;
-                                console.log("hhhh", _shared.user, _store.signInStatus);
+                                console.log("hhhh", _shared.actor, _shared.signInStatus);
                                 break;
                             case Boot.goals.sessionNotExistsThenServicePresentsSignin:
-                                _store.signInStatus = SignInStatus.signOut;
+                                _shared.signInStatus = SignInStatus.signOut;
                                 router.replace("/signin");
                                 break;
                             case Boot.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList:
-                                let mutableUserTasks = _store.userTasks as Task[];
-                                lastSceneContext.changedTasks.forEach(changedTask => {
-                                    switch (changedTask.kind) {
-                                        case ItemChangeType.added: {
-                                            // hot reloadで増えてしまうので、同じものを予め削除しておく
-                                            for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                                if (mutableUserTasks[i].id === changedTask.id) {
-                                                    mutableUserTasks.splice(i, 0);
-                                                    break;
-                                                }
-                                            }
-                                            mutableUserTasks.unshift(changedTask.item);
-                                            break;
-                                        }
-                                        case ItemChangeType.modified: {
-                                            // doingかどうかを調べ、そうなら更新する
-                                            // if (self.#stores.currentUser._doingTask && self.#stores.currentUser._doingTask.id === changedTask.id) {
-                                            //     self.#stores.currentUser._doingTask = changedTask.item;
-                                            // }
-                                            for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                                if (mutableUserTasks[i].id === changedTask.id) {
-                                                    mutableUserTasks.splice(i, 1, changedTask.item);
-                                                    break;
-                                                }
-                                            }
-                                            break;
-                                        }
-                                        case ItemChangeType.removed: {
-                                            for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                                if (mutableUserTasks[i].id === changedTask.id) {
-                                                    mutableUserTasks.splice(i, 0);
-                                                    break;
-                                                }
-                                            }
-                                            break;
-                                        }
-                                    }
-                                });
-                                console.log("user's tasks: ", _store.userTasks);
+                                // let mutableUserTasks = _store.userTasks as Task[];
+                                // lastSceneContext.changedTasks.forEach(changedTask => {
+                                //     switch (changedTask.kind) {
+                                //         case ItemChangeType.added: {
+                                //             // hot reloadで増えてしまうので、同じものを予め削除しておく
+                                //             for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
+                                //                 if (mutableUserTasks[i].id === changedTask.id) {
+                                //                     mutableUserTasks.splice(i, 0);
+                                //                     break;
+                                //                 }
+                                //             }
+                                //             mutableUserTasks.unshift(changedTask.item);
+                                //             break;
+                                //         }
+                                //         case ItemChangeType.modified: {
+                                //             // doingかどうかを調べ、そうなら更新する
+                                //             // if (self.#stores.currentUser._doingTask && self.#stores.currentUser._doingTask.id === changedTask.id) {
+                                //             //     self.#stores.currentUser._doingTask = changedTask.item;
+                                //             // }
+                                //             for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
+                                //                 if (mutableUserTasks[i].id === changedTask.id) {
+                                //                     mutableUserTasks.splice(i, 1, changedTask.item);
+                                //                     break;
+                                //                 }
+                                //             }
+                                //             break;
+                                //         }
+                                //         case ItemChangeType.removed: {
+                                //             for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
+                                //                 if (mutableUserTasks[i].id === changedTask.id) {
+                                //                     mutableUserTasks.splice(i, 0);
+                                //                     break;
+                                //                 }
+                                //             }
+                                //             break;
+                                //         }
+                                //     }
+                                // });
+                                // console.log("user's tasks: ", _store.userTasks);
+                                console.log("user's tasks: ");
                         }
                     }
                     , error: (e) => {

@@ -2,8 +2,6 @@
 // service
 import type { Task } from "@/shared/service/domain/models/task";
 import TaskModel from "@/shared/service/domain/models/task";
-import { Boot } from "@/shared/service/application/usecases/boot";
-import type { BootScenario } from "@/shared/service/application/usecases/boot";
 
 // view
 import { tree, findNodeById } from "vue3-tree";
@@ -12,7 +10,6 @@ import { tree, findNodeById } from "vue3-tree";
 import { inject, reactive, ref } from "vue";
 import type { BehaviorController } from "../../application/behaviors";
 import { BEHAVIOR_CONTROLLER_KEY } from "../../application/behaviors";
-import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import type { Treenode } from "vue3-tree";
 import "vue3-tree/style.css";
 
@@ -61,10 +58,6 @@ class TaskTreenode implements Treenode<Task> {
 // }>({
 //     signInStatus: null
 // });
-
-if (stores.user.signInStatus === null && stores.shared.user === null) {
-  dispatch({ scene: Boot.userOpensSite } as BootScenario);
-}
 
 const state = reactive<{
   donedleTree: TaskTreenode;

@@ -9,13 +9,14 @@ export const enum SignInStatus {
     , signingIn = "signingIn"
     , signOut = "signOut"
     , signingOut = "signingOut"
+    , unknown = "unknown"
 }
 
 export type SignInStatusContext = { kind: SignInStatus.signIn; user: User }
     | { kind: SignInStatus.signingIn }
     | { kind: SignInStatus.signOut }
     | { kind: SignInStatus.signingOut }
-;
+    ;
 
 export interface Authenticator {
     /**

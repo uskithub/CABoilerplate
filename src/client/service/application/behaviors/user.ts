@@ -7,7 +7,7 @@ import { SignedInUser } from "../actors/signedInUser";
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { inject, reactive } from "vue";
-import { Behavior, LocalStore, Mutable, SharedStore } from ".";
+import { Behavior, Store, Mutable, SharedStore } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Nobody, UserNotAuthorizedToInteractIn } from "robustive-ts";
@@ -20,7 +20,7 @@ import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 
 type ImmutableTask = Readonly<Task>;
 
-export interface UserStore extends LocalStore {
+export interface UserStore extends Store {
     readonly signInStatus: SignInStatus | null;
     readonly idInvalidMessage: string | string[] | null;
     readonly passwordInvalidMessage: string | string[] | null;
@@ -57,14 +57,16 @@ export function createUserBehavior(shared: SharedStore): UserBehavior {
         , signUp: (context: SignUpScenario) => {
             let subscription: Subscription | null = null;
             subscription = new SignUpUsecase(context)
-                .interactedBy(new Nobody())
+                .interactedBy(shared.actor)
                 .subscribe({
                     next: (performedScenario: SignUpScenario[]) => {
                         const lastSceneContext = performedScenario.slice(-1)[0];
                         if (!isSignUpGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                             case SignUp.goals.onSuccessInPublishingThenServicePresentsHomeView:
-                                _shared.user = lastSceneContext.user;
+                                const user = lastSceneContext.user;
+                                const actor = new SignedInUser(user);
+                                _shared.actor = actor;
                                 router.replace("/");
                                 break;
 
@@ -124,7 +126,7 @@ export function createUserBehavior(shared: SharedStore): UserBehavior {
             // _local.passwordInvalidMessage = null;
             let subscription: Subscription | null = null;
             subscription = new SignInUsecase(context)
-                .interactedBy(new Nobody())
+                .interactedBy(shared.actor)
                 .subscribe({
                     next: (performedScenario: SignInScenario[]) => {
                         const lastSceneContext = performedScenario.slice(-1)[0];
@@ -195,10 +197,9 @@ export function createUserBehavior(shared: SharedStore): UserBehavior {
                 });
         }
         , signOut: (context: SignOutScenario) => {
-            if (shared.user === null) { return; }
             let subscription: Subscription | null = null;
             subscription = new SignOutUsecase(context)
-                .interactedBy(new SignedInUser(shared.user))
+                .interactedBy(shared.actor)
                 .subscribe({
                     next: (performedScenario: SignOutScenario[]) => {
                         console.log("signOut:", performedScenario);
@@ -206,7 +207,7 @@ export function createUserBehavior(shared: SharedStore): UserBehavior {
                         if (!isSignOutGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                             case SignOut.goals.onSuccessThenServicePresentsSignInView:
-                                _shared.user = null;
+                                _shared.actor = new Nobody();
                                 break;
                             case SignOut.goals.onFailureThenServicePresentsError:
                                 console.log("SERVICE ERROR:", lastSceneContext.error);
