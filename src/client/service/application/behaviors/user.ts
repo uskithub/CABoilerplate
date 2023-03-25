@@ -22,9 +22,9 @@ type ImmutableTask = Readonly<Task>;
 
 export interface UserStore extends Store {
     readonly signInStatus: SignInStatus | null;
-    readonly idInvalidMessage: string | string[] | null;
-    readonly passwordInvalidMessage: string | string[] | null;
-    readonly signInFailureMessage: string | null;
+    readonly idInvalidMessage: string | string[] | undefined;
+    readonly passwordInvalidMessage: string | string[] | undefined;
+    readonly signInFailureMessage: string | undefined;
 
     readonly userTasks: ImmutableTask[];
 }
@@ -208,6 +208,7 @@ export function createUserBehavior(shared: SharedStore): UserBehavior {
                         switch (lastSceneContext.scene) {
                             case SignOut.goals.onSuccessThenServicePresentsSignInView:
                                 _shared.actor = new Nobody();
+                                _shared.signInStatus = SignInStatus.signOut;
                                 break;
                             case SignOut.goals.onFailureThenServicePresentsError:
                                 console.log("SERVICE ERROR:", lastSceneContext.error);

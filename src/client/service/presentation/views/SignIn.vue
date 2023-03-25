@@ -12,6 +12,8 @@ import { computed, inject, reactive } from "vue";
 import { useRouter } from "vue-router";
 import type { BehaviorController } from "../../application/behaviors";
 import { BEHAVIOR_CONTROLLER_KEY } from "../../application/behaviors";
+import { isSignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
@@ -26,7 +28,7 @@ const state = reactive<{
   , isValid: true
 });
 
-const isPresentDialog = computed(() => stores.shared.user !== null);
+const isPresentDialog = computed(() => stores.shared.signInStatus === SignInStatus.signIn);
 // const isFormValid = computed(() => state.email !== null && state.password !== null);
 
 </script>
