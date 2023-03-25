@@ -3,15 +3,15 @@ import { Boot, BootScenario, BootUsecase, isBootGoal, isBootScene } from "@useca
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
-import { inject, reactive } from "vue";
-import { Behavior, LocalStore, Mutable, SharedStore } from ".";
+import { inject } from "vue";
+import { Behavior, Mutable, SharedStore } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { Nobody, UserNotAuthorizedToInteractIn } from "robustive-ts";
+import { UserNotAuthorizedToInteractIn } from "robustive-ts";
 import { Task } from "@/shared/service/domain/models/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
-import { SignedInUser } from "../actors/signedInUser";
+import { SignedInUser } from "../../../../shared/service/application/actors/signedInUser";
 
 
 export interface ApplicationBehavior extends Behavior<SharedStore> {

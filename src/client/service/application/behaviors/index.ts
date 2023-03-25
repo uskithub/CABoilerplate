@@ -9,8 +9,7 @@ import { isSignInScene } from "@/shared/service/application/usecases/signIn";
 import { isSignOutScene } from "@/shared/service/application/usecases/signOut";
 import { Usecases } from "@/shared/service/application/usecases";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
-import { SignedInUser } from "../actors/signedInUser";
-import { Actor } from "../actors";
+import { Actor } from "@/shared/service/application/actors";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];

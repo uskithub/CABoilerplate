@@ -6,11 +6,12 @@ import { SignOutUsecase } from "../../application/usecases/signOut";
 import { SignUpUsecase } from "../../application/usecases/signUp";
 import { SignInStatusContext } from "../interfaces/authenticator";
 
-import { SignedInUser } from "@/client/service/application/actors/signedInUser";
+import { isSignedInUser, SignedInUser } from "@/shared/service/application/actors/signedInUser";
 // import { Usecase, Nobody, Actor } from "robustive-ts";
 import { Observable } from "rxjs";
-import { Actor, Usecase } from "robustive-ts";
+import { Usecase } from "robustive-ts";
 import { isNobody } from "robustive-ts";
+import { Actor } from "../../application/actors";
 
 
 export default {
@@ -18,23 +19,20 @@ export default {
         return dependencies.auth.signInStatus();
     }
 
-    , authorize: <T extends Actor<T>, Context, U extends Usecase<Context>>(actor: T, usecase: U): boolean => {
-
-        const isSignedInUser = (actor: any): actor is SignedInUser => actor.constructor === SignedInUser;
-
+    , authorize: <Context, U extends Usecase<Context>>(actor: Actor, usecase: U): boolean => {
         switch (usecase.constructor) {
-        case BootUsecase: {
-            return true;
-        }
-        case SignUpUsecase: {
-            return isNobody(actor);
-        }
-        case SignInUsecase: {
-            return isNobody(actor);
-        }
-        case SignOutUsecase: {
-            return isSignedInUser(actor);
-        }
+            case BootUsecase: {
+                return true;
+            }
+            case SignUpUsecase: {
+                return isNobody(actor);
+            }
+            case SignInUsecase: {
+                return isNobody(actor);
+            }
+            case SignOutUsecase: {
+                return isSignedInUser(actor);
+            }
         }
 
         const isBoot = (usecase: any): usecase is BootUsecase => usecase.constructor === BootUsecase;

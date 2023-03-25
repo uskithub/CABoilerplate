@@ -2,7 +2,7 @@
 import { Boot, BootScenario, BootUsecase, isBootGoal, isBootScene } from "@usecases/boot";
 import { isSignInGoal, isSignInScene, SignIn, SignInScenario, SignInUsecase } from "@/shared/service/application/usecases/signIn";
 import { isSignOutGoal, SignOut, SignOutScenario, SignOutUsecase } from "@/shared/service/application/usecases/signOut";
-import { SignedInUser } from "../actors/signedInUser";
+import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
