@@ -21,10 +21,14 @@
     "rxjs": "^7.5.5",
     "vue": "^3.2.45",
     "vue-router": "4.0.15",
-    "vuetify": "^v3.0.5",
+    "vuetify": "^v3.1.11",
     "webfontloader": "^1.0.0"
   },
   "devDependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.3.0",
+    "@fortawesome/free-regular-svg-icons": "^6.3.0",
+    "@fortawesome/free-solid-svg-icons": "^6.3.0",
+    "@fortawesome/vue-fontawesome": "^3.0.3",
     "@mdi/font": "^7.1.96",
     "@prettier/plugin-pug": "^2.0.0",
     "@types/express": "^4.17.13",
