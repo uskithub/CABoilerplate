@@ -5,6 +5,7 @@ import TaskModel from "@/shared/service/domain/models/task";
 
 // view
 import { tree, findNodeById } from "vue3-tree";
+import drawer from "../components/drawer.vue";
 
 // system
 import { inject, reactive, ref } from "vue";
@@ -17,6 +18,8 @@ import "vue3-tree/style.css";
 import donedleTree from "../../../../../test/stubs/donedle";
 import swtTree from "../../../../../test/stubs/swt";
 import taskTree from "../../../../../test/stubs/task";
+import { DrawerContentType } from "../components/drawer";
+import type { DrawerItem } from "../components/drawer";
 
 const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
 
@@ -59,12 +62,23 @@ class TaskTreenode implements Treenode<Task> {
 //     signInStatus: null
 // });
 
+const items: Array<DrawerItem> = [
+  { type: DrawerContentType.header, title: "Menu1" } as DrawerItem
+  , { type: DrawerContentType.link, title: "link1", href: "/link1" } as DrawerItem
+  , { type: DrawerContentType.divider } as DrawerItem
+  , { type: DrawerContentType.header, title: "Menu2" } as DrawerItem
+  , { type: DrawerContentType.link, title: "link2", href: "/link2" } as DrawerItem
+  , { type: DrawerContentType.link, title: "link3", href: "/link3" } as DrawerItem
+];
+
 const state = reactive<{
+  isDrawerOpen: boolean;
   donedleTree: TaskTreenode;
   swtTree: TaskTreenode;
   isEditing: boolean;
 }>({
-  donedleTree: new TaskTreenode(donedleTree as Task)
+  isDrawerOpen: true
+  , donedleTree: new TaskTreenode(donedleTree as Task)
   // TODO: TaskTreenodeでの表示。JSON.stringifyを使ったdeepCopyではgetterはコピーされないのでsubtreesが見つからないで落ちる
   // , swtTree: new TaskTreenode(taskTree as Task)
   , swtTree: new TaskTreenode(swtTree as Task)
@@ -166,92 +180,97 @@ const onToggleEditing = (id: string, isEditing: boolean) => {
 
 <template lang="pug">
 v-container
-  //- div [{{ user.store.signInStatus }}]
-  //- div [{{ shared.user?.mailAddress }}]
-  //- template(v-if="user.store.signInStatus === null")
-  //-   v-progress-circular(:size="70", :width="7", color="purple", indeterminate)
-  //- template(v-else-if="user.store.signInStatus === SignInStatus.signOut")
-  //-   h1 Home {{ shared.user?.mailAddress }}
-  //-   ul
-  //-     li
-  //-       router-link(to="/signin") -> SignIn
-  //-     li
-  //-       router-link(to="/signup") -> SignUp
-  //- template(v-else)
-  //-   ul
-  //-     li(v-for="task in user.store.userTasks", :key="task.id")
-  //-       | {{ task.title }}
-  //- br
-  tree(
-    :node="state.donedleTree"
-    @arrange="onArrange1"
-    @toggle-folding="onToggleFolding1"
-    @update-node="onUpdateName1"
-  )
-    template(v-slot="slotProps")
-      input(
-        v-if="slotProps.isEditing"
-        v-model="slotProps.node.name"
-        v-focus
-        @blur="() => { if (slotProps.endEditing) slotProps.endEditing(slotProps.node.name); }"
-      )
-      template(v-else-if="slotProps.depth===0")
-        span.header {{ slotProps.node.name }}
-        v-icon(
-          v-show="slotProps.isHovering" 
-          icon="mdi:mdi-export-variant"
-          @click.prevent="onClickExport($event, slotProps.node)"
+  drawer(:isOpen="state.isDrawerOpen", :items="items")
+  v-app-bar
+    v-app-bar-nav-icon(@click="state.isDrawerOpen = !state.isDrawerOpen")
+    v-toolbar-title Application
+  v-main
+    //- div [{{ user.store.signInStatus }}]
+    //- div [{{ shared.user?.mailAddress }}]
+    //- template(v-if="user.store.signInStatus === null")
+    //-   v-progress-circular(:size="70", :width="7", color="purple", indeterminate)
+    //- template(v-else-if="user.store.signInStatus === SignInStatus.signOut")
+    //-   h1 Home {{ shared.user?.mailAddress }}
+    //-   ul
+    //-     li
+    //-       router-link(to="/signin") -> SignIn
+    //-     li
+    //-       router-link(to="/signup") -> SignUp
+    //- template(v-else)
+    //-   ul
+    //-     li(v-for="task in user.store.userTasks", :key="task.id")
+    //-       | {{ task.title }}
+    //- br
+    tree(
+      :node="state.donedleTree"
+      @arrange="onArrange1"
+      @toggle-folding="onToggleFolding1"
+      @update-node="onUpdateName1"
+    )
+      template(v-slot="slotProps")
+        input(
+          v-if="slotProps.isEditing"
+          v-model="slotProps.node.name"
+          v-focus
+          @blur="() => { if (slotProps.endEditing) slotProps.endEditing(slotProps.node.name); }"
         )
-      span.title(v-else) {{ slotProps.node.name }}
-  br
-  tree(
-    :node="state.swtTree"
-    @arrange="onArrange2"
-    @toggle-folding="onToggleFolding2"
-    @update-node="onUpdateName2"
-    @toggle-editing="onToggleEditing"
-  )
-    template(v-slot="slotProps")
-      v-dialog(v-model="slotProps.isEditing" persistent)
-        v-card
-          v-card-text
-            v-container
-              v-row
-                v-col(cols="12" sm="8")
-                  v-text-field(v-model="slotProps.node.name" label="Task Name" required autofocus)
-                v-col(cols="12" sm="4")
-                  v-select(
-                    v-model="slotProps.node.type"
-                    :items="TaskModel.getAvailableTaskTypes(slotProps.node, slotProps.parent)"
-                    label="TaskType"
-                    required
-                  )
-            small *indicates required field
-          v-card-actions
-            v-container
-              v-row
-                v-col(cols="12" sm="6")
-                  v-btn(
-                    color="blue-darken-1"
-                    variant="text"
-                    block
-                    @click="() => slotProps.endEditing(false)"
-                  ) Cancel
-                v-col(cols="12" sm="6")
-                  v-btn(
-                    color="blue-darken-1"
-                    variant="text"
-                    block
-                    @click="() => slotProps.endEditing(true, slotProps.node)"
-                  ) Save
-      template(v-if="slotProps.depth === 0")
-        span.header {{ slotProps.node.name }}
-        v-icon(
-          v-show="slotProps.isHovering" 
-          icon="mdi:mdi-export-variant"
-          @click.prevent="onClickExport($event, slotProps.node)"
-        )
-      span.title(v-else) {{ slotProps.node.name }}
+        template(v-else-if="slotProps.depth===0")
+          span.header {{ slotProps.node.name }}
+          v-icon(
+            v-show="slotProps.isHovering" 
+            icon="mdi:mdi-export-variant"
+            @click.prevent="onClickExport($event, slotProps.node)"
+          )
+        span.title(v-else) {{ slotProps.node.name }}
+    br
+    tree(
+      :node="state.swtTree"
+      @arrange="onArrange2"
+      @toggle-folding="onToggleFolding2"
+      @update-node="onUpdateName2"
+      @toggle-editing="onToggleEditing"
+    )
+      template(v-slot="slotProps")
+        v-dialog(v-model="slotProps.isEditing" persistent)
+          v-card
+            v-card-text
+              v-container
+                v-row
+                  v-col(cols="12" sm="8")
+                    v-text-field(v-model="slotProps.node.name" label="Task Name" required autofocus)
+                  v-col(cols="12" sm="4")
+                    v-select(
+                      v-model="slotProps.node.type"
+                      :items="TaskModel.getAvailableTaskTypes(slotProps.node, slotProps.parent)"
+                      label="TaskType"
+                      required
+                    )
+              small *indicates required field
+            v-card-actions
+              v-container
+                v-row
+                  v-col(cols="12" sm="6")
+                    v-btn(
+                      color="blue-darken-1"
+                      variant="text"
+                      block
+                      @click="() => slotProps.endEditing(false)"
+                    ) Cancel
+                  v-col(cols="12" sm="6")
+                    v-btn(
+                      color="blue-darken-1"
+                      variant="text"
+                      block
+                      @click="() => slotProps.endEditing(true, slotProps.node)"
+                    ) Save
+        template(v-if="slotProps.depth === 0")
+          span.header {{ slotProps.node.name }}
+          v-icon(
+            v-show="slotProps.isHovering" 
+            icon="mdi:mdi-export-variant"
+            @click.prevent="onClickExport($event, slotProps.node)"
+          )
+        span.title(v-else) {{ slotProps.node.name }}
 </template>
 
 <style lang="sass" scoped>
