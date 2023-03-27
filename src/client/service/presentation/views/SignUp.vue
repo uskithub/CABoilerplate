@@ -1,9 +1,7 @@
 <script setup lang="ts">
 // service
-import { SignUp } from "@/shared/service/application/usecases/signUp";
-import type { SignUpScenario } from "@/shared/service/application/usecases/signUp";
-import { SignOut } from "@/shared/service/application/usecases/signOut";
-import type { SignOutScenario } from "@/shared/service/application/usecases/signOut";
+import { SignUp } from "@usecases/nobody/signUp";
+import { SignOut } from "@usecases/signedInUser/signOut";
 
 // system
 import { computed, inject, reactive } from "vue";
@@ -11,6 +9,7 @@ import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
 import { BEHAVIOR_CONTROLLER_KEY } from "../../application/behaviors";
 import type { BehaviorController } from "../../application/behaviors";
+import { isSignedInUser } from "@shared/service/application/actors/signedInUser";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
@@ -23,7 +22,7 @@ const state = reactive<{
   , password: null
 });
 
-const isPresentDialog = computed(() => stores.shared.user !== null);
+const isPresentDialog = computed(() => isSignedInUser(stores.shared.actor));
 const isFormValid = computed(() => state.email !== null && state.password !== null);
 
 </script>

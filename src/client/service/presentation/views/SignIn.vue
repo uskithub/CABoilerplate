@@ -1,19 +1,15 @@
 <script setup lang="ts">
 // service
-import { SignIn } from "@/shared/service/application/usecases/signIn";
-import type { SignInScenario } from "@/shared/service/application/usecases/signIn";
-import { SignOut } from "@/shared/service/application/usecases/signOut";
-import type { SignOutScenario } from "@/shared/service/application/usecases/signOut";
+import { SignIn } from "@usecases/nobody/signIn";
+import { SignOut } from "@usecases/signedInUser/signOut";
 
 // system
 import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
 import { computed, inject, reactive } from "vue";
-import { useRouter } from "vue-router";
 import type { BehaviorController } from "../../application/behaviors";
 import { BEHAVIOR_CONTROLLER_KEY } from "../../application/behaviors";
-import { isSignedInUser } from "@/shared/service/application/actors/signedInUser";
-import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
+import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;

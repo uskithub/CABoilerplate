@@ -1,105 +1,62 @@
 // service
-import { Boot, BootScenario, BootUsecase, isBootGoal, isBootScene } from "@usecases/boot";
+import { Boot, BootScenario, BootUsecase, isBootGoal, isBootScene } from "@usecases/nobody/boot";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
-import { inject } from "vue";
-import { Behavior, Mutable, SharedStore } from ".";
+import { inject, reactive } from "vue";
+import { Behavior, BehaviorController, BEHAVIOR_CONTROLLER_KEY, Mutable, SharedStore, Store } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { UserNotAuthorizedToInteractIn } from "robustive-ts";
+import { ActorNotAuthorizedToInteractIn } from "robustive-ts";
 import { Task } from "@/shared/service/domain/models/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
-import { SignedInUser } from "../../../../shared/service/application/actors/signedInUser";
+import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { ObservingUsersTasks } from "@usecases/service/observingUsersTasks";
 
 
-export interface ApplicationBehavior extends Behavior<SharedStore> {
-    readonly store: SharedStore;
+export interface ApplicationStore extends Store {}
+export interface ApplicationBehavior extends Behavior<ApplicationStore> {
+    readonly store: ApplicationStore;
     boot: (context: BootScenario) => void;
 }
 
-export function createApplicationBehavior(shared: SharedStore): ApplicationBehavior {
+export function createApplicationBehavior(controller: BehaviorController): ApplicationBehavior {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
 
-    const _shared = shared as Mutable<SharedStore>;
+    const store = reactive<ApplicationStore>({
+    });
 
     return {
-        store: shared
+        store
         , boot: (context: BootScenario) => {
-            let subscription: Subscription | null = null;
+            const _shared = controller.stores.shared as Mutable<SharedStore>;
+            let subscription: Subscription;
             subscription = new BootUsecase(context)
-                .interactedBy(shared.actor)
+                .interactedBy(controller.stores.shared.actor)
                 .subscribe({
                     next: (performedScenario: BootScenario[]) => {
-                        // bootはタスクの監視が後ろにくっ付くので complete が呼ばれないためここで計測する
-                        const executingUsecase = _shared.executingUsecase;
-                        if (executingUsecase && isBootScene(executingUsecase.executing)) {
-                            const elapsedTime = (new Date().getTime() - executingUsecase.startAt.getTime());
-                            _shared.executingUsecase = null;
-                            console.info(`The BootScenerio takes ${elapsedTime} ms.`);
-                        }
                         console.log("boot:", performedScenario);
                         const lastSceneContext = performedScenario.slice(-1)[0];
                         if (!isBootGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
-                            case Boot.goals.servicePresentsHome:
+                            case Boot.goals.sessionExistsThenServicePresentsHome:
                                 const user = { ...lastSceneContext.user };
                                 const actor = new SignedInUser(user);
                                 _shared.actor = actor;
                                 _shared.signInStatus = SignInStatus.signIn;
                                 console.log("hhhh", _shared.actor, _shared.signInStatus);
+                                controller.dispatch({ scene: ObservingUsersTasks.serviceDetectsSigningIn, user });
                                 break;
                             case Boot.goals.sessionNotExistsThenServicePresentsSignin:
                                 _shared.signInStatus = SignInStatus.signOut;
                                 router.replace("/signin");
                                 break;
-                            case Boot.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList:
-                                // let mutableUserTasks = _store.userTasks as Task[];
-                                // lastSceneContext.changedTasks.forEach(changedTask => {
-                                //     switch (changedTask.kind) {
-                                //         case ItemChangeType.added: {
-                                //             // hot reloadで増えてしまうので、同じものを予め削除しておく
-                                //             for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                //                 if (mutableUserTasks[i].id === changedTask.id) {
-                                //                     mutableUserTasks.splice(i, 0);
-                                //                     break;
-                                //                 }
-                                //             }
-                                //             mutableUserTasks.unshift(changedTask.item);
-                                //             break;
-                                //         }
-                                //         case ItemChangeType.modified: {
-                                //             // doingかどうかを調べ、そうなら更新する
-                                //             // if (self.#stores.currentUser._doingTask && self.#stores.currentUser._doingTask.id === changedTask.id) {
-                                //             //     self.#stores.currentUser._doingTask = changedTask.item;
-                                //             // }
-                                //             for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                //                 if (mutableUserTasks[i].id === changedTask.id) {
-                                //                     mutableUserTasks.splice(i, 1, changedTask.item);
-                                //                     break;
-                                //                 }
-                                //             }
-                                //             break;
-                                //         }
-                                //         case ItemChangeType.removed: {
-                                //             for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                //                 if (mutableUserTasks[i].id === changedTask.id) {
-                                //                     mutableUserTasks.splice(i, 0);
-                                //                     break;
-                                //                 }
-                                //             }
-                                //             break;
-                                //         }
-                                //     }
-                                // });
-                                // console.log("user's tasks: ", _store.userTasks);
-                                console.log("user's tasks: ");
                         }
                     }
                     , error: (e) => {
-                        if (e instanceof UserNotAuthorizedToInteractIn) {
+                        if (e instanceof ActorNotAuthorizedToInteractIn) {
                             console.error(e);
                         } else {
                             console.error(e);
@@ -114,7 +71,7 @@ export function createApplicationBehavior(shared: SharedStore): ApplicationBehav
                         } else {
                             console.info("complete");
                         }
-                        subscription?.unsubscribe();
+                        subscription.unsubscribe();
                     }
                 });
         }

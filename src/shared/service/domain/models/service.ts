@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dependencies from "../dependencies";
-import { Boot, BootUsecase } from "../../application/usecases/boot";
-import { SignInUsecase } from "../../application/usecases/signIn";
-import { SignOutUsecase } from "../../application/usecases/signOut";
-import { SignUpUsecase } from "../../application/usecases/signUp";
+import { Boot, BootUsecase } from "../../application/usecases/nobody/boot";
+import { SignInUsecase } from "../../application/usecases/nobody/signIn";
+import { SignOutUsecase } from "../../application/usecases/signedInUser/signOut";
+import { SignUpUsecase } from "../../application/usecases/nobody/signUp";
 import { SignInStatusContext } from "../interfaces/authenticator";
 
 import { isSignedInUser, SignedInUser } from "@/shared/service/application/actors/signedInUser";
 // import { Usecase, Nobody, Actor } from "robustive-ts";
 import { Observable } from "rxjs";
-import { Usecase } from "robustive-ts";
-import { isNobody } from "robustive-ts";
+import { Usecase, isNobody, IContext } from "robustive-ts";
 import { Actor } from "../../application/actors";
+import { ObservingUsersTasksUsecase } from "../../application/usecases/service/observingUsersTasks";
+import { isService } from "../../application/actors/service";
 
 
 export default {
@@ -19,8 +20,9 @@ export default {
         return dependencies.auth.signInStatus();
     }
 
-    , authorize: <Context, U extends Usecase<Context>>(actor: Actor, usecase: U): boolean => {
+    , authorize: <Context extends IContext, U extends Usecase<Context>>(actor: Actor, usecase: U): boolean => {
         switch (usecase.constructor) {
+            /* Nobody */
             case BootUsecase: {
                 return true;
             }
@@ -30,8 +32,15 @@ export default {
             case SignInUsecase: {
                 return isNobody(actor);
             }
+
+            /* SignedInUser */
             case SignOutUsecase: {
                 return isSignedInUser(actor);
+            }
+
+            /* Service */
+            case ObservingUsersTasksUsecase: {
+                return isService(actor);
             }
         }
 
