@@ -14,31 +14,39 @@ const t = inject(DICTIONARY_KEY) as Dictionary;
 const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
 
 const props = defineProps<{
-  isOpen: boolean
+  modelValue: boolean
   , items: Array<DrawerItem>
+}>();
+
+const emits = defineEmits<{
+  (e: "update:modelValue", isOpen: boolean): void
 }>();
 
 const state = reactive<{
   isOpen: boolean;
 }>({
-  isOpen: props.isOpen
+  isOpen: props.modelValue
 });
 
-watch(() => props.isOpen, (newVal: boolean) => {
+watch(() => props.modelValue, (newVal: boolean) => {
   state.isOpen = newVal;
 });
 
 </script>
 
 <template lang="pug">
-v-navigation-drawer(v-model="state.isOpen")
-  v-list(dense)
-    template(v-for="item in props.items")
-      v-layoutv-list-subheader(
-        v-if="item.type === DrawerContentType.header"
-      ) {{ item.title }}
+v-navigation-drawer(v-model="state.isOpen" 
+  @update:model-value="emits('update:modelValue', state.isOpen)")
+  v-list(nav)
+    template(v-for="(item, idx) in props.items")
+      v-list-subheader(v-if="item.type === DrawerContentType.header") {{ item.title }}
       v-divider(v-else-if="item.type === DrawerContentType.divider")
-      router-link(v-else :to="item.href" :key="item.title")
-        v-list-tile-content
-          v-list-tile-title {{ item.title }}
+      v-list-item(v-else 
+        :key="idx"
+        :value="item"
+        :to="item.href"
+        active-color="primary"
+        rounded="xl"
+      )
+        v-list-item-title(v-text="item.title")  
 </template>
