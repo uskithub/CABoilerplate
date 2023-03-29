@@ -1,17 +1,8 @@
 <script setup lang="ts">
-// service
-
 // system
-import { DICTIONARY_KEY } from "@shared/system/localizations";
-import type { Dictionary } from "@shared/system/localizations";
 import { computed, inject, reactive, watch } from "vue";
-import type { BehaviorController } from "../../application/behaviors";
-import { BEHAVIOR_CONTROLLER_KEY } from "../../application/behaviors";
-import { DrawerContentType } from "./drawer";
-import type { DrawerItem } from "./drawer";
-
-const t = inject(DICTIONARY_KEY) as Dictionary;
-const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
+import { DrawerContentType } from ".";
+import type { DrawerItem } from ".";
 
 const props = defineProps<{
   modelValue: boolean

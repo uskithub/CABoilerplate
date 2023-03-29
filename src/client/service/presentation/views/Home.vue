@@ -2,7 +2,9 @@
 // service
 
 // view
-import drawer from "../components/drawer.vue";
+import drawer from "../components/drawer/drawer.vue";
+import { DrawerContentType } from "../components/drawer";
+import type { DrawerItem } from "../components/drawer";
 
 // system
 import { inject, reactive, ref } from "vue";
@@ -10,8 +12,7 @@ import type { BehaviorController } from "../../application/behaviors";
 import { BEHAVIOR_CONTROLLER_KEY } from "../../application/behaviors";
 import "vue3-tree/style.css";
 
-import { DrawerContentType } from "../components/drawer";
-import type { DrawerItem } from "../components/drawer";
+
 
 const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
 

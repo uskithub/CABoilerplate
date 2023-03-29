@@ -13,6 +13,9 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
 import { far } from "@fortawesome/free-regular-svg-icons";
 // import { fas } from "@fortawesome/free-solid-svg-icons"
 
+// labs
+import { VDataTable } from "vuetify/labs/VDataTable";
+
 import { App } from "vue";
 
 library.add(far) // Include needed icons
@@ -20,7 +23,10 @@ library.add(far) // Include needed icons
 
 const vuetify = createVuetify({
   // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
-  components
+  components : {
+    ...components
+    , VDataTable
+  }
   , directives
   , icons: {
     defaultSet: "mdi"
