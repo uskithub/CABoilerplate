@@ -2,14 +2,12 @@
 // service
 
 // view
-import { tree, findNodeById } from "vue3-tree";
 import drawer from "../components/drawer.vue";
 
 // system
 import { inject, reactive, ref } from "vue";
 import type { BehaviorController } from "../../application/behaviors";
 import { BEHAVIOR_CONTROLLER_KEY } from "../../application/behaviors";
-import type { Treenode } from "vue3-tree";
 import "vue3-tree/style.css";
 
 import { DrawerContentType } from "../components/drawer";
@@ -41,13 +39,12 @@ const state = reactive<{
 </script>
 
 <template lang="pug">
-v-container
-  drawer(v-model="state.isDrawerOpen", :items="items")
-  v-app-bar
-    v-app-bar-nav-icon(@click="state.isDrawerOpen = !state.isDrawerOpen")
-    v-toolbar-title Application
-  v-main
-    router-view
+drawer(v-model="state.isDrawerOpen", :items="items")
+v-app-bar
+  v-app-bar-nav-icon(@click="state.isDrawerOpen = !state.isDrawerOpen")
+  v-toolbar-title Application
+v-main
+  router-view
 </template>
 
 <style lang="sass" scoped></style>

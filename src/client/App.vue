@@ -17,17 +17,6 @@ if (stores.shared.signInStatus === SignInStatus.unknown) {
 </script>
 
 <template lang="pug">
-v-app
-  v-main
-    router-view
+v-app(id="inspire")
+  router-view
 </template>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>

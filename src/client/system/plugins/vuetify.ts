@@ -15,29 +15,34 @@ import { far } from "@fortawesome/free-regular-svg-icons";
 
 import { App } from "vue";
 
-export function loadVuetify(app: App<Element>) {
+library.add(far) // Include needed icons
+// library.add(fas) // Include needed icons
 
-  app.component('font-awesome-icon', FontAwesomeIcon) // Register component globally
-  library.add(far) // Include needed icons
-  // library.add(fas) // Include needed icons
-
-  const vuetify = createVuetify(
-    // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
-    {
-      components,
-      directives,
-      icons: {
-        defaultSet: "mdi",
-        aliases,
-        sets: {
-          mdi,
-          fa,
-        }
-      },
+const vuetify = createVuetify({
+  // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
+  components
+  , directives
+  , icons: {
+    defaultSet: "mdi"
+    , aliases
+    , sets: {
+      mdi
+      , fa
     }
-  );
+  }
+  , theme: {
+    themes: {
+      light: {
+        colors: {
+          primary: "#1867C0"
+          , secondary: "#5CBBF6"
+        }
+      }
+    }
+  }
+});
 
+export function loadVuetify(app: App<Element>) {
+  app.component("font-awesome-icon", FontAwesomeIcon) // Register component globally
   app.use(vuetify);
-}
-
-
+};
