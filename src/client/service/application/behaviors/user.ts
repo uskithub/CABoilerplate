@@ -211,7 +211,7 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                         if (!isSignOutGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                             case SignOut.goals.onSuccessThenServicePresentsSignInView:
-                                _shared.actor = new Nobody();
+                                controller.change(new Nobody());
                                 _shared.signInStatus = SignInStatus.signOut;
                                 break;
                             case SignOut.goals.onFailureThenServicePresentsError:

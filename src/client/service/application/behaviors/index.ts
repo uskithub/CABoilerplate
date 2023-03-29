@@ -35,6 +35,7 @@ type Stores = {
 
 export type BehaviorController = {
     stores: Stores;
+    change: (actor: Actor) => void;
     dispatch: <T extends Record<keyof any, Empty>, S extends UsecaseScenario<T>>(context: S) => void;
     // accountViewModel: (shared: SharedStore) => HomeViewModel;
     // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
@@ -56,6 +57,10 @@ export function createBehaviorController(): BehaviorController {
         stores: {
             shared
             , user: {} as UserStore
+        }
+        , change(actor: Actor) {
+            const _shared = shared as Mutable<SharedStore>;
+            _shared.actor = actor;
         }
         , dispatch(context) {}
     } as BehaviorController;

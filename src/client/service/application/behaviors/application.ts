@@ -44,7 +44,7 @@ export function createApplicationBehavior(controller: BehaviorController): Appli
                             case Boot.goals.sessionExistsThenServicePresentsHome:
                                 const user = { ...lastSceneContext.user };
                                 const actor = new SignedInUser(user);
-                                _shared.actor = actor;
+                                controller.change(actor);
                                 _shared.signInStatus = SignInStatus.signIn;
                                 console.log("hhhh", _shared.actor, _shared.signInStatus);
                                 controller.dispatch({ scene: ObservingUsersTasks.serviceDetectsSigningIn, user });
