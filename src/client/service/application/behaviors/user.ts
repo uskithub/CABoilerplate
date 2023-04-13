@@ -58,12 +58,10 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
         store
         , signUp: (context: SignUpScenario, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription;
+            let subscription: Subscription | null = null;
             subscription = new SignUpUsecase(context)
-                .interactedBy(actor)
-                .subscribe({
-                    next: (performedScenario: SignUpScenario[]) => {
-                        const lastSceneContext = performedScenario.slice(-1)[0];
+                .interactedBy(actor, {
+                    next: ([ lastSceneContext, performedScenario]) => {
                         if (!isSignUpGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                             case SignUp.goals.onSuccessInPublishingThenServicePresentsHomeView:
@@ -111,29 +109,15 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                                 break;
                         }
                     }
-                    , error: (e) => {
-                        if (e instanceof ActorNotAuthorizedToInteractIn) {
-                            console.error(e);
-                        } else {
-                            console.error(e);
-                        }
-                    }
-                    , complete: () => {
-                        console.info("complete");
-                        subscription.unsubscribe();
-                    }
+                    , complete: controller.commonCompletionProcess
                 });
         }
         , signIn: (context: SignInScenario, actor: Actor) => {
-            // _local.idInvalidMessage = null;
-            // _local.passwordInvalidMessage = null;
             const _shared = controller.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription;
+            let subscription: Subscription | null = null;
             subscription = new SignInUsecase(context)
-                .interactedBy(actor)
-                .subscribe({
-                    next: (performedScenario: SignInScenario[]) => {
-                        const lastSceneContext = performedScenario.slice(-1)[0];
+                .interactedBy(actor, {
+                    next: ([lastSceneContext, performedScenario]) => {
                         if (!isSignInGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                             case SignIn.goals.onSuccessInSigningInThenServicePresentsHomeView:
@@ -181,34 +165,17 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                         }
                     }
                     , error: (e) => {
-                        if (e instanceof ActorNotAuthorizedToInteractIn) {
-                            console.error(e);
-                        } else {
-                            console.error(e);
-                        }
                         _store.signInFailureMessage = e.message;
                     }
-                    , complete: () => {
-                        const executingUsecase = _shared.executingUsecase;
-                        if (executingUsecase && isSignInScene(executingUsecase.executing)) {
-                            const elapsedTime = (new Date().getTime() - executingUsecase.startAt.getTime());
-                            _shared.executingUsecase = null;
-                            console.log(`The SignInScenerio takes ${elapsedTime} ms.`);
-                        }
-                        console.info("complete");
-                        subscription.unsubscribe();
-                    }
+                    , complete: controller.commonCompletionProcess
                 });
         }
         , signOut: (context: SignOutScenario, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription;
+            let subscription: Subscription | null = null;
             subscription = new SignOutUsecase(context)
-                .interactedBy(actor)
-                .subscribe({
-                    next: (performedScenario: SignOutScenario[]) => {
-                        console.log("signOut:", performedScenario);
-                        const lastSceneContext = performedScenario.slice(-1)[0];
+                .interactedBy(actor, {
+                    next: ([lastSceneContext, performedScenario]) => {
                         if (!isSignOutGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                             case SignOut.goals.onSuccessThenServicePresentsSignInView:
@@ -222,35 +189,15 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                                 router.replace("/");
                         }
                     }
-                    , error: (e) => {
-                        if (e instanceof UserNotAuthorizedToInteractIn) {
-                            console.error(e);
-                        } else {
-                            console.error(e);
-                        }
-                    }
-                    , complete: () => {
-                        console.info("complete");
-                        subscription.unsubscribe();
-                    }
+                    , complete: controller.commonCompletionProcess
                 });
         }
         , observingUsersTasks: (context: ObservingUsersTasksScenario, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription;
+            let subscription: Subscription | null = null;
             subscription = new ObservingUsersTasksUsecase(context)
-                .interactedBy(actor)
-                .subscribe({
-                    next: (performedScenario: ObservingUsersTasksScenario[]) => {
-                        // observingUsersTasks はタスクの監視が後ろにくっ付くので complete が呼ばれないためここで計測する
-                        const executingUsecase = _shared.executingUsecase;
-                        if (executingUsecase && isObservingUsersTasksScene(executingUsecase.executing)) {
-                            const elapsedTime = (new Date().getTime() - executingUsecase.startAt.getTime());
-                            _shared.executingUsecase = null;
-                            console.info(`The ObservingUsersTasksScenario takes ${elapsedTime} ms.`);
-                        }
-                        console.log("observingUsersTasks:", performedScenario);
-                        const lastSceneContext = performedScenario.slice(-1)[0];
+                .interactedBy(actor, {
+                    next: ([lastSceneContext, performedScenario]) => {
                         if (!isObservingUsersTasksGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                             case ObservingUsersTasks.goals.serviceDoNothing:
@@ -297,24 +244,6 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                                 });
                                 console.log("user's tasks: ", _store.userTasks);
                         }
-                    }
-                    , error: (e) => {
-                        if (e instanceof ActorNotAuthorizedToInteractIn) {
-                            console.error(e);
-                        } else {
-                            console.error(e);
-                        }
-                    }
-                    , complete: () => {
-                        const executingUsecase = _shared.executingUsecase;
-                        if (executingUsecase && executingUsecase instanceof BootUsecase) {
-                            const elapsedTime = (new Date().getTime() - executingUsecase.startAt.getTime());
-                            _shared.executingUsecase = null;
-                            console.info(`complete - BootUsecase takes ${elapsedTime} ms`);
-                        } else {
-                            console.info("complete");
-                        }
-                        subscription.unsubscribe();
                     }
                 });
         }

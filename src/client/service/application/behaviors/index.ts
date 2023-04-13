@@ -37,6 +37,7 @@ type Stores = {
 export type BehaviorController = {
     stores: Stores;
     change: (actor: Actor) => void;
+    commonCompletionProcess: () => void;
     dispatch: <T extends Record<keyof any, Empty>, S extends UsecaseScenario<T>>(context: S) => void;
     // accountViewModel: (shared: SharedStore) => HomeViewModel;
     // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
@@ -63,6 +64,10 @@ export function createBehaviorController(): BehaviorController {
             const _shared = shared as Mutable<SharedStore>;
             _shared.actor = actor;
         }
+        , commonCompletionProcess: () => {
+            const _shared = shared as Mutable<SharedStore>;
+            _shared.executingUsecase = null;
+        }
         , dispatch(context) {}
     } as BehaviorController;
 
@@ -76,11 +81,12 @@ export function createBehaviorController(): BehaviorController {
     controller.dispatch = (context) => {
         const _shared = shared as Mutable<SharedStore>;
         const actor = shared.actor;
+        
         /* Nobody */
         if (isBootScene(context)) {
             console.info("[DISPATCH] Boot:", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
-            behaviors.application.boot(context, actor);
+            behaviors.application.boot(context, actor, );
         } else if (isSignUpScene(context)) {
             console.info("[DISPATCH] SignUp", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
@@ -101,7 +107,8 @@ export function createBehaviorController(): BehaviorController {
         /* Service */
         else if (isObservingUsersTasksScene(context)) {
             console.info("[DISPATCH] ObservingUsersTasks:", context);
-            _shared.executingUsecase = { executing: context, startAt: new Date() };
+            // 観測し続けるのでステータス管理しない
+            // _shared.executingUsecase = { executing: context, startAt: new Date() };
             behaviors.user.observingUsersTasks(context, new Service());
         } else {
             throw new Error(`dispatch先が定義されていません: ${context.scene as string}`);

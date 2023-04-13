@@ -33,13 +33,10 @@ export function createApplicationBehavior(controller: BehaviorController): Appli
         store
         , boot: (context: BootScenario, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription;
+            let subscription: Subscription | null = null;
             subscription = new BootUsecase(context)
-                .interactedBy(actor)
-                .subscribe({
-                    next: (performedScenario: BootScenario[]) => {
-                        console.log("boot:", performedScenario);
-                        const lastSceneContext = performedScenario.slice(-1)[0];
+                .interactedBy(actor, {
+                    next: ([lastSceneContext, performedScenario]: [BootScenario, BootScenario[]]) => {
                         if (!isBootGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                             case Boot.goals.sessionExistsThenServicePresentsHome:
@@ -56,24 +53,7 @@ export function createApplicationBehavior(controller: BehaviorController): Appli
                                 break;
                         }
                     }
-                    , error: (e) => {
-                        if (e instanceof ActorNotAuthorizedToInteractIn) {
-                            console.error(e);
-                        } else {
-                            console.error(e);
-                        }
-                    }
-                    , complete: () => {
-                        const executingUsecase = _shared.executingUsecase;
-                        if (executingUsecase && executingUsecase instanceof BootUsecase) {
-                            const elapsedTime = (new Date().getTime() - executingUsecase.startAt.getTime());
-                            _shared.executingUsecase = null;
-                            console.info(`complete - BootUsecase takes ${elapsedTime} ms`);
-                        } else {
-                            console.info("complete");
-                        }
-                        subscription.unsubscribe();
-                    }
+                    , complete: controller.commonCompletionProcess
                 });
         }
     };
