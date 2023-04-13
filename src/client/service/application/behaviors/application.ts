@@ -45,7 +45,7 @@ export function createApplicationBehavior(controller: BehaviorController): Appli
                                 controller.change(actor);
                                 _shared.signInStatus = SignInStatus.signIn;
                                 console.log("hhhh", _shared.actor, _shared.signInStatus);
-                                controller.dispatch({ scene: ObservingUsersTasks.serviceDetectsSigningIn, user });
+                                // controller.dispatch({ scene: ObservingUsersTasks.serviceDetectsSigningIn, user });
                                 break;
                             case Boot.goals.sessionNotExistsThenServicePresentsSignin:
                                 _shared.signInStatus = SignInStatus.signOut;

@@ -13,6 +13,7 @@ import { Usecase, isNobody, IContext } from "robustive-ts";
 import { Actor } from "../../application/actors";
 import { ObservingUsersTasksUsecase } from "../../application/usecases/service/observingUsersTasks";
 import { isService } from "../../application/actors/service";
+import { GetWarrantyList, GetWarrantyListUsecase } from "../../application/usecases/signedInUser/getWarrantyList";
 
 
 export default {
@@ -31,6 +32,9 @@ export default {
             }
             case SignInUsecase: {
                 return isNobody(actor);
+            }
+            case GetWarrantyListUsecase: {
+                return true;
             }
 
             /* SignedInUser */

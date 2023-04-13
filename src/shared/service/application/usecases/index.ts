@@ -5,6 +5,7 @@ import { SignUpScenario } from "./nobody/signUp";
 import { SignOutScenario } from "./signedInUser/signOut";
 
 import { ObservingUsersTasksScenario } from "./service/observingUsersTasks";
+import { GetWarrantyListScenario } from "./signedInUser/getWarrantyList";
 
 export type Usecases = 
     /* Nobody */
@@ -14,6 +15,7 @@ export type Usecases =
 
     /* SignedIn */
     | { executing : SignOutScenario, startAt: Date }
+    | { executing : GetWarrantyListScenario, startAt: Date }
 
     /* Service */
     | { executing : ObservingUsersTasksScenario, startAt: Date }

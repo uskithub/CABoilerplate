@@ -20,10 +20,11 @@
       , "@interfaces/*": ["src/shared/service/domain/interfaces/*"]
       , "@usecases/*": ["src/shared/service/application/usecases/*"]
       , "@views/*": ["src/client/service/presentation/views/*"]
-    },
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
   "vueCompilerOptions": {
     "plugins": ["@volar/vue-language-plugin-pug"]
-  }
+  },
+  "skipLibCheck": true
 }

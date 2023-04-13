@@ -21,8 +21,12 @@ export default defineConfig({
             , "@shared": path.resolve(__dirname, "src/shared")
             , "@models": path.resolve(__dirname, "src/shared/service/domain/models")
             , "@interfaces": path.resolve(__dirname, "src/shared/service/domain/interfaces")
+            , "@api": path.resolve(__dirname, "src/shared/service/infrastructure/API")
+            , "@graphql": path.resolve(__dirname, "src/shared/service/infrastructure/graphql")
             , "@usecases": path.resolve(__dirname, "src/shared/service/application/usecases")
             , "@views": path.resolve(__dirname, "src/client/service/presentation/views")
+            , find: "./runtimeConfig"
+            , replacement: "./runtimeConfig.browser"
         }
     }
     , server: {

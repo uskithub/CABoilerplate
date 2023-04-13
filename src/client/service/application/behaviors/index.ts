@@ -12,6 +12,8 @@ import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { Actor } from "@/shared/service/application/actors";
 import { isObservingUsersTasksScene } from "@usecases/service/observingUsersTasks";
 import { Service } from "@/shared/service/application/actors/service";
+import { isGetWarrantyListScene } from "@/shared/service/application/usecases/signedInUser/getWarrantyList";
+import { createWarrantyBehavior } from "./warranty";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -74,6 +76,7 @@ export function createBehaviorController(): BehaviorController {
     const behaviors = {
         application: createApplicationBehavior(controller)
         , user: createUserBehavior(controller)
+        , warranty: createWarrantyBehavior(controller)
     };
 
     controller.stores.user = behaviors.user.store;
@@ -102,6 +105,10 @@ export function createBehaviorController(): BehaviorController {
             console.info("[DISPATCH] SignOut", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
             behaviors.user.signOut(context, actor);
+        } else if (isGetWarrantyListScene(context)) {
+            console.info("[DISPATCH] GetWarrantyList", context);
+            _shared.executingUsecase = { executing: context, startAt: new Date() };
+            behaviors.warranty.get(context, actor);
         }
 
         /* Service */
