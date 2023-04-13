@@ -18,6 +18,7 @@ import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { isObservingUsersTasksGoal, isObservingUsersTasksScene, ObservingUsersTasks, ObservingUsersTasksScenario, ObservingUsersTasksUsecase } from "@usecases/service/observingUsersTasks";
 import { Service } from "@/shared/service/application/actors/service";
+import { Actor } from "@/shared/service/application/actors";
 
 type ImmutableTask = Readonly<Task>;
 
@@ -32,10 +33,10 @@ export interface UserStore extends Store {
 
 export interface UserBehavior extends Behavior<UserStore> {
     readonly store: UserStore;
-    signUp: (context: SignUpScenario) => void;
-    signIn: (context: SignInScenario) => void;
-    signOut: (context: SignOutScenario) => void;
-    observingUsersTasks: (context: ObservingUsersTasksScenario) => void;
+    signUp: (context: SignUpScenario, actor: Actor) => void;
+    signIn: (context: SignInScenario, actor: Actor) => void;
+    signOut: (context: SignOutScenario, actor: Actor) => void;
+    observingUsersTasks: (context: ObservingUsersTasksScenario, actor: Actor) => void;
 }
 
 export function createUserBehavior(controller: BehaviorController): UserBehavior {
@@ -55,11 +56,11 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
 
     return {
         store
-        , signUp: (context: SignUpScenario) => {
+        , signUp: (context: SignUpScenario, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription;
             subscription = new SignUpUsecase(context)
-                .interactedBy(controller.stores.shared.actor)
+                .interactedBy(actor)
                 .subscribe({
                     next: (performedScenario: SignUpScenario[]) => {
                         const lastSceneContext = performedScenario.slice(-1)[0];
@@ -123,13 +124,13 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                     }
                 });
         }
-        , signIn: (context: SignInScenario) => {
+        , signIn: (context: SignInScenario, actor: Actor) => {
             // _local.idInvalidMessage = null;
             // _local.passwordInvalidMessage = null;
             const _shared = controller.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription;
             subscription = new SignInUsecase(context)
-                .interactedBy(controller.stores.shared.actor)
+                .interactedBy(actor)
                 .subscribe({
                     next: (performedScenario: SignInScenario[]) => {
                         const lastSceneContext = performedScenario.slice(-1)[0];
@@ -199,11 +200,11 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                     }
                 });
         }
-        , signOut: (context: SignOutScenario) => {
+        , signOut: (context: SignOutScenario, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription;
             subscription = new SignOutUsecase(context)
-                .interactedBy(controller.stores.shared.actor)
+                .interactedBy(actor)
                 .subscribe({
                     next: (performedScenario: SignOutScenario[]) => {
                         console.log("signOut:", performedScenario);
@@ -234,11 +235,11 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                     }
                 });
         }
-        , observingUsersTasks: (context: ObservingUsersTasksScenario) => {
+        , observingUsersTasks: (context: ObservingUsersTasksScenario, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription;
             subscription = new ObservingUsersTasksUsecase(context)
-                .interactedBy(new Service())
+                .interactedBy(actor)
                 .subscribe({
                     next: (performedScenario: ObservingUsersTasksScenario[]) => {
                         // observingUsersTasks はタスクの監視が後ろにくっ付くので complete が呼ばれないためここで計測する

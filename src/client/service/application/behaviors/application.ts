@@ -13,12 +13,13 @@ import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { ObservingUsersTasks } from "@usecases/service/observingUsersTasks";
+import { Actor } from "@/shared/service/application/actors";
 
 
 export interface ApplicationStore extends Store {}
 export interface ApplicationBehavior extends Behavior<ApplicationStore> {
     readonly store: ApplicationStore;
-    boot: (context: BootScenario) => void;
+    boot: (context: BootScenario, actor: Actor) => void;
 }
 
 export function createApplicationBehavior(controller: BehaviorController): ApplicationBehavior {
@@ -30,11 +31,11 @@ export function createApplicationBehavior(controller: BehaviorController): Appli
 
     return {
         store
-        , boot: (context: BootScenario) => {
+        , boot: (context: BootScenario, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription;
             subscription = new BootUsecase(context)
-                .interactedBy(controller.stores.shared.actor)
+                .interactedBy(actor)
                 .subscribe({
                     next: (performedScenario: BootScenario[]) => {
                         console.log("boot:", performedScenario);

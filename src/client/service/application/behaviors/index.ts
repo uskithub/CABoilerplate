@@ -11,6 +11,7 @@ import { Usecases } from "@/shared/service/application/usecases";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { Actor } from "@/shared/service/application/actors";
 import { isObservingUsersTasksScene } from "@usecases/service/observingUsersTasks";
+import { Service } from "@/shared/service/application/actors/service";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -74,34 +75,34 @@ export function createBehaviorController(): BehaviorController {
 
     controller.dispatch = (context) => {
         const _shared = shared as Mutable<SharedStore>;
-
+        const actor = shared.actor;
         /* Nobody */
         if (isBootScene(context)) {
             console.info("[DISPATCH] Boot:", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
-            behaviors.application.boot(context);
+            behaviors.application.boot(context, actor);
         } else if (isSignUpScene(context)) {
             console.info("[DISPATCH] SignUp", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
-            behaviors.user.signUp(context);
+            behaviors.user.signUp(context, actor);
         } else if (isSignInScene(context)) {
             console.info("[DISPATCH] SignIn", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
-            behaviors.user.signIn(context);
+            behaviors.user.signIn(context, actor);
         }
 
         /* SignedInUser */
         else if (isSignOutScene(context)) {
             console.info("[DISPATCH] SignOut", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
-            behaviors.user.signOut(context);
+            behaviors.user.signOut(context, actor);
         }
 
         /* Service */
         else if (isObservingUsersTasksScene(context)) {
             console.info("[DISPATCH] ObservingUsersTasks:", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
-            behaviors.user.observingUsersTasks(context);
+            behaviors.user.observingUsersTasks(context, new Service());
         } else {
             throw new Error(`dispatch先が定義されていません: ${context.scene as string}`);
         }
