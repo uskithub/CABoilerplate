@@ -1,0 +1,95 @@
+# This "input" configures a global authorization rule to enable public access to
+# all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
+input AMPLIFY {
+  globalAuthRule: AuthRule = { allow: public }
+} # FOR TESTING ONLY!
+# 製品
+type Product @model {
+  id: ID!
+  jancode: String! # JANコード
+  effectiveEnd: AWSDateTime
+  effectiveStart: AWSDateTime
+  name: String!
+  categoryId: ID!
+  category: Category @belongsTo(fields: ["categoryId"])
+}
+
+# 製品分類
+type Category @model {
+  id: ID!
+  effectiveEnd: AWSDateTime
+  effectiveStart: AWSDateTime
+  name: String!
+  parentId: ID
+  parent: Category @belongsTo(fields: ["parentId"]) # 全件取得してアプリケーション側でハッシュ作って対応すべきか？
+  children: [Category] @hasMany
+  procucts: [Product] @hasMany
+}
+
+# 保険特約条項の価格テーブルに記載する粒度の保険加入品目
+type InsuranceItem @model {
+  id: ID!
+  insuarancePriod: Int
+  rate: Float
+  productId: ID!
+  product: Product @hasOne(fields: ["productId"])
+  policyId: ID!
+  policy: Policy @hasOne(fields: ["policyId"])
+}
+
+# 保険特約条項
+type InsuranceRiderContract @model {
+  id: ID!
+  effectiveEnd: AWSDateTime
+  effectiveStart: AWSDateTime
+  line: String! # 種目
+  policies: [Policy] @hasMany
+}
+
+# 保険契約
+type Policy @model {
+  id: ID!
+  effectiveEnd: AWSDateTime
+  effectiveStart: AWSDateTime
+  name: String!
+  line: String! # 種目
+  insurerId: ID!
+  insurer: Client @hasOne(fields: ["insurerId"])
+}
+
+# 保証
+type Warranty @model {
+  id: ID!
+  effectiveEnd: AWSDateTime
+
+  effectiveStart: AWSDateTime
+  plan: String!
+  regulationId: String! # 規程ID
+  warrantyStartDate: AWSDate # 保証印日付
+  warrantyPeriod: Int # 保証期間(月)
+  distributorId: ID!
+  distributor: Client @hasOne(fields: ["distributorId"])
+  billingDestinationId: ID!
+  billingDestination: Client @hasOne(fields: ["billingDestinationId"])
+  targetId: ID!
+  target: Target @hasOne(fields: ["targetId"])
+}
+
+type Client @model {
+  id: ID!
+  effectiveEnd: AWSDateTime
+  effectiveStart: AWSDateTime
+  name: String!
+  type: String! # 1: 保険会社, 2: プラットフォーマー, 3: 販売店
+  address: String
+  phone: String
+  email: String
+}
+
+# 保証対象
+type Target @model {
+  id: ID!
+  type: String! # 1: 単一製品, 2: パッケージ, 3: 物件
+  warrantyId: ID!
+  warranty: Warranty @belongsTo(fields: ["warrantyId"])
+}

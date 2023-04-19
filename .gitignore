@@ -24,3 +24,6 @@ amplifytools.xcconfig
 .secret-*
 **.sample
 #amplify-do-not-edit-end
+
+amplify/backend/api/*/build
+amplify/backend/api/*/resolvers

@@ -22,7 +22,7 @@
       , "@views/*": ["src/client/service/presentation/views/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "amplify/**/*.graphql"],
   "vueCompilerOptions": {
     "plugins": ["@volar/vue-language-plugin-pug"]
   },
