@@ -29,7 +29,7 @@ type Category @model {
 # 保険特約条項の価格テーブルに記載する粒度の保険加入品目
 type InsuranceItem @model {
   id: ID!
-  insuarancePriod: Int
+  insurancePriod: Int
   rate: Float
   productId: ID!
   product: Product @hasOne(fields: ["productId"])
