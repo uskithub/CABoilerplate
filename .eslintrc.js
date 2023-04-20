@@ -41,8 +41,17 @@ module.exports = {
                 , "@vue/typescript/recommended"
             ]
             , parser: "vue-eslint-parser"
-            , parserOptions: {
-                parser: "@typescript-eslint/parser"
+            // script部分のparserをtypescript-eslintにすると、vueファイルにて
+            // 「The file must be included in at least one of the projects provided.」
+            // が出るため、デフォルトのparserを使用する
+            // , parserOptions: {
+            //     parser: {
+            //         ts : "@typescript-eslint/parser"
+            //     }
+            // }
+            , rules: {
+                "vue/script-indent": ["error", 4]
+                , "vue/html-indent": ["error", 2]
             }
             
         }

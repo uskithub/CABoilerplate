@@ -13,8 +13,13 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
-  "[vue]": {
-    "editor.defaultFormatter": "Vue.volar",
-  },
+  // scriptタグ内のindentも2にしてしまうのでコメントアウト
+  // "[vue]": {
+  //   "editor.defaultFormatter": "Vue.volar",
+  // },
   "editor.formatOnSave": true,
+  "volar.format.initialIndent": {
+    "html": true,
+    "typescript": false
+  },
 }
