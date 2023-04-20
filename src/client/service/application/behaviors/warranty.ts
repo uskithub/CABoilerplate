@@ -39,13 +39,13 @@ export function createWarrantyBehavior(controller: BehaviorController): Warranty
                     next: ([lastSceneContext, performedScenario]: [GetWarrantyListScenario, GetWarrantyListScenario[]]) => {
                         if (!isGetWarrantyListGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
-                            case GetWarrantyList.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
-                                console.log("OKKKKKK", lastSceneContext.warranties);
-                                _store.warranties = lastSceneContext.warranties;
-                                break;
-                            case GetWarrantyList.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView:
-                                _store.warranties = [];
-                                break;
+                        case GetWarrantyList.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
+                            console.log("OKKKKKK", lastSceneContext.warranties);
+                            _store.warranties = lastSceneContext.warranties;
+                            break;
+                        case GetWarrantyList.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView:
+                            _store.warranties = [];
+                            break;
                         }
                     }
                     , complete: controller.commonCompletionProcess

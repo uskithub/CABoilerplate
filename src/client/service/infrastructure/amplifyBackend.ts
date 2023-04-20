@@ -1,41 +1,37 @@
+// Service
 import { Backend } from "@/shared/service/domain/interfaces/backend";
+
+// Infrastructre
+import {  ListWarrantiesQuery } from "@/shared/service/infrastructure/API";
 import { Warranty } from "@/shared/service/domain/models/warranty";
-import { Observable } from "rxjs";
 
 import { API } from "aws-amplify";
-import { GraphQLResult } from "@aws-amplify/api-graphql";
-import { listPosts } from "@graphql/queries";
-import { Post, ListPostsQuery } from "@api";
-import { GraphQLError } from "graphql";
+import { graphqlOperation, GraphQLResult } from "@aws-amplify/api-graphql";
+
+import { GraphQLQuery } from "@aws-amplify/api";
+import * as queries from "@/shared/service/infrastructure/graphql/queries";
+
+// System
+import { from, Observable } from "rxjs";
 
 export class AmplifyBackend implements Backend {
 
-    constructor() {}
-
-    getWarranties(): Observable<Post[]> {
-        return new Observable(subscriber => {
-            return API.graphql<ListPostsQuery>({
-                query: listPosts
-              })
-              .then((response: GraphQLResult<ListPostsQuery>) => {
-                const data: ListPostsQuery | undefined = response.data;
-                const { listPosts } = data;
-                const { items, nextToken } = listPosts;
-                if (items) {
-                    subscriber.next(items);
-                    console.log("GGGGGG next", items);
-                    // subscriber.complete();
-                    return;
-                }
-                const errors: GraphQLError[] | undefined = response.errors;
+    getWarranties(): Observable<Warranty[]|null> {
+        return from(API.graphql<GraphQLQuery<ListWarrantiesQuery>>(
+            graphqlOperation(queries.listWarranties)
+        )
+            .then((response: GraphQLResult<GraphQLQuery<ListWarrantiesQuery>>) => {
+                const errors = response.errors;
                 if (errors) {
-                    subscriber.error(errors);
-                    console.log("GGGGGG error", errors);
-                    // subscriber.complete();
-                    return;
+                    // console.log("GGGGGG error", errors);
+                    throw errors;
                 }
-                console.error("itemsもerrorsもない", response);
-              });
-        });
+                // console.log("GGGGGG next", response.data);
+                const items = response.data?.listWarranties?.items;
+                if (items) {
+                    return items.filter(item => item !== null) as Warranty[];
+                }
+                return null;
+            }));
     }
 }

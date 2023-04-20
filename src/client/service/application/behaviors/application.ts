@@ -16,7 +16,7 @@ import { ObservingUsersTasks } from "@usecases/service/observingUsersTasks";
 import { Actor } from "@/shared/service/application/actors";
 
 
-export interface ApplicationStore extends Store {}
+export type ApplicationStore = Store
 export interface ApplicationBehavior extends Behavior<ApplicationStore> {
     readonly store: ApplicationStore;
     boot: (context: BootScenario, actor: Actor) => void;
@@ -39,18 +39,18 @@ export function createApplicationBehavior(controller: BehaviorController): Appli
                     next: ([lastSceneContext, performedScenario]: [BootScenario, BootScenario[]]) => {
                         if (!isBootGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
-                            case Boot.goals.sessionExistsThenServicePresentsHome:
-                                const user = { ...lastSceneContext.user };
-                                const actor = new SignedInUser(user);
-                                controller.change(actor);
-                                _shared.signInStatus = SignInStatus.signIn;
-                                console.log("hhhh", _shared.actor, _shared.signInStatus);
-                                // controller.dispatch({ scene: ObservingUsersTasks.serviceDetectsSigningIn, user });
-                                break;
-                            case Boot.goals.sessionNotExistsThenServicePresentsSignin:
-                                _shared.signInStatus = SignInStatus.signOut;
-                                router.replace("/signin");
-                                break;
+                        case Boot.goals.sessionExistsThenServicePresentsHome:
+                            const user = { ...lastSceneContext.user };
+                            const actor = new SignedInUser(user);
+                            controller.change(actor);
+                            _shared.signInStatus = SignInStatus.signIn;
+                            console.log("hhhh", _shared.actor, _shared.signInStatus);
+                            // controller.dispatch({ scene: ObservingUsersTasks.serviceDetectsSigningIn, user });
+                            break;
+                        case Boot.goals.sessionNotExistsThenServicePresentsSignin:
+                            _shared.signInStatus = SignInStatus.signOut;
+                            router.replace("/signin");
+                            break;
                         }
                     }
                     , complete: controller.commonCompletionProcess

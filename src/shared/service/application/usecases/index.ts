@@ -6,10 +6,14 @@ import { SignOutScenario } from "./signedInUser/signOut";
 
 import { ObservingUsersTasksScenario } from "./service/observingUsersTasks";
 import { GetWarrantyListScenario } from "./signedInUser/getWarrantyList";
+import { ListInsuranceItemsScenario } from "./ServiceInProcess/signedInUser/listInsuaranceItems";
 
 export type Usecases = 
+    /* ServiceInProcess */
+    | { executing : ListInsuranceItemsScenario, startAt: Date }
+
     /* Nobody */
-    { executing : BootScenario, startAt: Date }
+    | { executing : BootScenario, startAt: Date }
     | { executing : SignUpScenario, startAt: Date }
     | { executing : SignInScenario, startAt: Date }
 

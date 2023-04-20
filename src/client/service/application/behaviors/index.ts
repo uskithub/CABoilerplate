@@ -1,5 +1,4 @@
 import { isBootScene } from "@usecases/nobody/boot";
-import { Empty, Nobody, UsecaseScenario } from "robustive-ts";
 import { InjectionKey, reactive } from "vue";
 import { createApplicationBehavior } from "./application";
 import { createUserBehavior } from "./user";
@@ -14,6 +13,12 @@ import { isObservingUsersTasksScene } from "@usecases/service/observingUsersTask
 import { Service } from "@/shared/service/application/actors/service";
 import { isGetWarrantyListScene } from "@/shared/service/application/usecases/signedInUser/getWarrantyList";
 import { createWarrantyBehavior } from "./warranty";
+import { isListInsuranceItemsScene } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuaranceItems";
+import { createServiceInProcessBehavior } from "./serviceInProcess";
+
+// System
+import { Empty, Nobody, UsecaseScenario } from "robustive-ts";
+import { watch, WatchStopHandle } from "vue";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -77,6 +82,7 @@ export function createBehaviorController(): BehaviorController {
         application: createApplicationBehavior(controller)
         , user: createUserBehavior(controller)
         , warranty: createWarrantyBehavior(controller)
+        , serviceInProcess: createServiceInProcessBehavior(controller)
     };
 
     controller.stores.user = behaviors.user.store;
@@ -84,12 +90,12 @@ export function createBehaviorController(): BehaviorController {
     controller.dispatch = (context) => {
         const _shared = shared as Mutable<SharedStore>;
         const actor = shared.actor;
-        
+
         /* Nobody */
         if (isBootScene(context)) {
             console.info("[DISPATCH] Boot:", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
-            behaviors.application.boot(context, actor, );
+            behaviors.application.boot(context, actor);
         } else if (isSignUpScene(context)) {
             console.info("[DISPATCH] SignUp", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
@@ -98,6 +104,36 @@ export function createBehaviorController(): BehaviorController {
             console.info("[DISPATCH] SignIn", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
             behaviors.user.signIn(context, actor);
+        }
+
+        /* Service */
+        else if (isObservingUsersTasksScene(context)) {
+            console.info("[DISPATCH] ObservingUsersTasks:", context);
+            // 観測し続けるのでステータス管理しない
+            // _shared.executingUsecase = { executing: context, startAt: new Date() };
+            behaviors.user.observingUsersTasks(context, new Service());
+        } 
+
+        // 初回表示時対応
+        // signInStatus が不明の場合、signInUserでないと実行できないUsecaseがエラーになるので、
+        // ステータスが変わるのを監視し、その後実行し直す
+        else if (shared.signInStatus === SignInStatus.unknown) {
+            console.info("[DISPATCH] signInStatus が 不明のため、ユースケースの実行を保留します...");
+            let stopHandle: WatchStopHandle|null = null;
+            stopHandle = watch(() => shared.signInStatus, (newValue) => {
+                if (newValue !== SignInStatus.unknown) {
+                    console.log(`[DISPATCH] signInStatus が "${ newValue }" に変わったため、保留したユースケースを再開します...`);
+                    controller.dispatch(context);
+                    stopHandle?.();
+                }
+            });
+        }
+
+        /* ServiceInProcess */
+        else if (isListInsuranceItemsScene(context)) {
+            console.info("[DISPATCH] ListInsuranceItem:", context);
+            _shared.executingUsecase = { executing: context, startAt: new Date() };
+            behaviors.serviceInProcess.list(context, actor);
         }
 
         /* SignedInUser */
@@ -109,14 +145,6 @@ export function createBehaviorController(): BehaviorController {
             console.info("[DISPATCH] GetWarrantyList", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
             behaviors.warranty.get(context, actor);
-        }
-
-        /* Service */
-        else if (isObservingUsersTasksScene(context)) {
-            console.info("[DISPATCH] ObservingUsersTasks:", context);
-            // 観測し続けるのでステータス管理しない
-            // _shared.executingUsecase = { executing: context, startAt: new Date() };
-            behaviors.user.observingUsersTasks(context, new Service());
         } else {
             throw new Error(`dispatch先が定義されていません: ${context.scene as string}`);
         }

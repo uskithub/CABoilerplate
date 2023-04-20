@@ -5,22 +5,22 @@ import { DrawerContentType } from ".";
 import type { DrawerItem } from ".";
 
 const props = defineProps<{
-  modelValue: boolean
-  , items: Array<DrawerItem>
+    modelValue: boolean
+    , items: Array<DrawerItem>
 }>();
 
 const emits = defineEmits<{
-  (e: "update:modelValue", isOpen: boolean): void
+    (e: "update:modelValue", isOpen: boolean): void
 }>();
 
 const state = reactive<{
-  isOpen: boolean;
+    isOpen: boolean;
 }>({
-  isOpen: props.modelValue
+    isOpen: props.modelValue
 });
 
 watch(() => props.modelValue, (newVal: boolean) => {
-  state.isOpen = newVal;
+    state.isOpen = newVal;
 });
 
 </script>

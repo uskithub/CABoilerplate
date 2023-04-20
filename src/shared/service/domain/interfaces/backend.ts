@@ -1,7 +1,7 @@
 import { Observable } from "rxjs";
 import { Task } from "../models/task";
 import { Warranty } from "../models/warranty";
-import { Post } from "@api";
+
 
 export const enum ItemChangeType {
     added = "added"
@@ -23,5 +23,6 @@ export interface Backend {
      */
     observeTasks: (userId: string) => Observable<ChangedItem<Task>[]>;
 
-    getWarranties: () => Observable<Post[]>;
+    
+    getWarranties: () => Observable<Warranty[]|null>;
 }

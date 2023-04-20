@@ -2,156 +2,681 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const onCreateBlog = /* GraphQL */ `
-  subscription OnCreateBlog($filter: ModelSubscriptionBlogFilterInput) {
-    onCreateBlog(filter: $filter) {
+export const onCreateProduct = /* GraphQL */ `
+  subscription OnCreateProduct($filter: ModelSubscriptionProductFilterInput) {
+    onCreateProduct(filter: $filter) {
       id
+      jancode
+      effectiveEnd
+      effectiveStart
       name
-      posts {
-        nextToken
+      categoryId
+      category {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        parentId
+        createdAt
+        updatedAt
+        categoryChildrenId
       }
       createdAt
       updatedAt
+      categoryProcuctsId
     }
   }
 `;
-export const onUpdateBlog = /* GraphQL */ `
-  subscription OnUpdateBlog($filter: ModelSubscriptionBlogFilterInput) {
-    onUpdateBlog(filter: $filter) {
+export const onUpdateProduct = /* GraphQL */ `
+  subscription OnUpdateProduct($filter: ModelSubscriptionProductFilterInput) {
+    onUpdateProduct(filter: $filter) {
       id
+      jancode
+      effectiveEnd
+      effectiveStart
       name
-      posts {
-        nextToken
+      categoryId
+      category {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        parentId
+        createdAt
+        updatedAt
+        categoryChildrenId
       }
       createdAt
       updatedAt
+      categoryProcuctsId
     }
   }
 `;
-export const onDeleteBlog = /* GraphQL */ `
-  subscription OnDeleteBlog($filter: ModelSubscriptionBlogFilterInput) {
-    onDeleteBlog(filter: $filter) {
+export const onDeleteProduct = /* GraphQL */ `
+  subscription OnDeleteProduct($filter: ModelSubscriptionProductFilterInput) {
+    onDeleteProduct(filter: $filter) {
       id
+      jancode
+      effectiveEnd
+      effectiveStart
       name
-      posts {
-        nextToken
-      }
-      createdAt
-      updatedAt
-    }
-  }
-`;
-export const onCreatePost = /* GraphQL */ `
-  subscription OnCreatePost($filter: ModelSubscriptionPostFilterInput) {
-    onCreatePost(filter: $filter) {
-      id
-      title
-      blog {
+      categoryId
+      category {
         id
+        effectiveEnd
+        effectiveStart
         name
+        parentId
         createdAt
         updatedAt
-      }
-      comments {
-        nextToken
+        categoryChildrenId
       }
       createdAt
       updatedAt
-      blogPostsId
+      categoryProcuctsId
     }
   }
 `;
-export const onUpdatePost = /* GraphQL */ `
-  subscription OnUpdatePost($filter: ModelSubscriptionPostFilterInput) {
-    onUpdatePost(filter: $filter) {
+export const onCreateCategory = /* GraphQL */ `
+  subscription OnCreateCategory($filter: ModelSubscriptionCategoryFilterInput) {
+    onCreateCategory(filter: $filter) {
       id
-      title
-      blog {
+      effectiveEnd
+      effectiveStart
+      name
+      parentId
+      parent {
         id
+        effectiveEnd
+        effectiveStart
         name
+        parentId
         createdAt
         updatedAt
+        categoryChildrenId
       }
-      comments {
+      children {
+        nextToken
+      }
+      procucts {
         nextToken
       }
       createdAt
       updatedAt
-      blogPostsId
+      categoryChildrenId
     }
   }
 `;
-export const onDeletePost = /* GraphQL */ `
-  subscription OnDeletePost($filter: ModelSubscriptionPostFilterInput) {
-    onDeletePost(filter: $filter) {
+export const onUpdateCategory = /* GraphQL */ `
+  subscription OnUpdateCategory($filter: ModelSubscriptionCategoryFilterInput) {
+    onUpdateCategory(filter: $filter) {
       id
-      title
-      blog {
+      effectiveEnd
+      effectiveStart
+      name
+      parentId
+      parent {
         id
+        effectiveEnd
+        effectiveStart
         name
+        parentId
         createdAt
         updatedAt
+        categoryChildrenId
       }
-      comments {
+      children {
+        nextToken
+      }
+      procucts {
         nextToken
       }
       createdAt
       updatedAt
-      blogPostsId
+      categoryChildrenId
     }
   }
 `;
-export const onCreateComment = /* GraphQL */ `
-  subscription OnCreateComment($filter: ModelSubscriptionCommentFilterInput) {
-    onCreateComment(filter: $filter) {
+export const onDeleteCategory = /* GraphQL */ `
+  subscription OnDeleteCategory($filter: ModelSubscriptionCategoryFilterInput) {
+    onDeleteCategory(filter: $filter) {
       id
-      post {
+      effectiveEnd
+      effectiveStart
+      name
+      parentId
+      parent {
         id
-        title
+        effectiveEnd
+        effectiveStart
+        name
+        parentId
         createdAt
         updatedAt
-        blogPostsId
+        categoryChildrenId
       }
-      content
+      children {
+        nextToken
+      }
+      procucts {
+        nextToken
+      }
       createdAt
       updatedAt
-      postCommentsId
+      categoryChildrenId
     }
   }
 `;
-export const onUpdateComment = /* GraphQL */ `
-  subscription OnUpdateComment($filter: ModelSubscriptionCommentFilterInput) {
-    onUpdateComment(filter: $filter) {
+export const onCreateInsuranceItem = /* GraphQL */ `
+  subscription OnCreateInsuranceItem(
+    $filter: ModelSubscriptionInsuranceItemFilterInput
+  ) {
+    onCreateInsuranceItem(filter: $filter) {
       id
-      post {
+      insuarancePriod
+      rate
+      productId
+      product {
         id
-        title
+        jancode
+        effectiveEnd
+        effectiveStart
+        name
+        categoryId
         createdAt
         updatedAt
-        blogPostsId
+        categoryProcuctsId
       }
-      content
+      policyId
+      policy {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        line
+        insurerId
+        createdAt
+        updatedAt
+        insuranceRiderContractPoliciesId
+      }
       createdAt
       updatedAt
-      postCommentsId
     }
   }
 `;
-export const onDeleteComment = /* GraphQL */ `
-  subscription OnDeleteComment($filter: ModelSubscriptionCommentFilterInput) {
-    onDeleteComment(filter: $filter) {
+export const onUpdateInsuranceItem = /* GraphQL */ `
+  subscription OnUpdateInsuranceItem(
+    $filter: ModelSubscriptionInsuranceItemFilterInput
+  ) {
+    onUpdateInsuranceItem(filter: $filter) {
       id
-      post {
+      insuarancePriod
+      rate
+      productId
+      product {
         id
-        title
+        jancode
+        effectiveEnd
+        effectiveStart
+        name
+        categoryId
         createdAt
         updatedAt
-        blogPostsId
+        categoryProcuctsId
       }
-      content
+      policyId
+      policy {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        line
+        insurerId
+        createdAt
+        updatedAt
+        insuranceRiderContractPoliciesId
+      }
       createdAt
       updatedAt
-      postCommentsId
+    }
+  }
+`;
+export const onDeleteInsuranceItem = /* GraphQL */ `
+  subscription OnDeleteInsuranceItem(
+    $filter: ModelSubscriptionInsuranceItemFilterInput
+  ) {
+    onDeleteInsuranceItem(filter: $filter) {
+      id
+      insuarancePriod
+      rate
+      productId
+      product {
+        id
+        jancode
+        effectiveEnd
+        effectiveStart
+        name
+        categoryId
+        createdAt
+        updatedAt
+        categoryProcuctsId
+      }
+      policyId
+      policy {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        line
+        insurerId
+        createdAt
+        updatedAt
+        insuranceRiderContractPoliciesId
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onCreateInsuranceRiderContract = /* GraphQL */ `
+  subscription OnCreateInsuranceRiderContract(
+    $filter: ModelSubscriptionInsuranceRiderContractFilterInput
+  ) {
+    onCreateInsuranceRiderContract(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      line
+      policies {
+        nextToken
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdateInsuranceRiderContract = /* GraphQL */ `
+  subscription OnUpdateInsuranceRiderContract(
+    $filter: ModelSubscriptionInsuranceRiderContractFilterInput
+  ) {
+    onUpdateInsuranceRiderContract(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      line
+      policies {
+        nextToken
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeleteInsuranceRiderContract = /* GraphQL */ `
+  subscription OnDeleteInsuranceRiderContract(
+    $filter: ModelSubscriptionInsuranceRiderContractFilterInput
+  ) {
+    onDeleteInsuranceRiderContract(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      line
+      policies {
+        nextToken
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onCreatePolicy = /* GraphQL */ `
+  subscription OnCreatePolicy($filter: ModelSubscriptionPolicyFilterInput) {
+    onCreatePolicy(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      name
+      line
+      insurerId
+      insurer {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        type
+        address
+        phone
+        email
+        createdAt
+        updatedAt
+      }
+      createdAt
+      updatedAt
+      insuranceRiderContractPoliciesId
+    }
+  }
+`;
+export const onUpdatePolicy = /* GraphQL */ `
+  subscription OnUpdatePolicy($filter: ModelSubscriptionPolicyFilterInput) {
+    onUpdatePolicy(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      name
+      line
+      insurerId
+      insurer {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        type
+        address
+        phone
+        email
+        createdAt
+        updatedAt
+      }
+      createdAt
+      updatedAt
+      insuranceRiderContractPoliciesId
+    }
+  }
+`;
+export const onDeletePolicy = /* GraphQL */ `
+  subscription OnDeletePolicy($filter: ModelSubscriptionPolicyFilterInput) {
+    onDeletePolicy(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      name
+      line
+      insurerId
+      insurer {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        type
+        address
+        phone
+        email
+        createdAt
+        updatedAt
+      }
+      createdAt
+      updatedAt
+      insuranceRiderContractPoliciesId
+    }
+  }
+`;
+export const onCreateWarranty = /* GraphQL */ `
+  subscription OnCreateWarranty($filter: ModelSubscriptionWarrantyFilterInput) {
+    onCreateWarranty(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      plan
+      regulationId
+      warrantyStartDate
+      warrantyPeriod
+      distributorId
+      distributor {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        type
+        address
+        phone
+        email
+        createdAt
+        updatedAt
+      }
+      billingDestinationId
+      billingDestination {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        type
+        address
+        phone
+        email
+        createdAt
+        updatedAt
+      }
+      targetId
+      target {
+        id
+        type
+        warrantyId
+        createdAt
+        updatedAt
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdateWarranty = /* GraphQL */ `
+  subscription OnUpdateWarranty($filter: ModelSubscriptionWarrantyFilterInput) {
+    onUpdateWarranty(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      plan
+      regulationId
+      warrantyStartDate
+      warrantyPeriod
+      distributorId
+      distributor {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        type
+        address
+        phone
+        email
+        createdAt
+        updatedAt
+      }
+      billingDestinationId
+      billingDestination {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        type
+        address
+        phone
+        email
+        createdAt
+        updatedAt
+      }
+      targetId
+      target {
+        id
+        type
+        warrantyId
+        createdAt
+        updatedAt
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeleteWarranty = /* GraphQL */ `
+  subscription OnDeleteWarranty($filter: ModelSubscriptionWarrantyFilterInput) {
+    onDeleteWarranty(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      plan
+      regulationId
+      warrantyStartDate
+      warrantyPeriod
+      distributorId
+      distributor {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        type
+        address
+        phone
+        email
+        createdAt
+        updatedAt
+      }
+      billingDestinationId
+      billingDestination {
+        id
+        effectiveEnd
+        effectiveStart
+        name
+        type
+        address
+        phone
+        email
+        createdAt
+        updatedAt
+      }
+      targetId
+      target {
+        id
+        type
+        warrantyId
+        createdAt
+        updatedAt
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onCreateClient = /* GraphQL */ `
+  subscription OnCreateClient($filter: ModelSubscriptionClientFilterInput) {
+    onCreateClient(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      name
+      type
+      address
+      phone
+      email
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdateClient = /* GraphQL */ `
+  subscription OnUpdateClient($filter: ModelSubscriptionClientFilterInput) {
+    onUpdateClient(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      name
+      type
+      address
+      phone
+      email
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeleteClient = /* GraphQL */ `
+  subscription OnDeleteClient($filter: ModelSubscriptionClientFilterInput) {
+    onDeleteClient(filter: $filter) {
+      id
+      effectiveEnd
+      effectiveStart
+      name
+      type
+      address
+      phone
+      email
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onCreateTarget = /* GraphQL */ `
+  subscription OnCreateTarget($filter: ModelSubscriptionTargetFilterInput) {
+    onCreateTarget(filter: $filter) {
+      id
+      type
+      warrantyId
+      warranty {
+        id
+        effectiveEnd
+        effectiveStart
+        plan
+        regulationId
+        warrantyStartDate
+        warrantyPeriod
+        distributorId
+        billingDestinationId
+        targetId
+        createdAt
+        updatedAt
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdateTarget = /* GraphQL */ `
+  subscription OnUpdateTarget($filter: ModelSubscriptionTargetFilterInput) {
+    onUpdateTarget(filter: $filter) {
+      id
+      type
+      warrantyId
+      warranty {
+        id
+        effectiveEnd
+        effectiveStart
+        plan
+        regulationId
+        warrantyStartDate
+        warrantyPeriod
+        distributorId
+        billingDestinationId
+        targetId
+        createdAt
+        updatedAt
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeleteTarget = /* GraphQL */ `
+  subscription OnDeleteTarget($filter: ModelSubscriptionTargetFilterInput) {
+    onDeleteTarget(filter: $filter) {
+      id
+      type
+      warrantyId
+      warranty {
+        id
+        effectiveEnd
+        effectiveStart
+        plan
+        regulationId
+        warrantyStartDate
+        warrantyPeriod
+        distributorId
+        billingDestinationId
+        targetId
+        createdAt
+        updatedAt
+      }
+      createdAt
+      updatedAt
     }
   }
 `;

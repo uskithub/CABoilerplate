@@ -12,7 +12,7 @@ const { stores, dispatch } = controller;
 console.log("APPPPP");
 
 if (stores.shared.signInStatus === SignInStatus.unknown) {
-  dispatch({ scene: Boot.userOpensSite });
+    dispatch({ scene: Boot.userOpensSite });
 }
 </script>
 

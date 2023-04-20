@@ -24,15 +24,15 @@ dispatch({ scene: GetWarrantyList.userInitiatesWarrantyListing });
 // });
 
 const headers: Array<DataTableHeader> = [
-  { title: "保証番号", key: "hoshonum" } as DataTableHeader
-  , { title: "保証料", key: "hosyoryo", align: "end" } as DataTableHeader
-  , { title: "保証印日付", key: "hoshoindate", value: (item) => `${String(item.hoshoindate.getFullYear()).padStart(4, "0")}-${String(item.hoshoindate.getMonth() + 1).padStart(2, "0")}-${String(item.hoshoindate.getDate()).padStart(2, "0")}` } as DataTableHeader
+    { title: "保証番号", key: "hoshonum" } as DataTableHeader
+    , { title: "保証料", key: "hosyoryo", align: "end" } as DataTableHeader
+    , { title: "保証印日付", key: "hoshoindate", value: (item) => `${String(item.hoshoindate.getFullYear()).padStart(4, "0")}-${String(item.hoshoindate.getMonth() + 1).padStart(2, "0")}-${String(item.hoshoindate.getDate()).padStart(2, "0")}` } as DataTableHeader
 ];
 
 const rows = [
-  { hoshonum: "200001", hosyoryo: "1000", hoshoindate: new Date("2023-03-01") }
-  , { hoshonum: "200002", hosyoryo: "10000", hoshoindate: new Date("2023-03-01") }
-  , { hoshonum: "200003", hosyoryo: "-1000", hoshoindate: new Date("2023-03-01") }
+    { hoshonum: "200001", hosyoryo: "1000", hoshoindate: new Date("2023-03-01") }
+    , { hoshonum: "200002", hosyoryo: "10000", hoshoindate: new Date("2023-03-01") }
+    , { hoshonum: "200003", hosyoryo: "-1000", hoshoindate: new Date("2023-03-01") }
 ];
 
 const actions = new Array<Action>();

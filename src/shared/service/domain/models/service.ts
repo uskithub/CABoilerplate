@@ -14,6 +14,7 @@ import { Actor } from "../../application/actors";
 import { ObservingUsersTasksUsecase } from "../../application/usecases/service/observingUsersTasks";
 import { isService } from "../../application/actors/service";
 import { GetWarrantyList, GetWarrantyListUsecase } from "../../application/usecases/signedInUser/getWarrantyList";
+import { ListInsuranceItemsUsecase } from "../../application/usecases/ServiceInProcess/signedInUser/listInsuaranceItems";
 
 
 export default {
@@ -23,29 +24,33 @@ export default {
 
     , authorize: <Context extends IContext, U extends Usecase<Context>>(actor: Actor, usecase: U): boolean => {
         switch (usecase.constructor) {
-            /* Nobody */
-            case BootUsecase: {
-                return true;
-            }
-            case SignUpUsecase: {
-                return isNobody(actor);
-            }
-            case SignInUsecase: {
-                return isNobody(actor);
-            }
-            case GetWarrantyListUsecase: {
-                return true;
-            }
+        /* ServiceInProcess */
+        case ListInsuranceItemsUsecase: {
+            return isSignedInUser(actor);
+        }
+        /* Nobody */
+        case BootUsecase: {
+            return true;
+        }
+        case SignUpUsecase: {
+            return isNobody(actor);
+        }
+        case SignInUsecase: {
+            return isNobody(actor);
+        }
+        case GetWarrantyListUsecase: {
+            return true;
+        }
 
-            /* SignedInUser */
-            case SignOutUsecase: {
-                return isSignedInUser(actor);
-            }
+        /* SignedInUser */
+        case SignOutUsecase: {
+            return isSignedInUser(actor);
+        }
 
-            /* Service */
-            case ObservingUsersTasksUsecase: {
-                return isService(actor);
-            }
+        /* Service */
+        case ObservingUsersTasksUsecase: {
+            return isService(actor);
+        }
         }
 
         const isBoot = (usecase: any): usecase is BootUsecase => usecase.constructor === BootUsecase;

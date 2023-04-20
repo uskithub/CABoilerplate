@@ -20,6 +20,7 @@ import awsExports from "@client/system/config/aws-exports";
 import { AmplifyBackend } from "./service/infrastructure/amplifyBackend";
 
 import { DICTIONARY_KEY, i18n } from "@/shared/system/localizations";
+import { ServiceInProcessApi } from "./service/infrastructure/amplify/serviceInProcessApi";
 // import { GraphqlAuthenticator } from "./service/infrastructure/graphqlAuthenticator";
 
 // initialize firebase
@@ -28,6 +29,7 @@ dependencies.auth = new FirebaseAuthenticator(firebaseApp);
 // dependencies.auth = new GraphqlAuthenticator();
 // dependencies.backend = new FirestoreBackend(getFirestore(firebaseApp));
 dependencies.backend = new AmplifyBackend();
+dependencies.serviceInProcess = new ServiceInProcessApi();
 
 // initialize Amplify
 Amplify.configure(awsExports);

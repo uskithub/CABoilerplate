@@ -47,16 +47,16 @@ export class GetWarrantyListUsecase extends Usecase<GetWarrantyListScenario> {
 
     next(): Observable<this> | Boundary {
         switch (this.context.scene) {
-            case GetWarrantyList.userInitiatesWarrantyListing: {
-                return this.just({ scene: GetWarrantyList.serviceSelectsWarrantiesThatMeetConditions });
-            }
-            case GetWarrantyList.serviceSelectsWarrantiesThatMeetConditions: {
-                return this.select();
-            }
-            case GetWarrantyList.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
-            case GetWarrantyList.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView: {
-                return boundary;
-            }
+        case GetWarrantyList.userInitiatesWarrantyListing: {
+            return this.just({ scene: GetWarrantyList.serviceSelectsWarrantiesThatMeetConditions });
+        }
+        case GetWarrantyList.serviceSelectsWarrantiesThatMeetConditions: {
+            return this.select();
+        }
+        case GetWarrantyList.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
+        case GetWarrantyList.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView: {
+            return boundary;
+        }
         }
     }
 

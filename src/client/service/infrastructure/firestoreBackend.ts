@@ -48,23 +48,23 @@ export class FirestoreBackend implements Backend {
                     collection(this.#db, CollectionType.tasks)
                     // Closed含まない: A1 <= x < Z1
                     , where("typeStatus", ">=", `${ LayerTypeStatusValues.task }${ LayerTypeStatusValues.preinitiation }${ LayerTypeStatusValues.todo }`)
-                    , where("typeStatus", "<" , `${ LayerTypeStatusValues.task }${ LayerTypeStatusValues.closed }${ LayerTypeStatusValues.todo }`)
+                    , where("typeStatus", "<", `${ LayerTypeStatusValues.task }${ LayerTypeStatusValues.closed }${ LayerTypeStatusValues.todo }`)
                     , where("involved", "array-contains", userId)
                 )
                 , (snapshot) => {
                     const changedItems = snapshot.docChanges()
-                    .map(change => {
-                        const taskId = change.doc.id;
-                        const taskData = change.doc.data() as FSTask;
-                        // ここで Work を取ってくると見ないタスクのものまで取ってきてしまうのでやらないこと
-                        return {
-                            kind: itemChangeTypeFrom(change.type)
-                            , id: taskId
-                            , item: convert(taskId, taskData)
-                        };
-                    });
-                subscriber.next(changedItems);
-            });
+                        .map(change => {
+                            const taskId = change.doc.id;
+                            const taskData = change.doc.data() as FSTask;
+                            // ここで Work を取ってくると見ないタスクのものまで取ってきてしまうのでやらないこと
+                            return {
+                                kind: itemChangeTypeFrom(change.type)
+                                , id: taskId
+                                , item: convert(taskId, taskData)
+                            };
+                        });
+                    subscriber.next(changedItems);
+                });
             
             this.unsubscribers.push(unsubscribe);
         });
