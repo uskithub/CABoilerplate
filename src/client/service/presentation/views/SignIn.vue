@@ -15,13 +15,13 @@ const t = inject(DICTIONARY_KEY) as Dictionary;
 const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
 
 const state = reactive<{
-  email: string | null;
-  password: string | null;
-  isValid: boolean;
+    email: string | null;
+    password: string | null;
+    isValid: boolean;
 }>({
-  email: null
-  , password: null
-  , isValid: true
+    email: null
+    , password: null
+    , isValid: true
 });
 
 const isPresentDialog = computed(() => stores.shared.signInStatus === SignInStatus.signIn);

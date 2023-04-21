@@ -23,35 +23,35 @@ const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorControll
 
 // custom directive for autofocus
 const vFocus = {
-  mounted: (el: HTMLElement) => el.focus()
+    mounted: (el: HTMLElement) => el.focus()
 };
 
 class TaskTreenode implements Treenode<Task> {
-  private _task: Task;
-  isFolding: boolean;
+    private _task: Task;
+    isFolding: boolean;
 
-  constructor(task: Task) {
-    this._task = task;
-    this.isFolding = false;
-  }
+    constructor(task: Task) {
+        this._task = task;
+        this.isFolding = false;
+    }
 
-  get id(): string { return this._task.id; }
+    get id(): string { return this._task.id; }
 
-  get name(): string { return this._task.title; }
-  set name(newName: string) { this._task.title = newName; }
+    get name(): string { return this._task.title; }
+    set name(newName: string) { this._task.title = newName; }
 
-  get styleClass(): object | null { return { [this._task.type]: true }; }
+    get styleClass(): object | null { return { [this._task.type]: true }; }
 
-  get content(): Task { return this._task; }
-  get subtrees(): this[] {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this._task.children.map(c => new (this.constructor as any)(c));
-  }
-  get isDraggable(): boolean { return true; }
+    get content(): Task { return this._task; }
+    get subtrees(): this[] {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return this._task.children.map(c => new (this.constructor as any)(c));
+    }
+    get isDraggable(): boolean { return true; }
 
-  update(newTask: Task) {
-    this._task = newTask;
-  }
+    update(newTask: Task) {
+        this._task = newTask;
+    }
 }
 
 // const state = reactive<{
@@ -61,106 +61,106 @@ class TaskTreenode implements Treenode<Task> {
 // });
 
 const state = reactive<{
-  donedleTree: TaskTreenode;
-  swtTree: TaskTreenode;
-  isEditing: boolean;
+    donedleTree: TaskTreenode;
+    swtTree: TaskTreenode;
+    isEditing: boolean;
 }>({
-  donedleTree: new TaskTreenode(donedleTree as Task)
-  // TODO: TaskTreenodeでの表示。JSON.stringifyを使ったdeepCopyではgetterはコピーされないのでsubtreesが見つからないで落ちる
-  // , swtTree: new TaskTreenode(taskTree as Task)
-  , swtTree: new TaskTreenode(swtTree as Task)
-  , isEditing: false
+    donedleTree: new TaskTreenode(donedleTree as Task)
+    // TODO: TaskTreenodeでの表示。JSON.stringifyを使ったdeepCopyではgetterはコピーされないのでsubtreesが見つからないで落ちる
+    // , swtTree: new TaskTreenode(taskTree as Task)
+    , swtTree: new TaskTreenode(swtTree as Task)
+    , isEditing: false
 });
 
 // console.log("iii", state.swtTree, state.swtTree.subtrees, state.swtTree.subtrees.length);
 
 const onArrange1 = (
-  node: TaskTreenode
-  , from: {
-    id: string
-    , node: TaskTreenode
-  }
-  , to: {
-    id: string
-    , node: TaskTreenode
-  }
-  , index: number
+    node: TaskTreenode
+    , from: {
+        id: string
+        , node: TaskTreenode
+    }
+    , to: {
+        id: string
+        , node: TaskTreenode
+    }
+    , index: number
 ) => {
-  const _from = findNodeById(from.id, state.donedleTree);
-  const _to = findNodeById(to.id, state.donedleTree);
-  if (_from === null || _to === null) return;
-  // 元親から削除
-  _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
-  // 新親に追加
-  _to.content.children.splice(index, 0, node.content);
-  _to.isFolding = false;
+    const _from = findNodeById(from.id, state.donedleTree);
+    const _to = findNodeById(to.id, state.donedleTree);
+    if (_from === null || _to === null) return;
+    // 元親から削除
+    _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
+    // 新親に追加
+    _to.content.children.splice(index, 0, node.content);
+    _to.isFolding = false;
 };
 
 const onArrange2 = (
-  node: TaskTreenode
-  , from: {
-    id: string
-    , node: TaskTreenode
-  }
-  , to: {
-    id: string
-    , node: TaskTreenode
-  }
-  , index: number
+    node: TaskTreenode
+    , from: {
+        id: string
+        , node: TaskTreenode
+    }
+    , to: {
+        id: string
+        , node: TaskTreenode
+    }
+    , index: number
 ) => {
-  const _from = findNodeById(from.id, state.swtTree);
-  const _to = findNodeById(to.id, state.swtTree);
-  if (_from === null || _to === null) return;
-  // 元親から削除
-  _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
-  // 新親に追加
-  _to.subtrees.splice(index, 0, node);
-  _to.isFolding = false;
+    const _from = findNodeById(from.id, state.swtTree);
+    const _to = findNodeById(to.id, state.swtTree);
+    if (_from === null || _to === null) return;
+    // 元親から削除
+    _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
+    // 新親に追加
+    _to.subtrees.splice(index, 0, node);
+    _to.isFolding = false;
 };
 
 const onToggleFolding1 = (id: string) => {
-  const node = findNodeById(id, state.donedleTree);
-  if (node === null) return;
-  node.isFolding = !node.isFolding;
+    const node = findNodeById(id, state.donedleTree);
+    if (node === null) return;
+    node.isFolding = !node.isFolding;
 };
 
 const onToggleFolding2 = (id: string) => {
-  const node = findNodeById(id, state.swtTree);
-  if (node === null) return;
-  node.isFolding = !node.isFolding;
+    const node = findNodeById(id, state.swtTree);
+    if (node === null) return;
+    node.isFolding = !node.isFolding;
 };
 
 const onClickExport = (event: MouseEvent, node: TaskTreenode) => {
-  console.log("export", node);
-  if (navigator.clipboard) {
-    navigator.clipboard
-      .writeText(JSON.stringify(node))
-      .then(function () {
-        alert('done!');
-      });
-  } else {
-    alert('failed!');
-  }
+    console.log("export", node);
+    if (navigator.clipboard) {
+        navigator.clipboard
+            .writeText(JSON.stringify(node))
+            .then(function () {
+                alert("done!");
+            });
+    } else {
+        alert("failed!");
+    }
 };
 
 const onUpdateName1 = (id: string, newName: string) => {
-  const node = findNodeById(id, state.donedleTree);
-  if (node === null) return;
-  node.name = newName;
+    const node = findNodeById(id, state.donedleTree);
+    if (node === null) return;
+    node.name = newName;
 };
 
 const onUpdateName2 = (newValue: TaskTreenode) => {
-  const node = findNodeById(newValue.id, state.swtTree) as TaskTreenode;
-  if (node === null) return;
-  console.log(node);
-  node.update(newValue.content);
-  // TODO reaciveを起こさないといけない
+    const node = findNodeById(newValue.id, state.swtTree) as TaskTreenode;
+    if (node === null) return;
+    console.log(node);
+    node.update(newValue.content);
+    // TODO reaciveを起こさないといけない
 };
 
 const onToggleEditing = (id: string, isEditing: boolean) => {
-  const node = findNodeById(id, state.swtTree);
-  if (node === null) return;
-  state.isEditing = isEditing;
+    const node = findNodeById(id, state.swtTree);
+    if (node === null) return;
+    state.isEditing = isEditing;
 };
 
 </script>

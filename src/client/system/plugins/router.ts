@@ -11,4 +11,4 @@ const router = createRouter({
 
 export function loadRouter(app: App<Element>) {
     app.use(router);
-};
+}
