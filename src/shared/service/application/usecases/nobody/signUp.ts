@@ -2,7 +2,7 @@ import type { SignUpValidationResult } from "@models/user";
 import type { User } from "@models/user";
 import UserModel from "@models/user";
 import ServiceModel from "@models/service";
-import { Actor, boundary, Boundary, Usecase, Scenes as _S } from "robustive-ts";
+import { Actor, boundary, Boundary, ContextualizedScenes, Usecase } from "robustive-ts";
 import { first, map, Observable } from "rxjs";
 
 /**
@@ -24,13 +24,13 @@ export const scenes = {
 
 type SignUp = typeof scenes[keyof typeof scenes];
 
-export type Goals = _S<{
+export type Goals = ContextualizedScenes<{
     [scenes.goals.onSuccessInPublishingThenServicePresentsHomeView] : { user: User; };
     [scenes.goals.onFailureInValidatingThenServicePresentsError] : { result: SignUpValidationResult; };
     [scenes.goals.onFailureInPublishingThenServicePresentsError] : { error: Error; };
 }>;
 
-export type Scenes = _S<{
+export type Scenes = ContextualizedScenes<{
     [scenes.userStartsSignUpProcess] : { id: string|null; password: string|null; };
     [scenes.serviceValidateInputs]: { id: string|null; password: string|null; };
     [scenes.onSuccessInValidatingThenServicePublishNewAccount]: { id: string; password: string; };

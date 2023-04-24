@@ -17,7 +17,7 @@ import { isListInsuranceItemsScene } from "@/shared/service/application/usecases
 import { createServiceInProcessBehavior } from "./serviceInProcess";
 
 // System
-import { Empty, Nobody, Scenes } from "robustive-ts";
+import { ContextualizedScenes, Empty, Nobody } from "robustive-ts";
 import { watch, WatchStopHandle } from "vue";
 
 export type Mutable<Type> = {
@@ -45,7 +45,7 @@ export type BehaviorController = {
     stores: Stores;
     change: (actor: Actor) => void;
     commonCompletionProcess: () => void;
-    dispatch: <T extends Record<keyof any, Empty>, S extends Scenes<T>>(context: S) => void;
+    dispatch: <T extends Record<keyof any, Empty>>(context: ContextualizedScenes<T>) => void;
     // accountViewModel: (shared: SharedStore) => HomeViewModel;
     // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
     // createSignUpViewModel: (shared: SharedStore) => SignUpViewModel;

@@ -3,7 +3,7 @@ import ServiceModel from "@models/service";
 import TaskModel, { Task } from "@models/task";
 import { User } from "@models/user";
 import { concat, first, map, Observable } from "rxjs";
-import { Actor, Boundary, boundary, Empty, Usecase, Scenes as _S, IContext } from "robustive-ts";
+import { Actor, Boundary, boundary, ContextualizedScenes, Empty, Usecase, IContext } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
 
 /**
@@ -26,19 +26,27 @@ type Boot = typeof scenes[keyof typeof scenes];
 
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
 // https://zenn.dev/eagle/articles/ts-coproduct-introduction
-type Goals = _S<{
+type Goals = ContextualizedScenes<{
     [scenes.goals.sessionExistsThenServicePresentsHome]: { user: User; };
     [scenes.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
     [scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
 }>;
 
-type Scenes = _S<{
+type Scenes = ContextualizedScenes<{
     [scenes.userOpensSite]: Empty;
     [scenes.serviceChecksSession]: Empty;
     // [Boot.sessionExistsThenPerformObservingUsersTasks]: { user: User; };
 }> | Goals;
 
-export const isBootGoal = <T extends IContext>(context: T): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
+export const curriedTypeGuard = <T extends Record<keyof any, Empty>>(scenes: _S<T>) => { 
+    return (context: Record<"scene", any> & Record<string, any>): context is T => {
+        return context.scene !== undefined && Object.keys(scenes).find(c => { return c === context.scene; }) !== undefined;
+    };
+};
+
+export const isBootGoal = <Goals>createTypeGuard();
+
+// export const isBootGoal = <T extends IContext>(context: T): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
 export const isBootScene = <T extends IContext>(context: T): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
 
 export const Boot = scenes;

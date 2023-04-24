@@ -2,7 +2,7 @@ import UserModel from "@models/user";
 import WarrantyModel from "@models/warranty";
 import ServiceModel from "@models/service";
 import { catchError, map, Observable } from "rxjs";
-import { Actor, boundary, Boundary, Empty, Usecase, Scenes as _S } from "robustive-ts";
+import { Actor, boundary, Boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
 
 /**
  * usecase: 保証一覧を取得する
@@ -25,12 +25,12 @@ export const scenes = {
 
 type GetWarrantyList = typeof scenes[keyof typeof scenes];
 
-export type Goals = _S<{
+export type Goals = ContextualizedScenes<{
     [scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView]: { warranties: Post[]; }
     [scenes.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView]: Empty
 }>;
 
-export type Scenes = _S<{
+export type Scenes = ContextualizedScenes<{
     [scenes.userInitiatesWarrantyListing]: Empty
     [scenes.serviceSelectsWarrantiesThatMeetConditions]: Empty
 }> | Goals;

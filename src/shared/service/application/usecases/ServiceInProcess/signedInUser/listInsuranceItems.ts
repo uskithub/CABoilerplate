@@ -5,7 +5,7 @@ import { InsuranceItem } from "@/shared/service/infrastructure/API";
 
 // System
 import { map, Observable } from "rxjs";
-import { Actor, boundary, Boundary, Empty, Usecase, Scenes as _S } from "robustive-ts";
+import { Actor, boundary, Boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
 
 /**
  * usecase: 保険加入アイテム一覧を取得する
@@ -26,12 +26,12 @@ const scenes = {
     }
 } as const;
 
-type Goals = _S<{
+type Goals = ContextualizedScenes<{
     [scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView]: { insuranceItems: InsuranceItem[]|null; }
     [scenes.goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView]: Empty
 }>;
 
-type Scenes = _S<{
+type Scenes = ContextualizedScenes<{
     [scenes.userInitiatesListing]: Empty
     [scenes.serviceSelectsInsuranceItemsThatMeetConditions]: Empty
 }> | Goals;

@@ -2,7 +2,7 @@ import ServiceModel from "@models/service";
 import TaskModel, { Task } from "@models/task";
 import { User } from "@models/user";
 import { concat, map, Observable } from "rxjs";
-import { Actor, Boundary, boundary, Empty, Usecase, Scenes as _S } from "robustive-ts";
+import { Actor, Boundary, boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
 
 /**
@@ -24,12 +24,12 @@ type ObservingUsersTasks = typeof scenes[keyof typeof scenes];
 
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
 // https://zenn.dev/eagle/articles/ts-coproduct-introduction
-export type Goals = _S<{
+export type Goals = ContextualizedScenes<{
     [scenes.goals.serviceDoNothing]: Empty;
     [scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
 }>;
 
-export type Scenes = _S<{
+export type Scenes = ContextualizedScenes<{
     [scenes.serviceDetectsSigningIn]: { user: User; };
     [scenes.startObservingUsersTasks]: { user: User; };
 }> | Goals;
