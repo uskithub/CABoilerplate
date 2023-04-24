@@ -24,6 +24,7 @@ export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Store { }
 export interface Behavior<T extends Store> { readonly store: T; }
 

@@ -1,5 +1,5 @@
 // service
-import { GetWarrantyList, GetWarrantyListScenario, GetWarrantyListUsecase, isGetWarrantyListGoal } from "@usecases/signedInUser/getWarrantyList";
+import { GetWarrantyList, GetWarrantyListScenes, GetWarrantyListUsecase, isGetWarrantyListGoal } from "@usecases/signedInUser/getWarrantyList";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
@@ -16,7 +16,7 @@ export interface WarrantyStore extends Store {
 }
 export interface WarrantyBehavior extends Behavior<WarrantyStore> {
     readonly store: WarrantyStore;
-    get: (context: GetWarrantyListScenario, actor: Actor) => void;
+    get: (context: GetWarrantyListScenes, actor: Actor) => void;
 }
 
 export function createWarrantyBehavior(controller: BehaviorController): WarrantyBehavior {
@@ -31,12 +31,12 @@ export function createWarrantyBehavior(controller: BehaviorController): Warranty
 
     return {
         store
-        , get: (context: GetWarrantyListScenario, actor: Actor) => {
+        , get: (context: GetWarrantyListScenes, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = new GetWarrantyListUsecase(context)
                 .interactedBy(actor, {
-                    next: ([lastSceneContext, performedScenario]: [GetWarrantyListScenario, GetWarrantyListScenario[]]) => {
+                    next: ([lastSceneContext, performedScenario]) => {
                         if (!isGetWarrantyListGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                         case GetWarrantyList.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:

@@ -1,5 +1,5 @@
 // service
-import { isSignInGoal, isSignInScene, SignIn, SignInScenes, SignInUsecase } from "@/shared/service/application/usecases/nobody/signIn";
+import { isSignInGoal, SignIn, SignInScenes, SignInUsecase } from "@/shared/service/application/usecases/nobody/signIn";
 import { isSignOutGoal, SignOut, SignOutScenes, SignOutUsecase } from "@/shared/service/application/usecases/signedInUser/signOut";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 
@@ -15,7 +15,7 @@ import { browserPopupRedirectResolver } from "firebase/auth";
 import { Task } from "@/shared/service/domain/models/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
-import { isObservingUsersTasksGoal, isObservingUsersTasksScene, ObservingUsersTasks, ObservingUsersTasksScenes, ObservingUsersTasksUsecase } from "@usecases/service/observingUsersTasks";
+import { isObservingUsersTasksGoal, ObservingUsersTasks, ObservingUsersTasksScenes, ObservingUsersTasksUsecase } from "@usecases/service/observingUsersTasks";
 import { Service } from "@/shared/service/application/actors/service";
 import { Actor } from "@/shared/service/application/actors";
 
@@ -32,10 +32,10 @@ export interface UserStore extends Store {
 
 export interface UserBehavior extends Behavior<UserStore> {
     readonly store: UserStore;
-    signUp: (context: SignUpScenario, actor: Actor) => void;
-    signIn: (context: SignInScenario, actor: Actor) => void;
-    signOut: (context: SignOutScenario, actor: Actor) => void;
-    observingUsersTasks: (context: ObservingUsersTasksScenario, actor: Actor) => void;
+    signUp: (context: SignUpScenes, actor: Actor) => void;
+    signIn: (context: SignInScenes, actor: Actor) => void;
+    signOut: (context: SignOutScenes, actor: Actor) => void;
+    observingUsersTasks: (context: ObservingUsersTasksScenes, actor: Actor) => void;
 }
 
 export function createUserBehavior(controller: BehaviorController): UserBehavior {

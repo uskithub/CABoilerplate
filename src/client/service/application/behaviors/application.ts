@@ -36,7 +36,7 @@ export function createApplicationBehavior(controller: BehaviorController): Appli
             let subscription: Subscription | null = null;
             subscription = new BootUsecase(context)
                 .interactedBy(actor, {
-                    next: ([lastSceneContext, performedScenario]: [BootScenes, BootScenes[]]) => {
+                    next: ([lastSceneContext, performedScenario]) => {
                         if (!isBootGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                         case Boot.goals.sessionExistsThenServicePresentsHome:
