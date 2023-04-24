@@ -10,7 +10,7 @@ import type { Action, DataTableHeader } from "../../components/dataTable";
 import { inject, reactive, ref } from "vue";
 import type { BehaviorController } from "../../../application/behaviors";
 import { BEHAVIOR_CONTROLLER_KEY } from "../../../application/behaviors";
-import { ListInsuranceItems } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuaranceItems";
+import { ListInsuranceItems } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuranceItems";
 
 
 const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;

@@ -14,7 +14,7 @@ import { Actor } from "../../application/actors";
 import { ObservingUsersTasksUsecase } from "../../application/usecases/service/observingUsersTasks";
 import { isService } from "../../application/actors/service";
 import { GetWarrantyList, GetWarrantyListUsecase } from "../../application/usecases/signedInUser/getWarrantyList";
-import { ListInsuranceItemsUsecase } from "../../application/usecases/ServiceInProcess/signedInUser/listInsuaranceItems";
+import { ListInsuranceItemsUsecase } from "../../application/usecases/ServiceInProcess/signedInUser/listInsuranceItems";
 
 
 export default {

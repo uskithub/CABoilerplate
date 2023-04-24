@@ -3,13 +3,13 @@ import ServiceModel from "@models/service";
 import TaskModel, { Task } from "@models/task";
 import { User } from "@models/user";
 import { concat, first, map, Observable } from "rxjs";
-import { Actor, Boundary, boundary, Empty, Usecase, UsecaseScenario } from "robustive-ts";
+import { Actor, Boundary, boundary, Empty, Usecase, Scenes as _S, IContext } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
 
 /**
  * usecase: アプリを起動する
  */
-export const Boot = {
+export const scenes = {
     /* Basic Courses */
     userOpensSite : "ユーザはサイトを開く"
     , serviceChecksSession : "サービスはセッションがあるかを確認する"
@@ -22,24 +22,28 @@ export const Boot = {
     }
 } as const;
 
-type Boot = typeof Boot[keyof typeof Boot];
+type Boot = typeof scenes[keyof typeof scenes];
 
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
 // https://zenn.dev/eagle/articles/ts-coproduct-introduction
-export type BootGoal = UsecaseScenario<{
-    [Boot.goals.sessionExistsThenServicePresentsHome]: { user: User; };
-    [Boot.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
-    [Boot.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
+type Goals = _S<{
+    [scenes.goals.sessionExistsThenServicePresentsHome]: { user: User; };
+    [scenes.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
+    [scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
 }>;
 
-export type BootScenario = UsecaseScenario<{
-    [Boot.userOpensSite]: Empty;
-    [Boot.serviceChecksSession]: Empty;
+type Scenes = _S<{
+    [scenes.userOpensSite]: Empty;
+    [scenes.serviceChecksSession]: Empty;
     // [Boot.sessionExistsThenPerformObservingUsersTasks]: { user: User; };
-}> | BootGoal;
+}> | Goals;
 
-export const isBootGoal = (context: any): context is BootGoal => context.scene !== undefined && Object.values(Boot.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isBootScene = (context: any): context is BootScenario => context.scene !== undefined && Object.values(Boot).find(c => { return c === context.scene; }) !== undefined;
+export const isBootGoal = <T extends IContext>(context: T): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isBootScene = <T extends IContext>(context: T): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
+
+export const Boot = scenes;
+export type BootGoals = Goals;
+export type BootScenes = Scenes;
 
 /**
  * コンストラクタでSceneが保持するContextを設定します。
@@ -47,7 +51,7 @@ export const isBootScene = (context: any): context is BootScenario => context.sc
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class BootUsecase extends Usecase<BootScenario> {
+export class BootUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
         return ServiceModel.authorize(actor, this);
@@ -55,15 +59,15 @@ export class BootUsecase extends Usecase<BootScenario> {
 
     next(): Observable<this>|Boundary {
         switch (this.context.scene) {
-        case Boot.userOpensSite: {
+        case scenes.userOpensSite: {
             return this.just({ scene: Boot.serviceChecksSession });
         }
-        case Boot.serviceChecksSession : {
+        case scenes.serviceChecksSession : {
             return this.check();
         }
-        case Boot.goals.sessionExistsThenServicePresentsHome:
-        case Boot.goals.sessionNotExistsThenServicePresentsSignin:
-        case Boot.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList: {
+        case scenes.goals.sessionExistsThenServicePresentsHome:
+        case scenes.goals.sessionNotExistsThenServicePresentsSignin:
+        case scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList: {
             return boundary;
         }
         }
@@ -76,10 +80,10 @@ export class BootUsecase extends Usecase<BootScenario> {
                 map((signInStatusContext) => {
                     switch(signInStatusContext.kind) {
                     case SignInStatus.signIn: {
-                        return this.instantiate({ scene: Boot.goals.sessionExistsThenServicePresentsHome, user: signInStatusContext.user });
+                        return this.instantiate({ scene: scenes.goals.sessionExistsThenServicePresentsHome, user: signInStatusContext.user });
                     }
                     default: {
-                        return this.instantiate({ scene: Boot.goals.sessionNotExistsThenServicePresentsSignin });
+                        return this.instantiate({ scene: scenes.goals.sessionNotExistsThenServicePresentsSignin });
                     }
                     }
                 })
@@ -90,11 +94,11 @@ export class BootUsecase extends Usecase<BootScenario> {
     // private startObservingUsersTasks(user: User): Observable<this> {
     //     // ユースケースの終わり（バウンダリー）に、オブザーバ（タスクの観測）を結合している
     //     return concat(
-    //         this.just({ scene: Boot.goals.servicePresentsHome, user: user }) as Observable<this>
+    //         this.just({ scene: scenes.goals.servicePresentsHome, user: user }) as Observable<this>
     //         , TaskModel.observeUserTasks(user.uid)
     //             .pipe(
     //                 map(changedTasks =>
-    //                     this.instantiate({ scene: Boot.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList, changedTasks })
+    //                     this.instantiate({ scene: scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList, changedTasks })
     //                 )
     //             )
     //     );

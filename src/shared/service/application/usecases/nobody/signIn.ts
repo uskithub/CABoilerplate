@@ -2,13 +2,13 @@
 import type { SignInValidationResult, User } from "@models/user";
 import ServiceModel from "@models/service";
 import UserModel from "@models/user";
-import { Actor, boundary, Boundary, Usecase, UsecaseScenario } from "robustive-ts";
+import { Actor, boundary, Boundary, Usecase, Scenes as _S } from "robustive-ts";
 import { catchError, map, Observable } from "rxjs";
 
 /**
  * usecase: サインインする
  */
-export const SignIn = {
+export const scenes = {
     /* Basic Courses */
     userStartsSignInProcess : "ユーザはサインインを開始する"
     , serviceValidateInputs : "サービスは入力項目に問題がないかを確認する"
@@ -22,24 +22,28 @@ export const SignIn = {
     }
 } as const;
 
-type SignIn = typeof SignIn[keyof typeof SignIn];
+type SignIn = typeof scenes[keyof typeof scenes];
 
-export type SignInGoal = UsecaseScenario<{
-    [SignIn.goals.onSuccessInSigningInThenServicePresentsHomeView] : { user: User; };
-    [SignIn.goals.onFailureInValidatingThenServicePresentsError] : { result: SignInValidationResult; };
-    [SignIn.goals.onFailureInSigningInThenServicePresentsError] : { error: Error; };
+type Goals = _S<{
+    [scenes.goals.onSuccessInSigningInThenServicePresentsHomeView] : { user: User; };
+    [scenes.goals.onFailureInValidatingThenServicePresentsError] : { result: SignInValidationResult; };
+    [scenes.goals.onFailureInSigningInThenServicePresentsError] : { error: Error; };
 }>;
 
-export type SignInScenario = UsecaseScenario<{
-    [SignIn.userStartsSignInProcess] : { id: string|null; password: string|null; };
-    [SignIn.serviceValidateInputs] : { id: string|null; password: string|null; };
-    [SignIn.onSuccessInValidatingThenServiceTrySigningIn] : { id: string; password: string; };
-}> | SignInGoal;
+type Scenes = _S<{
+    [scenes.userStartsSignInProcess] : { id: string|null; password: string|null; };
+    [scenes.serviceValidateInputs] : { id: string|null; password: string|null; };
+    [scenes.onSuccessInValidatingThenServiceTrySigningIn] : { id: string; password: string; };
+}> | Goals;
 
-export const isSignInGoal = (context: any): context is SignInGoal => context.scene !== undefined && Object.values(SignIn.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isSignInScene = (context: any): context is SignInScenario => context.scene !== undefined && Object.values(SignIn).find(c => { return c === context.scene; }) !== undefined;
+export const isSignInGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isSignInScene = (context: any): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
 
-export class SignInUsecase extends Usecase<SignInScenario> {
+export const SignIn = scenes;
+export type SignInGoals = Goals;
+export type SignInScenes = Scenes;
+
+export class SignInUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
         return ServiceModel.authorize(actor, this);
@@ -47,18 +51,18 @@ export class SignInUsecase extends Usecase<SignInScenario> {
 
     next(): Observable<this>|Boundary {
         switch (this.context.scene) {
-        case SignIn.userStartsSignInProcess: {
-            return this.just({ scene: SignIn.serviceValidateInputs, id: this.context.id, password: this.context.password });
+        case scenes.userStartsSignInProcess: {
+            return this.just({ scene: scenes.serviceValidateInputs, id: this.context.id, password: this.context.password });
         }
-        case SignIn.serviceValidateInputs: {
+        case scenes.serviceValidateInputs: {
             return this.validate(this.context.id, this.context.password);
         }
-        case SignIn.onSuccessInValidatingThenServiceTrySigningIn : {
+        case scenes.onSuccessInValidatingThenServiceTrySigningIn : {
             return this.signIn(this.context.id, this.context.password);
         }
-        case SignIn.goals.onSuccessInSigningInThenServicePresentsHomeView:
-        case SignIn.goals.onFailureInValidatingThenServicePresentsError:
-        case SignIn.goals.onFailureInSigningInThenServicePresentsError: {
+        case scenes.goals.onSuccessInSigningInThenServicePresentsHomeView:
+        case scenes.goals.onFailureInValidatingThenServicePresentsError:
+        case scenes.goals.onFailureInSigningInThenServicePresentsError: {
             return boundary;
         }
         }
@@ -67,9 +71,9 @@ export class SignInUsecase extends Usecase<SignInScenario> {
     private validate(id: string|null, password: string|null): Observable<this> {
         const result = UserModel.validate(id, password);
         if (result === true && id !== null && password != null) {
-            return this.just({ scene: SignIn.onSuccessInValidatingThenServiceTrySigningIn, id, password });
+            return this.just({ scene: scenes.onSuccessInValidatingThenServiceTrySigningIn, id, password });
         } else {
-            return this.just({ scene: SignIn.goals.onFailureInValidatingThenServicePresentsError, result });
+            return this.just({ scene: scenes.goals.onFailureInValidatingThenServicePresentsError, result });
         }
     }
 
@@ -77,8 +81,8 @@ export class SignInUsecase extends Usecase<SignInScenario> {
         return UserModel
             .signIn(id, password)
             .pipe(
-                map(user => this.instantiate({ scene: SignIn.goals.onSuccessInSigningInThenServicePresentsHomeView, user }))
-                , catchError(error => this.just({ scene: SignIn.goals.onFailureInSigningInThenServicePresentsError, error }))
+                map(user => this.instantiate({ scene: scenes.goals.onSuccessInSigningInThenServicePresentsHomeView, user }))
+                , catchError(error => this.just({ scene: scenes.goals.onFailureInSigningInThenServicePresentsError, error }))
             );
     }
 }

@@ -6,7 +6,7 @@ import { SignOutScenario } from "./signedInUser/signOut";
 
 import { ObservingUsersTasksScenario } from "./service/observingUsersTasks";
 import { GetWarrantyListScenario } from "./signedInUser/getWarrantyList";
-import { ListInsuranceItemsScenario } from "./ServiceInProcess/signedInUser/listInsuaranceItems";
+import { ListInsuranceItemsScenario } from "./ServiceInProcess/signedInUser/listInsuranceItems";
 
 export type Usecases = 
     /* ServiceInProcess */

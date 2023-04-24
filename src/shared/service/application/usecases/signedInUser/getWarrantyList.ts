@@ -2,13 +2,12 @@ import UserModel from "@models/user";
 import WarrantyModel from "@models/warranty";
 import ServiceModel from "@models/service";
 import { catchError, map, Observable } from "rxjs";
-import { Actor, boundary, Boundary, Empty, Usecase, UsecaseScenario } from "robustive-ts";
-import { Post } from "@api";
+import { Actor, boundary, Boundary, Empty, Usecase, Scenes as _S } from "robustive-ts";
 
 /**
  * usecase: 保証一覧を取得する
  */
-export const GetWarrantyList = {
+export const scenes = {
     /* Basic Courses */
     userInitiatesWarrantyListing: "ユーザは保証一覧の取得を開始する"
     , serviceSelectsWarrantiesThatMeetConditions: "サービスは条件に該当する保証を抽出する"
@@ -24,22 +23,26 @@ export const GetWarrantyList = {
     }
 } as const;
 
-type GetWarrantyList = typeof GetWarrantyList[keyof typeof GetWarrantyList];
+type GetWarrantyList = typeof scenes[keyof typeof scenes];
 
-export type GetWarrantyListGoal = UsecaseScenario<{
-    [GetWarrantyList.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView]: { warranties: Post[]; }
-    [GetWarrantyList.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView]: Empty
+export type Goals = _S<{
+    [scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView]: { warranties: Post[]; }
+    [scenes.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView]: Empty
 }>;
 
-export type GetWarrantyListScenario = UsecaseScenario<{
-    [GetWarrantyList.userInitiatesWarrantyListing]: Empty
-    [GetWarrantyList.serviceSelectsWarrantiesThatMeetConditions]: Empty
-}> | GetWarrantyListGoal;
+export type Scenes = _S<{
+    [scenes.userInitiatesWarrantyListing]: Empty
+    [scenes.serviceSelectsWarrantiesThatMeetConditions]: Empty
+}> | Goals;
 
-export const isGetWarrantyListGoal = (context: any): context is GetWarrantyList => context.scene !== undefined && Object.values(GetWarrantyList.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isGetWarrantyListScene = (context: any): context is GetWarrantyListScenario => context.scene !== undefined && Object.values(GetWarrantyList).find(c => { return c === context.scene; }) !== undefined;
+export const isGetWarrantyListGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isGetWarrantyListScene = (context: any): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
 
-export class GetWarrantyListUsecase extends Usecase<GetWarrantyListScenario> {
+export const GetWarrantyList = scenes;
+export type GetWarrantyListGoals = Goals;
+export type GetWarrantyListScenes = Scenes;
+
+export class GetWarrantyListUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
         return ServiceModel.authorize(actor, this);
@@ -47,14 +50,14 @@ export class GetWarrantyListUsecase extends Usecase<GetWarrantyListScenario> {
 
     next(): Observable<this> | Boundary {
         switch (this.context.scene) {
-        case GetWarrantyList.userInitiatesWarrantyListing: {
-            return this.just({ scene: GetWarrantyList.serviceSelectsWarrantiesThatMeetConditions });
+        case scenes.userInitiatesWarrantyListing: {
+            return this.just({ scene: scenes.serviceSelectsWarrantiesThatMeetConditions });
         }
-        case GetWarrantyList.serviceSelectsWarrantiesThatMeetConditions: {
+        case scenes.serviceSelectsWarrantiesThatMeetConditions: {
             return this.select();
         }
-        case GetWarrantyList.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
-        case GetWarrantyList.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView: {
+        case scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
+        case scenes.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView: {
             return boundary;
         }
         }
@@ -65,7 +68,7 @@ export class GetWarrantyListUsecase extends Usecase<GetWarrantyListScenario> {
             .get()
             .pipe(
                 map((warranties) => {
-                    return this.instantiate({ scene: GetWarrantyList.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView, warranties });
+                    return this.instantiate({ scene: scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView, warranties });
                 })
                 // , catchError(error => this.just({ scene: SignOut.goals.onFailureThenServicePresentsError, error }))
             );

@@ -1,12 +1,12 @@
 import UserModel from "@models/user";
 import ServiceModel from "@models/service";
 import { catchError, map, Observable } from "rxjs";
-import { Actor, boundary, Boundary, Empty, Usecase, UsecaseScenario } from "robustive-ts";
+import { Actor, boundary, Boundary, Empty, Usecase, Scenes as _S } from "robustive-ts";
 
 /**
  * usecase: サインアウトする
  */
-export const SignOut = {
+export const scenes = {
     /* Basic Courses */
     userStartsSignOutProcess: "ユーザはサインアウトを開始する"
     , serviceClosesSession: "サービスはセッションを終了する"
@@ -24,24 +24,28 @@ export const SignOut = {
     }
 } as const;
 
-type SignOut = typeof SignOut[keyof typeof SignOut];
+type SignOut = typeof scenes[keyof typeof scenes];
 
-export type SignOutGoal = UsecaseScenario<{
-    [SignOut.goals.onSuccessThenServicePresentsSignInView]: Empty
-    [SignOut.goals.onFailureThenServicePresentsError]: { error: Error; }
-    [SignOut.goals.servicePresentsHomeView]: Empty
+export type Goals = _S<{
+    [scenes.goals.onSuccessThenServicePresentsSignInView]: Empty
+    [scenes.goals.onFailureThenServicePresentsError]: { error: Error; }
+    [scenes.goals.servicePresentsHomeView]: Empty
 }>;
 
-export type SignOutScenario = UsecaseScenario<{
-    [SignOut.userStartsSignOutProcess]: Empty
-    [SignOut.serviceClosesSession]: Empty
-    [SignOut.userResignSignOut]: Empty
-}> | SignOutGoal;
+export type Scenes = _S<{
+    [scenes.userStartsSignOutProcess]: Empty
+    [scenes.serviceClosesSession]: Empty
+    [scenes.userResignSignOut]: Empty
+}> | Goals;
 
-export const isSignOutGoal = (context: any): context is SignOutGoal => context.scene !== undefined && Object.values(SignOut.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isSignOutScene = (context: any): context is SignOutScenario => context.scene !== undefined && Object.values(SignOut).find(c => { return c === context.scene; }) !== undefined;
+export const isSignOutGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isSignOutScene = (context: any): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
 
-export class SignOutUsecase extends Usecase<SignOutScenario> {
+export const SignOut = scenes;
+export type SignOutGoals = Goals;
+export type SignOutScenes = Scenes;
+
+export class SignOutUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
         return ServiceModel.authorize(actor, this);
@@ -49,20 +53,20 @@ export class SignOutUsecase extends Usecase<SignOutScenario> {
 
     next(): Observable<this> | Boundary {
         switch (this.context.scene) {
-            case SignOut.userStartsSignOutProcess: {
-                return this.just({ scene: SignOut.serviceClosesSession });
-            }
-            case SignOut.serviceClosesSession: {
-                return this.signOut();
-            }
-            case SignOut.userResignSignOut: {
-                return this.just({ scene: SignOut.goals.servicePresentsHomeView });
-            }
-            case SignOut.goals.onSuccessThenServicePresentsSignInView:
-            case SignOut.goals.onFailureThenServicePresentsError:
-            case SignOut.goals.servicePresentsHomeView: {
-                return boundary;
-            }
+        case scenes.userStartsSignOutProcess: {
+            return this.just({ scene: scenes.serviceClosesSession });
+        }
+        case scenes.serviceClosesSession: {
+            return this.signOut();
+        }
+        case scenes.userResignSignOut: {
+            return this.just({ scene: scenes.goals.servicePresentsHomeView });
+        }
+        case scenes.goals.onSuccessThenServicePresentsSignInView:
+        case scenes.goals.onFailureThenServicePresentsError:
+        case scenes.goals.servicePresentsHomeView: {
+            return boundary;
+        }
         }
     }
 
@@ -71,9 +75,9 @@ export class SignOutUsecase extends Usecase<SignOutScenario> {
             .signOut()
             .pipe(
                 map(() => {
-                    return this.instantiate({ scene: SignOut.goals.onSuccessThenServicePresentsSignInView });
+                    return this.instantiate({ scene: scenes.goals.onSuccessThenServicePresentsSignInView });
                 })
-                , catchError(error => this.just({ scene: SignOut.goals.onFailureThenServicePresentsError, error }))
+                , catchError(error => this.just({ scene: scenes.goals.onFailureThenServicePresentsError, error }))
             );
     }
 }

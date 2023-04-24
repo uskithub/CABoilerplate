@@ -1,5 +1,5 @@
 import { Actor } from "@/shared/service/application/actors";
-import { ListInsuranceItems, isListInsuranceItemsGoal, ListInsuranceItemsScenario, ListInsuranceItemsUsecase } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuaranceItems";
+import { ListInsuranceItems, isListInsuranceItemsGoal, ListInsuranceItemsScenes, ListInsuranceItemsUsecase } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuranceItems";
 import { InsuranceItem } from "@/shared/service/infrastructure/API";
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { Behavior, BehaviorController, Mutable, SharedStore, Store } from ".";
@@ -8,14 +8,13 @@ import { Behavior, BehaviorController, Mutable, SharedStore, Store } from ".";
 import { inject, reactive } from "vue";
 import { Subscription } from "rxjs";
 import { useRouter } from "vue-router";
-import { Usecase } from "robustive-ts";
 
 export interface ServiceInProcessStore extends Store {
     insuranceItems: InsuranceItem[]|null
 }
 export interface ServiceInProcessBehavior extends Behavior<ServiceInProcessStore> {
     readonly store: ServiceInProcessStore;
-    list: (context: ListInsuranceItemsScenario, actor: Actor) => void;
+    list: (context: ListInsuranceItemsScenes, actor: Actor) => void;
 }
 
 export function createServiceInProcessBehavior(controller: BehaviorController): ServiceInProcessBehavior {
@@ -30,12 +29,12 @@ export function createServiceInProcessBehavior(controller: BehaviorController): 
 
     return {
         store
-        , list: (context: ListInsuranceItemsScenario, actor: Actor) => {
+        , list: (context: ListInsuranceItemsScenes, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = new ListInsuranceItemsUsecase(context)
                 .interactedBy(actor, {
-                    next: ([lastSceneContext, performedScenario]: [ListInsuranceItemsScenario, ListInsuranceItemsScenario[]]) => {
+                    next: ([lastSceneContext, performedScenario]) => {
                         if (!isListInsuranceItemsGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                         case ListInsuranceItems.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView:

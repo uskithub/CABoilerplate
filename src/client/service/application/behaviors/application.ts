@@ -1,5 +1,5 @@
 // service
-import { Boot, BootScenario, BootUsecase, isBootGoal, isBootScene } from "@usecases/nobody/boot";
+import { Boot, BootScenes, BootUsecase, isBootGoal, isBootScene } from "@usecases/nobody/boot";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
@@ -31,12 +31,12 @@ export function createApplicationBehavior(controller: BehaviorController): Appli
 
     return {
         store
-        , boot: (context: BootScenario, actor: Actor) => {
+        , boot: (context: BootScenes, actor: Actor) => {
             const _shared = controller.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = new BootUsecase(context)
                 .interactedBy(actor, {
-                    next: ([lastSceneContext, performedScenario]: [BootScenario, BootScenario[]]) => {
+                    next: ([lastSceneContext, performedScenario]: [BootScenes, BootScenes[]]) => {
                         if (!isBootGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                         case Boot.goals.sessionExistsThenServicePresentsHome:
