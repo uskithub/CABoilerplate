@@ -38,16 +38,8 @@ type Scenes = ContextualizedScenes<{
     // [Boot.sessionExistsThenPerformObservingUsersTasks]: { user: User; };
 }> | Goals;
 
-export const curriedTypeGuard = <T extends Record<keyof any, Empty>>(scenes: _S<T>) => { 
-    return (context: Record<"scene", any> & Record<string, any>): context is T => {
-        return context.scene !== undefined && Object.keys(scenes).find(c => { return c === context.scene; }) !== undefined;
-    };
-};
-
-// export const isBootGoal = <Goals>createTypeGuard();
-
-export const isBootGoal = <T extends IContext>(context: T): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isBootScene = <T extends IContext>(context: T): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
+export const isBootGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isBootScene = (context: any): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
 
 export const Boot = scenes;
 export type BootGoals = Goals;

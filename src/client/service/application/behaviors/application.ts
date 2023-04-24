@@ -1,5 +1,5 @@
 // service
-import { Boot, BootScenes, BootUsecase, isBootGoal, isBootScene } from "@usecases/nobody/boot";
+import { Boot, BootScenes, BootUsecase, isBootGoal } from "@usecases/nobody/boot";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
@@ -19,7 +19,7 @@ import { Actor } from "@/shared/service/application/actors";
 export type ApplicationStore = Store
 export interface ApplicationBehavior extends Behavior<ApplicationStore> {
     readonly store: ApplicationStore;
-    boot: (context: BootScenario, actor: Actor) => void;
+    boot: (context: BootScenes, actor: Actor) => void;
 }
 
 export function createApplicationBehavior(controller: BehaviorController): ApplicationBehavior {
