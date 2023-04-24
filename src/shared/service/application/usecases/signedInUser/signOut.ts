@@ -6,7 +6,7 @@ import { Actor, boundary, Boundary, ContextualizedScenes, Empty, Usecase } from 
 /**
  * usecase: サインアウトする
  */
-export const scenes = {
+const scenes = {
     /* Basic Courses */
     userStartsSignOutProcess: "ユーザはサインアウトを開始する"
     , serviceClosesSession: "サービスはセッションを終了する"
@@ -26,13 +26,13 @@ export const scenes = {
 
 type SignOut = typeof scenes[keyof typeof scenes];
 
-export type Goals = ContextualizedScenes<{
+type Goals = ContextualizedScenes<{
     [scenes.goals.onSuccessThenServicePresentsSignInView]: Empty
     [scenes.goals.onFailureThenServicePresentsError]: { error: Error; }
     [scenes.goals.servicePresentsHomeView]: Empty
 }>;
 
-export type Scenes = ContextualizedScenes<{
+type Scenes = ContextualizedScenes<{
     [scenes.userStartsSignOutProcess]: Empty
     [scenes.serviceClosesSession]: Empty
     [scenes.userResignSignOut]: Empty

@@ -8,7 +8,7 @@ import { catchError, map, Observable } from "rxjs";
 /**
  * usecase: サインインする
  */
-export const scenes = {
+const scenes = {
     /* Basic Courses */
     userStartsSignInProcess : "ユーザはサインインを開始する"
     , serviceValidateInputs : "サービスは入力項目に問題がないかを確認する"

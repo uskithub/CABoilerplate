@@ -8,7 +8,7 @@ import { ChangedItem } from "../../../domain/interfaces/backend";
 /**
  * usecase: アプリを起動する
  */
-export const scenes = {
+const scenes = {
     /* Basic Courses */
     serviceDetectsSigningIn : "サービスはユーザのサインインを検知する"
     , startObservingUsersTasks : "サービスはユーザのタスクの観測を開始する"
@@ -24,12 +24,12 @@ type ObservingUsersTasks = typeof scenes[keyof typeof scenes];
 
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
 // https://zenn.dev/eagle/articles/ts-coproduct-introduction
-export type Goals = ContextualizedScenes<{
+type Goals = ContextualizedScenes<{
     [scenes.goals.serviceDoNothing]: Empty;
     [scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
 }>;
 
-export type Scenes = ContextualizedScenes<{
+type Scenes = ContextualizedScenes<{
     [scenes.serviceDetectsSigningIn]: { user: User; };
     [scenes.startObservingUsersTasks]: { user: User; };
 }> | Goals;

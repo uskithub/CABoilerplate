@@ -9,7 +9,7 @@ import { ChangedItem } from "../../../domain/interfaces/backend";
 /**
  * usecase: アプリを起動する
  */
-export const scenes = {
+const scenes = {
     /* Basic Courses */
     userOpensSite : "ユーザはサイトを開く"
     , serviceChecksSession : "サービスはセッションがあるかを確認する"
@@ -44,9 +44,9 @@ export const curriedTypeGuard = <T extends Record<keyof any, Empty>>(scenes: _S<
     };
 };
 
-export const isBootGoal = <Goals>createTypeGuard();
+// export const isBootGoal = <Goals>createTypeGuard();
 
-// export const isBootGoal = <T extends IContext>(context: T): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
+export const isBootGoal = <T extends IContext>(context: T): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
 export const isBootScene = <T extends IContext>(context: T): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
 
 export const Boot = scenes;

@@ -7,7 +7,7 @@ import { Actor, boundary, Boundary, ContextualizedScenes, Empty, Usecase } from 
 /**
  * usecase: 保証一覧を取得する
  */
-export const scenes = {
+const scenes = {
     /* Basic Courses */
     userInitiatesWarrantyListing: "ユーザは保証一覧の取得を開始する"
     , serviceSelectsWarrantiesThatMeetConditions: "サービスは条件に該当する保証を抽出する"
@@ -25,12 +25,12 @@ export const scenes = {
 
 type GetWarrantyList = typeof scenes[keyof typeof scenes];
 
-export type Goals = ContextualizedScenes<{
+type Goals = ContextualizedScenes<{
     [scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView]: { warranties: Post[]; }
     [scenes.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView]: Empty
 }>;
 
-export type Scenes = ContextualizedScenes<{
+type Scenes = ContextualizedScenes<{
     [scenes.userInitiatesWarrantyListing]: Empty
     [scenes.serviceSelectsWarrantiesThatMeetConditions]: Empty
 }> | Goals;

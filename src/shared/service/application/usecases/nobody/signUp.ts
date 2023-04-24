@@ -8,7 +8,7 @@ import { first, map, Observable } from "rxjs";
 /**
  * usecase: サインアップする
  */
-export const scenes = {
+const scenes = {
     /* Basic Courses */
     userStartsSignUpProcess : "ユーザはサインアップを開始する"
     , serviceValidateInputs : "サービスは入力項目に問題がないかを確認する"
@@ -24,13 +24,13 @@ export const scenes = {
 
 type SignUp = typeof scenes[keyof typeof scenes];
 
-export type Goals = ContextualizedScenes<{
+type Goals = ContextualizedScenes<{
     [scenes.goals.onSuccessInPublishingThenServicePresentsHomeView] : { user: User; };
     [scenes.goals.onFailureInValidatingThenServicePresentsError] : { result: SignUpValidationResult; };
     [scenes.goals.onFailureInPublishingThenServicePresentsError] : { error: Error; };
 }>;
 
-export type Scenes = ContextualizedScenes<{
+type Scenes = ContextualizedScenes<{
     [scenes.userStartsSignUpProcess] : { id: string|null; password: string|null; };
     [scenes.serviceValidateInputs]: { id: string|null; password: string|null; };
     [scenes.onSuccessInValidatingThenServicePublishNewAccount]: { id: string; password: string; };
