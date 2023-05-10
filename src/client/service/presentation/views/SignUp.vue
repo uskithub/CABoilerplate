@@ -7,12 +7,12 @@ import { SignOut } from "@usecases/signedInUser/signOut";
 import { computed, inject, reactive } from "vue";
 import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
-import { BEHAVIOR_CONTROLLER_KEY } from "../../application/behaviors";
-import type { BehaviorController } from "../../application/behaviors";
+import { DISPATCHER_KEY } from "../../application/performers";
+import type { Dispatcher } from "../../application/performers";
 import { isSignedInUser } from "@shared/service/application/actors/signedInUser";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
-const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
+const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
 
 const state = reactive<{
     email: string | null;

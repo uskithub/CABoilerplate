@@ -8,12 +8,12 @@ import type { Action, DataTableHeader } from "../../components/dataTable";
 
 // system
 import { inject, reactive, ref } from "vue";
-import type { BehaviorController } from "../../../application/behaviors";
-import { BEHAVIOR_CONTROLLER_KEY } from "../../../application/behaviors";
+import type { Dispatcher } from "../../../application/performers";
+import { DISPATCHER_KEY } from "../../../application/performers";
 import { GetWarrantyList } from "@/shared/service/application/usecases/signedInUser/getWarrantyList";
 
 
-const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
+const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
 
 dispatch({ scene: GetWarrantyList.userInitiatesWarrantyListing });
 

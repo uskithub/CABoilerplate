@@ -1,5 +1,5 @@
-import UserModel from "@models/user";
-import ServiceModel from "@models/service";
+import UserModel from "@domain/entities/user";
+import ServiceModel from "@domain/services/service";
 import { catchError, map, Observable } from "rxjs";
 import { Actor, boundary, Boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
 

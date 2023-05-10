@@ -1,6 +1,6 @@
-import UserModel from "@models/user";
-import WarrantyModel from "@models/warranty";
-import ServiceModel from "@models/service";
+import UserModel from "@domain/entities/user";
+import WarrantyModel from "@domain/entities/warranty";
+import ServiceModel from "@domain/services/service";
 import { catchError, map, Observable } from "rxjs";
 import { Actor, boundary, Boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
 

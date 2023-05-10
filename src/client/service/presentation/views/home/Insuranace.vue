@@ -8,19 +8,21 @@ import type { Action, DataTableHeader } from "../../components/dataTable";
 
 // system
 import { inject, reactive, ref } from "vue";
-import type { BehaviorController } from "../../../application/behaviors";
-import { BEHAVIOR_CONTROLLER_KEY } from "../../../application/behaviors";
+import type { Dispatcher } from "../../../application/performers";
+import { DISPATCHER_KEY } from "../../../application/performers";
 import { ListInsuranceItems } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuranceItems";
 
 
-const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
+const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
 
 
 
 const state = reactive<{
     isPresentDialog: boolean;
+    isAddingNewPolicy: boolean;
 }>({
     isPresentDialog: false
+    , isAddingNewPolicy: false
 });
 
 
@@ -36,24 +38,49 @@ const onClickAddButton = () => {
 v-container
  v-card
   v-toolbar(dense, flat)
-    v-toolbar-title 保険一覧
+    v-toolbar-title 保険加入アイテム一覧
     template(v-slot:append)
       v-btn(icon="mdi:mdi-plus" @click="onClickAddButton")
 v-row(justify="center")
   v-dialog(v-model="state.isPresentDialog", persistent, max-width="800")
     v-card
-      v-card-title.text-h5 Use Google's location service?
-      v-card-text Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.
+      v-card-title.text-h5 保険加入アイテムを追加
+      v-card-text
+        v-container
+          v-row
+            v-col
+              v-autocomplete(
+                label="製品カテゴリ"
+                :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
+              )
+          v-row
+            v-col
+              v-autocomplete(
+                label="保険期間"
+                :items="['20', '19', '3', '4', '5', 'Wyoming']"
+              )
+          v-row
+            v-col
+              v-autocomplete(
+                label="ポリシー"
+                :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
+              )
       v-card-actions
         v-spacer
         v-btn(
-          color="warning",
-          text,
-        ) Sign Out
+          variant="outlined"
+          size="large"
+          prepend-icon="mdi-close"
+          @click="state.isPresentDialog = false"
+        ) 閉じる
+        v-spacer
         v-btn(
-          color="success",
+          variant="outlined"
+          size="large"
+          prepend-icon="mdi-check"
           text,
-        ) Go Home
+        ) 追加する
+        v-spacer
 </template>
 
 <style lang="sass" scoped></style>

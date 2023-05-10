@@ -1,15 +1,15 @@
 <script setup lang="ts">
 // service
-import type { Task } from "@/shared/service/domain/models/task";
-import TaskModel from "@/shared/service/domain/models/task";
+import type { Task } from "@/shared/service/domain/entities/task";
+import TaskModel from "@/shared/service/domain/entities/task";
 
 // view
 import { tree, findNodeById } from "vue3-tree";
 
 // system
 import { inject, reactive, ref } from "vue";
-import type { BehaviorController } from "../../../application/behaviors";
-import { BEHAVIOR_CONTROLLER_KEY } from "../../../application/behaviors";
+import type { Dispatcher } from "../../../application/performers";
+import { DISPATCHER_KEY } from "../../../application/performers";
 import type { Treenode } from "vue3-tree";
 import "vue3-tree/style.css";
 
@@ -19,7 +19,7 @@ import swtTree from "../../../../../../test/stubs/swt";
 import taskTree from "../../../../../../test/stubs/task";
 
 
-const { stores, dispatch } = inject(BEHAVIOR_CONTROLLER_KEY) as BehaviorController;
+const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
 
 // custom directive for autofocus
 const vFocus = {

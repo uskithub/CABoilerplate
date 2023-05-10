@@ -19,7 +19,7 @@ export default defineConfig({
             , "@client": path.resolve(__dirname, "src/client")
             , "@server": path.resolve(__dirname, "src/server")
             , "@shared": path.resolve(__dirname, "src/shared")
-            , "@models": path.resolve(__dirname, "src/shared/service/domain/models")
+            , "@domain": path.resolve(__dirname, "src/shared/service/domain")
             , "@interfaces": path.resolve(__dirname, "src/shared/service/domain/interfaces")
             , "@api": path.resolve(__dirname, "src/shared/service/infrastructure/API")
             , "@graphql": path.resolve(__dirname, "src/shared/service/infrastructure/graphql")

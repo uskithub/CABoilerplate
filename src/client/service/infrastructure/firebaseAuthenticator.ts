@@ -2,7 +2,7 @@ import { Authenticator, SignInStatus, SignInStatusContext } from "@interfaces/au
 import { FirebaseApp, FirebaseError } from "firebase/app";
 import { Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, Unsubscribe, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { Observable, ReplaySubject } from "rxjs";
-import { User } from "@models/user";
+import { User } from "@domain/entities/user";
 
 export class FirebaseAuthenticator implements Authenticator {
     #auth: Auth;

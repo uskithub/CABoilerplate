@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { provide } from "vue";
-import { BEHAVIOR_CONTROLLER_KEY, createBehaviorController } from "@/client/service/application/behaviors";
+import { DISPATCHER_KEY, createDispatcher } from "@/client/service/application/performers";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { Boot } from "@/shared/service/application/usecases/nobody/boot";
 
-const controller = createBehaviorController();
-provide(BEHAVIOR_CONTROLLER_KEY, controller);
+const dispatcher = createDispatcher();
+provide(DISPATCHER_KEY, dispatcher);
 
-const { stores, dispatch } = controller;
+const { stores, dispatch } = dispatcher;
 
 console.log("APPPPP");
 

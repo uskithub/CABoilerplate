@@ -1,7 +1,7 @@
 
-import type { SignInValidationResult, User } from "@models/user";
-import ServiceModel from "@models/service";
-import UserModel from "@models/user";
+import type { SignInValidationResult, User } from "@domain/entities/user";
+import ServiceModel from "@domain/services/service";
+import UserModel from "@domain/entities/user";
 import { Actor, boundary, Boundary, ContextualizedScenes, Usecase } from "robustive-ts";
 import { catchError, map, Observable } from "rxjs";
 
