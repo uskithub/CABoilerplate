@@ -21,6 +21,7 @@ import { AmplifyBackend } from "./service/infrastructure/amplifyBackend";
 
 import { DICTIONARY_KEY, i18n } from "@/shared/system/localizations";
 import { ServiceInProcessApi } from "./service/infrastructure/amplify/serviceInProcessApi";
+import { FirebaseAnalytics } from "./service/infrastructure/firebaseAnalytics/firebaseAnalytics";
 // import { GraphqlAuthenticator } from "./service/infrastructure/graphqlAuthenticator";
 
 // initialize firebase
@@ -30,6 +31,7 @@ dependencies.auth = new FirebaseAuthenticator(firebaseApp);
 // dependencies.backend = new FirestoreBackend(getFirestore(firebaseApp));
 dependencies.backend = new AmplifyBackend();
 dependencies.serviceInProcess = new ServiceInProcessApi();
+dependencies.analytics = new FirebaseAnalytics();
 
 // initialize Amplify
 Amplify.configure(awsExports);
