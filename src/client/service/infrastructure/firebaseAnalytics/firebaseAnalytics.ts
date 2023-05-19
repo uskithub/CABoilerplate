@@ -11,6 +11,7 @@ export class FirebaseAnalytics implements Analytics {
     }
     
     logEvent(properties: LogProperties) {
-        logEvent(this.analytics, properties.event, properties.params);
+        // logEvent(this.analytics, properties.event, properties.params);
+        console.log("FAnalytices.logEvent", properties);
     }
 }

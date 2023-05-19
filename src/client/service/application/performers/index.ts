@@ -19,6 +19,7 @@ import { createServiceInProcessPerformer } from "./serviceInProcess";
 // System
 import { ContextualizedScenes, Empty, Nobody } from "robustive-ts";
 import { watch, WatchStopHandle } from "vue";
+import { Log } from "@/shared/service/domain/analytics/log";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -91,6 +92,8 @@ export function createDispatcher(): Dispatcher {
     dispatcher.dispatch = (context) => {
         const _shared = shared as Mutable<SharedStore>;
         const actor = shared.actor;
+
+        new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user }}).record();
 
         /* Nobody */
         if (isBootScene(context)) {
