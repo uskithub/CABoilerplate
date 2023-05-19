@@ -2,7 +2,7 @@ import { Actor } from "@/shared/service/application/actors";
 import { ListInsuranceItems, isListInsuranceItemsGoal, ListInsuranceItemsScenes, ListInsuranceItemsUsecase } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuranceItems";
 import { InsuranceItem } from "@/shared/service/infrastructure/API";
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
-import { Behavior, BehaviorController, Mutable, SharedStore, Store } from ".";
+import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 
 // System
 import { inject, reactive } from "vue";
@@ -12,12 +12,12 @@ import { useRouter } from "vue-router";
 export interface ServiceInProcessStore extends Store {
     insuranceItems: InsuranceItem[]|null
 }
-export interface ServiceInProcessBehavior extends Behavior<ServiceInProcessStore> {
+export interface ServiceInProcessPerformer extends Performer<ServiceInProcessStore> {
     readonly store: ServiceInProcessStore;
     list: (context: ListInsuranceItemsScenes, actor: Actor) => void;
 }
 
-export function createServiceInProcessBehavior(controller: BehaviorController): ServiceInProcessBehavior {
+export function createServiceInProcessPerformer(dispatcher: Dispatcher): ServiceInProcessPerformer {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
 
@@ -30,7 +30,7 @@ export function createServiceInProcessBehavior(controller: BehaviorController): 
     return {
         store
         , list: (context: ListInsuranceItemsScenes, actor: Actor) => {
-            const _shared = controller.stores.shared as Mutable<SharedStore>;
+            const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = new ListInsuranceItemsUsecase(context)
                 .interactedBy(actor, {
@@ -46,7 +46,7 @@ export function createServiceInProcessBehavior(controller: BehaviorController): 
                             break;
                         }
                     }
-                    , complete: controller.commonCompletionProcess
+                    , complete: dispatcher.commonCompletionProcess
                 });
         }
     };

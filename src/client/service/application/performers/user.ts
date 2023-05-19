@@ -6,13 +6,13 @@ import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { inject, reactive } from "vue";
-import { Behavior, Store, Mutable, SharedStore, BehaviorController } from ".";
+import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Nobody, ActorNotAuthorizedToInteractIn } from "robustive-ts";
 import { isSignUpGoal, SignUp, SignUpScenes, SignUpUsecase } from "@/shared/service/application/usecases/nobody/signUp";
 import { browserPopupRedirectResolver } from "firebase/auth";
-import { Task } from "@/shared/service/domain/models/task";
+import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { isObservingUsersTasksGoal, ObservingUsersTasks, ObservingUsersTasksScenes, ObservingUsersTasksUsecase } from "@usecases/service/observingUsersTasks";
@@ -30,7 +30,7 @@ export interface UserStore extends Store {
     readonly userTasks: ImmutableTask[];
 }
 
-export interface UserBehavior extends Behavior<UserStore> {
+export interface UserPerformer extends Performer<UserStore> {
     readonly store: UserStore;
     signUp: (context: SignUpScenes, actor: Actor) => void;
     signIn: (context: SignInScenes, actor: Actor) => void;
@@ -38,7 +38,7 @@ export interface UserBehavior extends Behavior<UserStore> {
     observingUsersTasks: (context: ObservingUsersTasksScenes, actor: Actor) => void;
 }
 
-export function createUserBehavior(controller: BehaviorController): UserBehavior {
+export function createUserPerformer(dispatcher: Dispatcher): UserPerformer {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
     const store = reactive<UserStore>({
@@ -56,7 +56,7 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
     return {
         store
         , signUp: (context: SignUpScenes, actor: Actor) => {
-            const _shared = controller.stores.shared as Mutable<SharedStore>;
+            const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = new SignUpUsecase(context)
                 .interactedBy(actor, {
@@ -108,11 +108,11 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                             break;
                         }
                     }
-                    , complete: controller.commonCompletionProcess
+                    , complete: dispatcher.commonCompletionProcess
                 });
         }
         , signIn: (context: SignInScenes, actor: Actor) => {
-            const _shared = controller.stores.shared as Mutable<SharedStore>;
+            const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = new SignInUsecase(context)
                 .interactedBy(actor, {
@@ -166,11 +166,11 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                     , error: (e) => {
                         _store.signInFailureMessage = e.message;
                     }
-                    , complete: controller.commonCompletionProcess
+                    , complete: dispatcher.commonCompletionProcess
                 });
         }
         , signOut: (context: SignOutScenes, actor: Actor) => {
-            const _shared = controller.stores.shared as Mutable<SharedStore>;
+            const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = new SignOutUsecase(context)
                 .interactedBy(actor, {
@@ -178,7 +178,7 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                         if (!isSignOutGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
                         case SignOut.goals.onSuccessThenServicePresentsSignInView:
-                            controller.change(new Nobody());
+                            dispatcher.change(new Nobody());
                             _shared.signInStatus = SignInStatus.signOut;
                             break;
                         case SignOut.goals.onFailureThenServicePresentsError:
@@ -188,11 +188,11 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                             router.replace("/");
                         }
                     }
-                    , complete: controller.commonCompletionProcess
+                    , complete: dispatcher.commonCompletionProcess
                 });
         }
         , observingUsersTasks: (context: ObservingUsersTasksScenes, actor: Actor) => {
-            const _shared = controller.stores.shared as Mutable<SharedStore>;
+            const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = new ObservingUsersTasksUsecase(context)
                 .interactedBy(actor, {
@@ -203,7 +203,7 @@ export function createUserBehavior(controller: BehaviorController): UserBehavior
                             console.log("Started observing user's tasks...");
                             break;
                         case ObservingUsersTasks.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList:
-                            const mutableUserTasks = _store.userTasks as Task[];
+                            const mutableUserTasks = _store.userTasks ;
                             lastSceneContext.changedTasks.forEach(changedTask => {
                                 switch (changedTask.kind) {
                                 case ItemChangeType.added: {

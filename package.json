@@ -2,7 +2,7 @@
   "name": "caboilerplate",
   "version": "0.0.0",
   "scripts": {
-    "serve": "vite",
+    "serve": "amplify mock & vite",
     "build": "vite build",
     "dev": "nodemon --config src/server/system/config/nodemon.json src/server/system/main.ts",
     "preview": "vite preview",

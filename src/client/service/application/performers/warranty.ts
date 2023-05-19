@@ -4,22 +4,21 @@ import { GetWarrantyList, GetWarrantyListScenes, GetWarrantyListUsecase, isGetWa
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { inject, reactive } from "vue";
-import { Behavior, BehaviorController, Mutable, SharedStore, Store } from ".";
+import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
-import { Post } from "@/shared/service/infrastructure/API";
 
 
 export interface WarrantyStore extends Store {
     warranties: Post[]
 }
-export interface WarrantyBehavior extends Behavior<WarrantyStore> {
+export interface WarrantyPerformer extends Performer<WarrantyStore> {
     readonly store: WarrantyStore;
     get: (context: GetWarrantyListScenes, actor: Actor) => void;
 }
 
-export function createWarrantyBehavior(controller: BehaviorController): WarrantyBehavior {
+export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerformer {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
 
@@ -32,7 +31,7 @@ export function createWarrantyBehavior(controller: BehaviorController): Warranty
     return {
         store
         , get: (context: GetWarrantyListScenes, actor: Actor) => {
-            const _shared = controller.stores.shared as Mutable<SharedStore>;
+            const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = new GetWarrantyListUsecase(context)
                 .interactedBy(actor, {
@@ -48,7 +47,7 @@ export function createWarrantyBehavior(controller: BehaviorController): Warranty
                             break;
                         }
                     }
-                    , complete: controller.commonCompletionProcess
+                    , complete: dispatcher.commonCompletionProcess
                 });
         }
     };

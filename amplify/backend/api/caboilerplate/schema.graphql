@@ -31,8 +31,8 @@ type InsuranceItem @model {
   id: ID!
   insurancePriod: Int
   rate: Float
-  productId: ID!
-  product: Product @hasOne(fields: ["productId"])
+  categoryId: ID!
+  category: Category @hasOne(fields: ["categoryId"])
   policyId: ID!
   policy: Policy @hasOne(fields: ["policyId"])
 }

@@ -1,6 +1,6 @@
 // Service
 import InsuranceItemModel from "@shared/service/domain/ServiceInProcess/models/insuranceItem";
-import ServiceModel from "@models/service";
+import ServiceModel from "@domain/services/service";
 import { InsuranceItem } from "@/shared/service/infrastructure/API";
 
 // System
