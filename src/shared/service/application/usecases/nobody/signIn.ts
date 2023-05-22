@@ -1,7 +1,7 @@
 
-import type { SignInValidationResult, User } from "@domain/entities/user";
+import { SignInValidationResult, User } from "@/shared/service/domain/authentication/user";
 import ServiceModel from "@domain/services/service";
-import UserModel from "@domain/entities/user";
+import UserModel from "@/shared/service/domain/authentication/user";
 import { Actor, boundary, Boundary, ContextualizedScenes, Usecase } from "robustive-ts";
 import { catchError, map, Observable } from "rxjs";
 
@@ -69,7 +69,7 @@ export class SignInUsecase extends Usecase<Scenes> {
     }
 
     private validate(id: string|null, password: string|null): Observable<this> {
-        const result = UserModel.validate(id, password);
+        const result = User.validate(id, password);
         if (result === true && id !== null && password != null) {
             return this.just({ scene: scenes.onSuccessInValidatingThenServiceTrySigningIn, id, password });
         } else {
@@ -78,8 +78,7 @@ export class SignInUsecase extends Usecase<Scenes> {
     }
 
     private signIn(id: string, password: string): Observable<this> {
-        return UserModel
-            .signIn(id, password)
+        return User.signIn(id, password)
             .pipe(
                 map(user => this.instantiate({ scene: scenes.goals.onSuccessInSigningInThenServicePresentsHomeView, user }))
                 , catchError(error => this.just({ scene: scenes.goals.onFailureInSigningInThenServicePresentsError, error }))

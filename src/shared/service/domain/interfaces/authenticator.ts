@@ -1,5 +1,6 @@
 import { Observable } from "rxjs";
 import { User } from "../models/user";
+import { UserProperties } from "../authentication/user";
 
 /**
  * サインインステータス
@@ -27,12 +28,12 @@ export interface Authenticator {
     /**
      * アカウントを作成します。
      */
-    createAccount: (mailAddress: string, password: string) => Observable<User>;
+    createAccount: (mailAddress: string, password: string) => Observable<UserProperties>;
 
     /**
      * サインインします。
      */
-    signIn: (mailAddress: string, password: string) => Observable<User>;
+    signIn: (mailAddress: string, password: string) => Observable<UserProperties>;
 
     /**
      * サインアウトします。

@@ -1,6 +1,6 @@
 import ServiceModel from "@domain/services/service";
 import TaskModel, { Task } from "@domain/entities/task";
-import { User } from "@domain/entities/user";
+import { User } from "@/shared/service/domain/authentication/user";
 import { concat, map, Observable } from "rxjs";
 import { Actor, Boundary, boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";

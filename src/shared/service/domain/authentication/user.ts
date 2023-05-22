@@ -1,14 +1,15 @@
 import { ValidationResult as r, AbstructValidation } from "@/shared/system/interfaces/validation";
 import { Observable } from "rxjs";
 import dependencies from "../dependencies";
+import { Entity } from "@/shared/system/interfaces/architecture";
 
-export interface User {
+export type UserProperties = {
     uid: string;
     mailAddress: string|null;
     photoUrl: string|null;
     displayName: string|null;
     isMailAddressVerified: boolean;
-}
+};
 
 const idValidationResults = [r.isRequired, r.isMalformed] as const;
 const passwordValidationResults = [r.isRequired, r.isTooLong, r.isTooShort] as const;
@@ -49,10 +50,18 @@ export class PasswordValidation extends AbstructValidation<string, PasswordValid
     }
 }
 
-export default {
+export class User implements Entity<UserProperties> {
+    properties: UserProperties|null;
 
-    validate: (id: string|null, password: string|null): SignUpValidationResult => {
+    constructor(properties: UserProperties) {
+        this.properties = properties;
+    }
 
+    /**
+     * アプリはユーザが入力したIDとパスワードが正しい形式か検証できなければならない。
+     * @returns 
+     */
+    static validate(id: string|null, password: string|null): SignUpValidationResult {
         const idValidationResult = new IdValidation(id)
             .isRequired()
             .isMailAddress()
@@ -70,13 +79,25 @@ export default {
             return { id: idValidationResult, password: passwordValidationResult };
         }
     }
-    , create: (id: string, password: string): Observable<User> => {
+
+    /**
+     * アプリはユーザが入力したIDとパスワードでアカウントを作成できなければならない。
+     * @param id 
+     * @param password 
+     * @returns 
+     */
+    static create(id: string, password: string): Observable<UserProperties> {
         return dependencies.auth.createAccount(id, password);
     }
-    , signIn: (id: string, password: string): Observable<User> => {
+
+    /**
+     * アプリはユーザが入力したIDとパスワードでアカウントを認証できなければならない。
+     */ 
+    static signIn(id: string, password: string): Observable<UserProperties> {
         return dependencies.auth.signIn(id, password);
     }
-    , signOut: (): Observable<void> => {
+
+    static signOut(): Observable<void> {
         return dependencies.auth.signOut();
     }
-};
+}

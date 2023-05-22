@@ -12,6 +12,7 @@ export class Log implements ValueObject<LogProperties> {
     constructor(event: string, params: any) {
         this.properties = { event, params };
     }
+
     /**
      * アプリはユーザのアクションに対して任意のパラメータを持つログを記録できなければならない。
      */

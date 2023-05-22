@@ -1,6 +1,6 @@
-import type { SignUpValidationResult } from "@domain/entities/user";
-import type { User } from "@domain/entities/user";
-import UserModel from "@domain/entities/user";
+import type { SignUpValidationResult } from "@/shared/service/domain/authentication/user";
+import { User } from "@/shared/service/domain/authentication/user";
+import UserModel from "@/shared/service/domain/authentication/user";
 import ServiceModel from "@domain/services/service";
 import { Actor, boundary, Boundary, ContextualizedScenes, Usecase } from "robustive-ts";
 import { first, map, Observable } from "rxjs";
@@ -69,7 +69,7 @@ export class SignUpUsecase extends Usecase<Scenes> {
     }
 
     private validate(id: string|null, password: string|null): Observable<this> {
-        const result = UserModel.validate(id, password);
+        const result = User.validate(id, password);
         if (result === true && id !== null && password != null) {
             return this.just({ scene: scenes.onSuccessInValidatingThenServicePublishNewAccount, id, password });
         } else {
@@ -78,7 +78,7 @@ export class SignUpUsecase extends Usecase<Scenes> {
     }
 
     private publishNewAccount(id: string, password: string): Observable<this> {
-        return UserModel
+        return User
             .create(id, password)
             .pipe(
                 map(user => {

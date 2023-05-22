@@ -1,4 +1,4 @@
-import UserModel from "@domain/entities/user";
+import UserModel from "@/shared/service/domain/authentication/user";
 import WarrantyModel from "@domain/entities/warranty";
 import ServiceModel from "@domain/services/service";
 import { catchError, map, Observable } from "rxjs";

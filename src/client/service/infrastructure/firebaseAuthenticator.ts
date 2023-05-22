@@ -2,7 +2,7 @@ import { Authenticator, SignInStatus, SignInStatusContext } from "@interfaces/au
 import { FirebaseApp, FirebaseError } from "firebase/app";
 import { Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, Unsubscribe, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { Observable, ReplaySubject } from "rxjs";
-import { User } from "@domain/entities/user";
+import { User, UserProperties } from "@/shared/service/domain/authentication/user";
 
 export class FirebaseAuthenticator implements Authenticator {
     #auth: Auth;
@@ -15,7 +15,7 @@ export class FirebaseAuthenticator implements Authenticator {
 
         this.#unscriber = onAuthStateChanged(this.#auth, (user) => {
             if (user) {
-                const _user: User = {
+                const _user: UserProperties = {
                     uid: user.uid
                     , mailAddress: user.email
                     , photoUrl: user.photoURL
@@ -35,7 +35,7 @@ export class FirebaseAuthenticator implements Authenticator {
         return this.#signInStatus.asObservable();
     }
 
-    createAccount(mailAddress: string, password: string): Observable<User> {
+    createAccount(mailAddress: string, password: string): Observable<UserProperties> {
         return new Observable(subscriber => {
             createUserWithEmailAndPassword(this.#auth, mailAddress, password)
                 .then(userCredential => {
@@ -46,7 +46,7 @@ export class FirebaseAuthenticator implements Authenticator {
                         , photoUrl: user.photoURL
                         , displayName: user.displayName
                         , isMailAddressVerified: user.emailVerified
-                    } as User);
+                    } as UserProperties);
                     subscriber.complete();
                 })
                 .catch(error => {
@@ -55,7 +55,7 @@ export class FirebaseAuthenticator implements Authenticator {
         });
     }
 
-    signIn(mailAddress: string, password: string): Observable<User> {
+    signIn(mailAddress: string, password: string): Observable<UserProperties> {
         return new Observable(subscriber => {
             signInWithEmailAndPassword(this.#auth, mailAddress, password)
                 .then(userCredential => {
@@ -66,7 +66,7 @@ export class FirebaseAuthenticator implements Authenticator {
                         , photoUrl: user.photoURL
                         , displayName: user.displayName
                         , isMailAddressVerified: user.emailVerified
-                    } as User);
+                    } as UserProperties);
                     subscriber.complete();
                 })
                 .catch((error: FirebaseError) => {

@@ -1,4 +1,4 @@
-import UserModel from "@domain/entities/user";
+import { User } from "@/shared/service/domain/authentication/user";
 import ServiceModel from "@domain/services/service";
 import { catchError, map, Observable } from "rxjs";
 import { Actor, boundary, Boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
@@ -71,8 +71,7 @@ export class SignOutUsecase extends Usecase<Scenes> {
     }
 
     private signOut(): Observable<this> {
-        return UserModel
-            .signOut()
+        return User.signOut()
             .pipe(
                 map(() => {
                     return this.instantiate({ scene: scenes.goals.onSuccessThenServicePresentsSignInView });

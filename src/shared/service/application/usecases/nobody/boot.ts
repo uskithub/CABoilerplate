@@ -1,7 +1,7 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import ServiceModel from "@domain/services/service";
 import TaskModel, { Task } from "@domain/entities/task";
-import { User } from "@domain/entities/user";
+import { User } from "@/shared/service/domain/authentication/user";
 import { concat, first, map, Observable } from "rxjs";
 import { Actor, Boundary, boundary, ContextualizedScenes, Empty, Usecase, IContext } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
