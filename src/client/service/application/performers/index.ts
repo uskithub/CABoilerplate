@@ -1,8 +1,8 @@
 import { isBootScene } from "@usecases/nobody/boot";
 import { InjectionKey, reactive } from "vue";
 import { createApplicationPerformer } from "./application";
-import { createUserPerformer } from "./user";
-import type { UserStore } from "./user";
+import { createAuthenticationPerformer } from "./authentication";
+import type { AuthenticationStore } from "./authentication";
 import { isSignUpScene } from "@usecases/nobody/signUp";
 import { isSignInScene } from "@usecases/nobody/signIn";
 import { isSignOutScene } from "@usecases/signedInUser/signOut";
@@ -40,7 +40,7 @@ export interface SharedStore extends Store {
 
 type Stores = {
     shared: SharedStore;
-    user: UserStore;
+    authentication: AuthenticationStore;
 };
 
 export type Dispatcher = {
@@ -67,7 +67,7 @@ export function createDispatcher(): Dispatcher {
     const dispatcher = {
         stores: {
             shared
-            , user: {} as UserStore
+            , authentication: {} as AuthenticationStore
         }
         , change(actor: Actor) {
             const _shared = shared as Mutable<SharedStore>;
@@ -82,12 +82,12 @@ export function createDispatcher(): Dispatcher {
 
     const performers = {
         application: createApplicationPerformer(dispatcher)
-        , user: createUserPerformer(dispatcher)
+        , authentication: createAuthenticationPerformer(dispatcher)
         , warranty: createWarrantyPerformer(dispatcher)
         , serviceInProcess: createServiceInProcessPerformer(dispatcher)
     };
 
-    dispatcher.stores.user = performers.user.store;
+    dispatcher.stores.authentication = performers.authentication.store;
 
     dispatcher.dispatch = (context) => {
         const _shared = shared as Mutable<SharedStore>;
@@ -103,11 +103,11 @@ export function createDispatcher(): Dispatcher {
         } else if (isSignUpScene(context)) {
             console.info("[DISPATCH] SignUp", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.user.signUp(context, actor);
+            performers.authentication.signUp(context, actor);
         } else if (isSignInScene(context)) {
             console.info("[DISPATCH] SignIn", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.user.signIn(context, actor);
+            performers.authentication.signIn(context, actor);
         }
 
         /* Service */
@@ -115,7 +115,7 @@ export function createDispatcher(): Dispatcher {
             console.info("[DISPATCH] ObservingUsersTasks:", context);
             // 観測し続けるのでステータス管理しない
             // _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.user.observingUsersTasks(context, new Service());
+            performers.authentication.observingUsersTasks(context, new Service());
         } 
 
         // 初回表示時対応
@@ -144,7 +144,7 @@ export function createDispatcher(): Dispatcher {
         else if (isSignOutScene(context)) {
             console.info("[DISPATCH] SignOut", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.user.signOut(context, actor);
+            performers.authentication.signOut(context, actor);
         } else if (isGetWarrantyListScene(context)) {
             console.info("[DISPATCH] GetWarrantyList", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };

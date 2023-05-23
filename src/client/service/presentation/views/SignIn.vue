@@ -35,18 +35,18 @@ v-container
     v-toolbar-title ホーム
   h1 SignIn
   v-form(ref="form", v-model="state.isValid", lazy-validation)
-    span(v-if="stores.user.signInFailureMessage !== null") {{ stores.user.signInFailureMessage }}
+    span(v-if="stores.authentication.signInFailureMessage !== null") {{ stores.authentication.signInFailureMessage }}
     v-text-field(
       v-model="state.email",
       :label="t.common.labels.mailAddress",
-      :error-messages="stores.user.idInvalidMessage",
+      :error-messages="stores.authentication.idInvalidMessage",
       required
     )
     v-text-field(
       v-model="state.password",
       type="password",
       :label="t.common.labels.password",
-      :error-messages="stores.user.passwordInvalidMessage",
+      :error-messages="stores.authentication.passwordInvalidMessage",
       required
     )
     v-btn.mr-4(

@@ -21,7 +21,7 @@ import { Actor } from "@/shared/service/application/actors";
 
 type ImmutableTask = Readonly<Task>;
 
-export interface UserStore extends Store {
+export interface AuthenticationStore extends Store {
     readonly signInStatus: SignInStatus | null;
     readonly idInvalidMessage: string | string[] | undefined;
     readonly passwordInvalidMessage: string | string[] | undefined;
@@ -30,18 +30,18 @@ export interface UserStore extends Store {
     readonly userTasks: ImmutableTask[];
 }
 
-export interface UserPerformer extends Performer<UserStore> {
-    readonly store: UserStore;
+export interface AuthenticationPerformer extends Performer<AuthenticationStore> {
+    readonly store: AuthenticationStore;
     signUp: (context: SignUpScenes, actor: Actor) => void;
     signIn: (context: SignInScenes, actor: Actor) => void;
     signOut: (context: SignOutScenes, actor: Actor) => void;
     observingUsersTasks: (context: ObservingUsersTasksScenes, actor: Actor) => void;
 }
 
-export function createUserPerformer(dispatcher: Dispatcher): UserPerformer {
+export function createAuthenticationPerformer(dispatcher: Dispatcher): AuthenticationPerformer {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
-    const store = reactive<UserStore>({
+    const store = reactive<AuthenticationStore>({
         signInStatus: null
 
         , idInvalidMessage: "" // ホントは null でいいはずが...
@@ -51,7 +51,7 @@ export function createUserPerformer(dispatcher: Dispatcher): UserPerformer {
         , userTasks: []
     });
 
-    const _store = store as Mutable<UserStore>;
+    const _store = store as Mutable<AuthenticationStore>;
 
     return {
         store
