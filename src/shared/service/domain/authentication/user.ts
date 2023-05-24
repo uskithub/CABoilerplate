@@ -1,7 +1,7 @@
 import { ValidationResult as r, AbstructValidation } from "@/shared/system/interfaces/validation";
-import { Observable } from "rxjs";
 import dependencies from "../dependencies";
 import { Entity } from "@/shared/system/interfaces/architecture";
+import { Observable } from "rxjs";
 
 export type UserProperties = {
     uid: string;
@@ -51,7 +51,7 @@ export class PasswordValidation extends AbstructValidation<string, PasswordValid
 }
 
 export class User implements Entity<UserProperties> {
-    properties: UserProperties|null;
+    properties: UserProperties;
 
     constructor(properties: UserProperties) {
         this.properties = properties;
