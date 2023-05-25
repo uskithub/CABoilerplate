@@ -2,6 +2,7 @@ import { Analytics } from "./interfaces/analytics";
 import { Authenticator } from "./interfaces/authenticator";
 import { Backend } from "./interfaces/backend";
 import { Notifier } from "./interfaces/notifier";
+import { Recollector } from "./interfaces/recollection";
 import { ServiceInProcessBackend } from "./ServiceInProcess/interfaces/serviceInProcessBackend";
 
 
@@ -11,6 +12,7 @@ export interface Dependencies {
     serviceInProcess: ServiceInProcessBackend;
     analytics: Analytics;
     notification: Notifier;
+    recollection: Recollector;
 }
 
 export default {
@@ -19,4 +21,5 @@ export default {
     , serviceInProcess : {} as ServiceInProcessBackend
     , analytics: {} as Analytics
     , notification: {} as Notifier
+    , recollection: {} as Recollector
 } as Dependencies;
