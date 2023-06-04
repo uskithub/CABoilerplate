@@ -36,7 +36,7 @@ v-navigation-drawer(v-model="state.isOpen"
         :key="idx"
         :value="item"
         :to="item.href"
-        active-color="primary"
+        color="primary"
         rounded="xl"
       )
         v-list-item-title(v-text="item.title")  

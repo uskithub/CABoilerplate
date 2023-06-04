@@ -4,6 +4,9 @@ import dependencies from "../dependencies";
 export type ConsultationProperties = {
 };
 
+/**
+ * ユーザの相談を解決します。
+ */
 export class Consultation implements ValueObject<ConsultationProperties>{
     properties: ConsultationProperties;
 
