@@ -27,14 +27,46 @@ export class PineconeRecollector implements Recollector {
             });
     }
 
-    setup(fromDocuments: string): Promise<void> {
-        return PineconeStore.fromDocuments(fromDocuments, new OpenAIEmbeddings(), { 
-            pineconeIndex: this.#index
-        }).then(store => {
-            return;
-        });
+    /**
+     * 初期データとともにVectorStoreを新規作成する。
+     * @param text 
+     * @returns 
+     */
+    setup(text: string): Promise<void> {
+        const docs = [
+            new Document({
+                metadata: { foo: "bar" }
+                , pageContent: "pinecone is a vector db"
+            })
+            , new Document({
+                metadata: { foo: "bar" }
+                , pageContent: "the quick brown fox jumped over the lazy dog"
+            })
+            , new Document({
+                metadata: { baz: "qux" }
+                , pageContent: "lorem ipsum dolor sit amet"
+            })
+            , new Document({
+                metadata: { baz: "qux" }
+                , pageContent: "pinecones are the woody fruiting body and of a pine tree"
+            })
+        ];
+        const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+        return textSplitter.createDocuments([text])
+            .then(docs => {
+                return PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), { 
+                    pineconeIndex: this.#index
+                }).then(store => {
+                    return;
+                });
+            });
     }
 
+    /**
+     * 既存のVectorStoreにデータを追加する。
+     * @param text 
+     * @returns 
+     */
     larn(text: string): Promise<void> {
         const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
         return textSplitter.createDocuments([text])

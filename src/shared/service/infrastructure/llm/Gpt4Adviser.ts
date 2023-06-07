@@ -8,23 +8,25 @@ import { PineconeStore, VectorStore } from "langchain/vectorstores";
 import { OpenAIEmbeddings } from "langchain/embeddings";
 
 
-
+/**
+ * @see: https://js.langchain.com/docs/modules/indexes/vector_stores/integrations/pinecone
+ */
 export class Gpt4Adviser implements Adviser {
     #llmChain: LLMChain;
     #vectorDBQAChain: VectorDBQAChain;
 
-    constructor(store?: VectorStore) {
-        const openAi = new OpenAI({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY, temperature: 0.9 });
+    constructor(vectorStore?: VectorStore) {
+        const model = new OpenAI({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY, temperature: 0.9 });
         const prompt = new PromptTemplate({
             inputVariables: ["product"]
             , template: "一日の始めに3分くらいでできる、「これをやったら世界が確実に少し良くなる」という何かを一つ提案して下さい。"
         });
 
-        this.#llmChain = new LLMChain({ llm: openAi, prompt });
-        if (store !== undefined) {
-            this.#vectorDBQAChain = new VectorDBQAChain({
-                vectorstore: store 
-                , combineDocumentsChain: this.#llmChain
+        this.#llmChain = new LLMChain({ llm: model, prompt });
+        if (vectorStore !== undefined) {
+            this.#vectorDBQAChain = VectorDBQAChain.fromLLM(model, vectorStore, {
+                k: 1
+                , returnSourceDocuments: true
             });
         }  
     }
@@ -36,10 +38,10 @@ export class Gpt4Adviser implements Adviser {
             , environment: import.meta.env.VITE_PINECONE_ENVIRONMENT as string
         })
             .then(() => {
-                const index = client.Index(import.meta.env.VITE_PINECONE_INDEX as string);
+                const pineconeIndex = client.Index(import.meta.env.VITE_PINECONE_INDEX as string);
                 return PineconeStore.fromExistingIndex(
                     new OpenAIEmbeddings()
-                    , { pineconeIndex: index }
+                    , { pineconeIndex }
                 );
             })
             .then(store => {
@@ -52,6 +54,7 @@ export class Gpt4Adviser implements Adviser {
     }
 
     output(): Promise<string> {
+        this.#vectorDBQAChain.call();
         return this.#llmChain.call({ 
             product: "家庭用ロボット" 
         }).then(chainValues => {
