@@ -1,4 +1,4 @@
 
 export interface Recollector {
-    larn(): Promise<void>
+    larn(documents: string): Promise<void>
 }
