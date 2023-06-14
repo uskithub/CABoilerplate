@@ -1,7 +1,8 @@
 import ServiceModel from "@domain/services/service";
-import { MessageProperties } from "@/shared/service/domain/chat/message";
+import { Message, MessageProperties } from "@/shared/service/domain/chat/message";
 import { Actor, boundary, Boundary, ContextualizedScenes, Usecase } from "robustive-ts";
-import { catchError, map, Observable } from "rxjs";
+import { catchError, from, map, Observable } from "rxjs";
+
 /**
  * usecase: 相談する
  */
@@ -23,7 +24,6 @@ const scenes = {
     }
 } as const;
 
-
 type Consult = typeof scenes[keyof typeof scenes];
 
 type Goals = ContextualizedScenes<{
@@ -34,9 +34,9 @@ type Goals = ContextualizedScenes<{
 type Scenes = ContextualizedScenes<{
     [scenes.userInputsQuery]: { messages: MessageProperties[]; }
     [scenes.serviceChecksIfThereAreExistingMessages]: { messages: MessageProperties[]; }
-    [scenes.ifThereAreThenServiceGetRelatedVectors]: { messages: MessageProperties[]; vector: string }
-    [scenes.onSuccessThenServiceAskAI]: { messages: MessageProperties[]; vector: string }
-    [scenes.ifNotThenServiceGetRelatedVectors]: { messages: MessageProperties[]; vector: string }
+    [scenes.ifThereAreThenServiceGetRelatedVectors]: { messages: MessageProperties[] }
+    [scenes.onSuccessThenServiceAskAI]: { messages: MessageProperties[]; embeddings: string }
+    [scenes.ifNotThenServiceGetRelatedVectors]: { messages: MessageProperties[] }
 }> | Goals;
 
 export const isConsultGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
@@ -58,21 +58,45 @@ export class ConsultUsecase extends Usecase<Scenes> {
             return this.just({ scene: scenes.serviceChecksIfThereAreExistingMessages, messages: this.context.messages });
         }
         case scenes.serviceChecksIfThereAreExistingMessages : {
-            return this.check();
+            return this.check(this.context.messages);
         }
-        // case scenes.goals.sessionExistsThenServicePresentsHome:
-        // case scenes.goals.sessionNotExistsThenServicePresentsSignin:
-        // case scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList: {
-        //     return boundary;
-        // }
+        case scenes.ifNotThenServiceGetRelatedVectors: {
+            return this.getRelatedVector(this.context.messages);
+        }
+
+        case scenes.ifThereAreThenServiceGetRelatedVectors: {
+            return this.getRelatedEmbeddings(this.context.messages);
+        }
+
+        case scenes.onSuccessThenServiceAskAI: {
+            return this.ask(this.context.messages, this.context.embeddings);
+        }
+
+        case scenes.goals.onSuccessThenServiceDisplaysMessages:
+        case scenes.goals.onFailureThenServicePresentsError: {
+            return boundary;
+        }
         }
     }
 
-    private check(): Observable<this>|Boundary {
-        // const messages = this.context.messages;
-        // if (messages.length > 0) {
-        //     return this.just({ scene: scenes.ifThereAreThenServiceGetRelatedVectors, messages });
-        // }
-        // return this.just({ scene: scenes.ifNotThenServiceGetRelatedVectors, messages });
+    private check(messages: MessageProperties[]): Observable<this> {
+        if (messages.length === 1) {
+            return this.just({ scene: scenes.ifNotThenServiceGetRelatedVectors, messages });
+        }
+        return this.just({ scene: scenes.ifThereAreThenServiceGetRelatedVectors, messages });
+    }
+
+    private getRelatedEmbeddings(messages: MessageProperties[]): Observable<this> {
+        return from(
+            new Message(messages).getRelatedEmbeddings()
+                .then(embeddings => this.just({ scene: scenes.onSuccessThenServiceAskAI, messages, embeddings }))
+        );
+    }
+
+    private ask(messages: MessageProperties[], embeddings: string): Observable<this> {
+        return from(
+            new Message(messages).createAnswer(embeddings)
+                .then(messages => this.just({ scene: scenes.goals.onSuccessThenServiceDisplaysMessages, messages }))
+        );
     }
 }

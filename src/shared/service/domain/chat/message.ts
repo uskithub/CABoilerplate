@@ -16,6 +16,8 @@ export type MessageProperties = {
     , content: string
 }
 
+const TOKEN_BUDGET = 4096;
+
 export class Message implements ValueObject<MessageProperties[]> {
     properties: MessageProperties[];
 
@@ -23,10 +25,14 @@ export class Message implements ValueObject<MessageProperties[]> {
         this.properties = properties;
     }
 
+    getRelatedEmbeddings() : Promise<string> {
+        return dependencies.assistance.getRelatedEmbeddings(this.properties, TOKEN_BUDGET);
+    }
+
     /**
      * アプリはユーザの質問事項に対して回答を得られなければならない。
      */
-    createAnswer() : Observable<MessageProperties[]> { 
-        return dependencies.assistance.ask(this.properties);
+    createAnswer(embeddings: string) : Promise<MessageProperties[]> { 
+        return dependencies.assistance.ask(this.properties, embeddings);
     }
 }

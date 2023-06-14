@@ -6,6 +6,16 @@ import { Recollector } from "./interfaces/recollection";
 import { Assistance } from "./interfaces/assistance";
 import { ServiceInProcessBackend } from "./ServiceInProcess/interfaces/serviceInProcessBackend";
 
+import { FirebaseAuthenticator } from "@/client/service/infrastructure/firebaseAuthenticator";
+
+// fireabse
+import { initializeApp } from "firebase/app";
+import firebaseConfig from "@client/system/config/firebase.config.json";
+import { AmplifyBackend } from "@/client/service/infrastructure/amplifyBackend";
+import { ServiceInProcessApi } from "@/client/service/infrastructure/amplify/serviceInProcessApi";
+import { FirebaseAnalytics } from "@/client/service/infrastructure/firebaseAnalytics/firebaseAnalytics";
+import { OpenaiAssistance } from "../infrastructure/openai/openaiAssistance";
+
 
 export interface Dependencies {
     auth: Authenticator;
@@ -27,3 +37,19 @@ export default {
     , recollection: {} as Recollector
     , assistance: {} as Assistance
 } as Dependencies;
+
+export function setUpDependencies(dependencies: Dependencies) {
+    // initialize firebase
+    const firebaseApp = initializeApp(firebaseConfig);
+    dependencies.auth = new FirebaseAuthenticator(firebaseApp);
+    // dependencies.auth = new GraphqlAuthenticator();
+    // dependencies.backend = new FirestoreBackend(getFirestore(firebaseApp));
+    dependencies.backend = new AmplifyBackend();
+    dependencies.serviceInProcess = new ServiceInProcessApi();
+    dependencies.analytics = new FirebaseAnalytics();
+    return OpenaiAssistance.instantiate()
+        .then(openaiAssistance => {
+            dependencies.assistance = openaiAssistance;
+        });
+    
+}
