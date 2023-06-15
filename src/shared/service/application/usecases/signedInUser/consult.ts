@@ -61,7 +61,7 @@ export class ConsultUsecase extends Usecase<Scenes> {
             return this.check(this.context.messages);
         }
         case scenes.ifNotThenServiceGetRelatedVectors: {
-            return this.getRelatedVector(this.context.messages);
+            return this.getRelatedEmbeddings(this.context.messages);
         }
 
         case scenes.ifThereAreThenServiceGetRelatedVectors: {
@@ -89,14 +89,14 @@ export class ConsultUsecase extends Usecase<Scenes> {
     private getRelatedEmbeddings(messages: MessageProperties[]): Observable<this> {
         return from(
             new Message(messages).getRelatedEmbeddings()
-                .then(embeddings => this.just({ scene: scenes.onSuccessThenServiceAskAI, messages, embeddings }))
+                .then(embeddings => this.instantiate({ scene: scenes.onSuccessThenServiceAskAI, messages, embeddings }))
         );
     }
 
     private ask(messages: MessageProperties[], embeddings: string): Observable<this> {
         return from(
             new Message(messages).createAnswer(embeddings)
-                .then(messages => this.just({ scene: scenes.goals.onSuccessThenServiceDisplaysMessages, messages }))
+                .then(messages => this.instantiate({ scene: scenes.goals.onSuccessThenServiceDisplaysMessages, messages }))
         );
     }
 }

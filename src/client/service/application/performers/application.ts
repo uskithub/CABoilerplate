@@ -50,9 +50,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                         }
                         case Boot.goals.sessionNotExistsThenServicePresentsSignin: {
                             _shared.signInStatus = SignInStatus.signOut;
-                            router.replace("/signin")
-                                .catch((error) => {
-                                });
+                            router.replace("/signin");
                             break;
                         }
                         }

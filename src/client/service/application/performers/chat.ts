@@ -7,6 +7,7 @@ import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { MessageProperties } from "@/shared/service/domain/chat/message";
+import { Consult, ConsultScenes, ConsultUsecase, isConsultGoal } from "@/shared/service/application/usecases/signedInUser/consult";
 
 export interface ChatStore extends Store {
     messages: MessageProperties[]
@@ -14,7 +15,7 @@ export interface ChatStore extends Store {
 
 export interface ChatPerformer extends Performer<ChatStore> {
     readonly store: ChatStore;
-    ask: (messages: MessageProperties[], actor: Actor) => void;
+    consult: (context: ConsultScenes, actor: Actor) => void;
 }
 
 export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
@@ -22,28 +23,26 @@ export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
         messages: []
     });
 
-    const _store = store as Mutable<ChatStore>;
-
     return {
         store
-        , ask: (messages: MessageProperties[], actor: Actor) => {
-            const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
+        , consult: (context: ConsultScenes, actor: Actor) => {
+            // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = new ListInsuranceItemsUsecase(context)
+            subscription = new ConsultUsecase(context)
                 .interactedBy(actor, {
                     next: ([lastSceneContext, performedScenario]) => {
-                        if (!isListInsuranceItemsGoal(lastSceneContext)) { return; }
+                        if (!isConsultGoal(lastSceneContext)) { return; }
                         switch (lastSceneContext.scene) {
-                        case ListInsuranceItems.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView:
-                            console.log("OKKKKKK", lastSceneContext.insuranceItems);
-                            _store.insuranceItems = lastSceneContext.insuranceItems;
-                            break;
-                        case ListInsuranceItems.goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView:
-                            _store.insuranceItems = null;
+                        case Consult.goals.onSuccessThenServiceDisplaysMessages: {
+                            console.log("OKKKKKK", lastSceneContext.messages);
                             break;
                         }
+                        case Consult.goals.onFailureThenServicePresentsError: {
+                            console.error(lastSceneContext.error);
+                            break;
+                        }
+                        }
                     }
-                    , complete: dispatcher.commonCompletionProcess
                 });
         }
     };

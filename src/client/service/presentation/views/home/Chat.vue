@@ -11,31 +11,42 @@ import { inject, reactive, ref } from "vue";
 import type { Dispatcher } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
 import { GetWarrantyList } from "@/shared/service/application/usecases/signedInUser/getWarrantyList";
+import { Consult } from "@/shared/service/application/usecases/signedInUser/consult";
+import { Role } from "@/shared/service/domain/chat/message";
+import type { MessageProperties } from "@/shared/service/domain/chat/message";
 
 
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
 
-dispatch({ scene: GetWarrantyList.userInitiatesWarrantyListing });
 
-// const state = reactive<{
-//   isDrawerOpen: boolean;
-// }>({
-//   isDrawerOpen: true
-// });
+const state = reactive<{
+    inputText: string;
+}>({
+    inputText: ""
+});
+
+const onClickSendButton = () => {
+    const message = {
+        role: Role.user
+        , content: state.inputText
+    } as MessageProperties;
+  
+    dispatch({ scene: Consult.userInputsQuery, messages: [ message ]  }); 
+};
 
 const items = [
-      {
-        id: 1,
-        color: 'info',
-        icon: 'mdi-information',
-        content: "hogehoge"
-      }
-      , {
-        id: 2,
-        color: 'error',
-        icon: 'mdi-alert-circle',
-        content: "fugafuga"
-      }
+    {
+        id: 1
+        , color: "info"
+        , icon: "mdi-information"
+        , content: "hogehoge"
+    }
+    , {
+        id: 2
+        , color: "error"
+        , icon: "mdi-alert-circle"
+        , content: "fugafuga"
+    }
 ];
 
 const actions = new Array<Action>();
@@ -62,7 +73,7 @@ v-container
     clear-icon="mdi-close-circle"
     label="Text"
     model-value="This is clearable text."
-    @click:append="()=> { console.log('clicked'); }"
+    @click:append="onClickSendButton"
   )
 </template>
 
