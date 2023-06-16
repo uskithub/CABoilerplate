@@ -28,7 +28,8 @@ const items: Array<DrawerItem> = [
     , { type: DrawerContentType.link, title: "保険加入アイテム", href: "/insuranceItems" } as DrawerItem
     , { type: DrawerContentType.divider } as DrawerItem
     , { type: DrawerContentType.header, title: "Menu2" } as DrawerItem
-    , { type: DrawerContentType.link, title: "タスク一覧", href: "/" } as DrawerItem
+    , { type: DrawerContentType.link, title: "Chat", href: "/" } as DrawerItem
+    , { type: DrawerContentType.link, title: "タスク一覧", href: "/tasks" } as DrawerItem
     , { type: DrawerContentType.link, title: "link3", href: "/link3" } as DrawerItem
 ];
 

@@ -20,6 +20,8 @@ import { createServiceInProcessPerformer } from "./serviceInProcess";
 import { ContextualizedScenes, Empty, Nobody } from "robustive-ts";
 import { watch, WatchStopHandle } from "vue";
 import { Log } from "@/shared/service/domain/analytics/log";
+import { createChatPerformer } from "./chat";
+import { isConsultScene } from "@/shared/service/application/usecases/signedInUser/consult";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -85,6 +87,7 @@ export function createDispatcher(): Dispatcher {
         , authentication: createAuthenticationPerformer(dispatcher)
         , warranty: createWarrantyPerformer(dispatcher)
         , serviceInProcess: createServiceInProcessPerformer(dispatcher)
+        , chat: createChatPerformer(dispatcher)
     };
 
     dispatcher.stores.authentication = performers.authentication.store;
@@ -149,7 +152,16 @@ export function createDispatcher(): Dispatcher {
             console.info("[DISPATCH] GetWarrantyList", context);
             _shared.executingUsecase = { executing: context, startAt: new Date() };
             performers.warranty.get(context, actor);
-        } else {
+        }
+
+        /* Chat */
+        else if (isConsultScene(context)) {
+            console.info("[DISPATCH] Consult", context);
+            _shared.executingUsecase = { executing: context, startAt: new Date() };
+            performers.chat.consult(context, actor);
+        }
+
+        else {
             throw new Error(`dispatch先が定義されていません: ${context.scene as string}`);
         }
     };

@@ -15,6 +15,8 @@ import { ObservingUsersTasksUsecase } from "../../application/usecases/service/o
 import { isService } from "../../application/actors/service";
 import { GetWarrantyList, GetWarrantyListUsecase } from "../../application/usecases/signedInUser/getWarrantyList";
 import { ListInsuranceItemsUsecase } from "../../application/usecases/ServiceInProcess/signedInUser/listInsuranceItems";
+import { isChatModel } from "langchain/prompts";
+import { ConsultUsecase } from "../../application/usecases/signedInUser/consult";
 
 
 export default {
@@ -46,7 +48,9 @@ export default {
         case SignOutUsecase: {
             return isSignedInUser(actor);
         }
-
+        case ConsultUsecase: {
+            return isSignedInUser(actor);
+        }
         /* Service */
         case ObservingUsersTasksUsecase: {
             return isService(actor);
@@ -57,7 +61,7 @@ export default {
         const isSignUp = (usecase: any): usecase is SignUpUsecase => usecase.constructor === SignUpUsecase;
         const isSignIn = (usecase: any): usecase is SignInUsecase => usecase.constructor === SignInUsecase;
         const isSignOut = (usecase: any): usecase is SignOutUsecase => usecase.constructor === SignOutUsecase;
-
+        
         if (isBoot(usecase)) {
             if (usecase.context.scene === Boot.userOpensSite) {
                 // TODO
@@ -70,6 +74,9 @@ export default {
         } else if (isSignOut(usecase)) {
             return true;
         }
-        return false;
+
+        // 開発時はここでエラーを発生させた方が分かりやすい
+        throw new Error(`USECASE ${ usecase.constructor.name } IS NOT AUTHORIZED FOR ACTOR ${ actor.constructor.name }`);
+        // return false;
     }
 };
