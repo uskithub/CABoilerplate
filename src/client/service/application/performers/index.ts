@@ -49,7 +49,7 @@ export type Dispatcher = {
     stores: Stores;
     change: (actor: Actor) => void;
     commonCompletionProcess: () => void;
-    dispatch: <T extends Record<keyof any, Empty>>(context: ContextualizedScenes<T>) => void;
+    dispatch: <T extends Record<"scene", string> & object>(context: T) => void;
     // accountViewModel: (shared: SharedStore) => HomeViewModel;
     // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
     // createSignUpViewModel: (shared: SharedStore) => SignUpViewModel;
