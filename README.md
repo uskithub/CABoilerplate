@@ -80,7 +80,28 @@ export default defineConfig({
     }
   }
 })
+```
 
+ts-node で 実行する際に @を使うなら tsconfig-paths が必要。
+@see: https://tech-blog.tkcco21.me/blog/resolve_paths_with_ts-node/
+
+```shell
+$ yarn add -D tsconfig-paths
+```
+
+```shell
+$ ts-node --esm -r tsconfig-paths/register src/playground.ts
+```
+
+あるいは
+
+```tsconfig.json
+{
+  ...
+  "ts-node": {
+    "esm": true, // nodeでimportを使うために必要
+    "require": ["tsconfig-paths/register"] // tsconfig.jsonのpathsを使うために必要
+  },
 ```
 
 ## 1.2 フォルダ構成
