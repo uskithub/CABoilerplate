@@ -1,7 +1,6 @@
 
-import { SignInValidationResult, User } from "@/shared/service/domain/authentication/user";
+import { SignInValidationResult, User, UserProperties } from "@/shared/service/domain/authentication/user";
 import ServiceModel from "@domain/services/service";
-import UserModel from "@/shared/service/domain/authentication/user";
 import { Actor, boundary, Boundary, ContextualizedScenes, Usecase } from "robustive-ts";
 import { catchError, map, Observable } from "rxjs";
 
@@ -25,7 +24,7 @@ const scenes = {
 type SignIn = typeof scenes[keyof typeof scenes];
 
 type Goals = ContextualizedScenes<{
-    [scenes.goals.onSuccessInSigningInThenServicePresentsHomeView] : { user: User; };
+    [scenes.goals.onSuccessInSigningInThenServicePresentsHomeView] : { user: UserProperties; };
     [scenes.goals.onFailureInValidatingThenServicePresentsError] : { result: SignInValidationResult; };
     [scenes.goals.onFailureInSigningInThenServicePresentsError] : { error: Error; };
 }>;
@@ -80,7 +79,7 @@ export class SignInUsecase extends Usecase<Scenes> {
     private signIn(id: string, password: string): Observable<this> {
         return User.signIn(id, password)
             .pipe(
-                map(user => this.instantiate({ scene: scenes.goals.onSuccessInSigningInThenServicePresentsHomeView, user }))
+                map(userProperties => this.instantiate({ scene: scenes.goals.onSuccessInSigningInThenServicePresentsHomeView, user: userProperties }))
                 , catchError(error => this.just({ scene: scenes.goals.onFailureInSigningInThenServicePresentsError, error }))
             );
     }

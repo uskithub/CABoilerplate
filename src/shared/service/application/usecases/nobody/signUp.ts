@@ -1,6 +1,4 @@
-import type { SignUpValidationResult } from "@/shared/service/domain/authentication/user";
-import { User } from "@/shared/service/domain/authentication/user";
-import UserModel from "@/shared/service/domain/authentication/user";
+import { User, type SignUpValidationResult, type UserProperties } from "@/shared/service/domain/authentication/user";
 import ServiceModel from "@domain/services/service";
 import { Actor, boundary, Boundary, ContextualizedScenes, Usecase } from "robustive-ts";
 import { first, map, Observable } from "rxjs";
@@ -25,7 +23,7 @@ const scenes = {
 type SignUp = typeof scenes[keyof typeof scenes];
 
 type Goals = ContextualizedScenes<{
-    [scenes.goals.onSuccessInPublishingThenServicePresentsHomeView] : { user: User; };
+    [scenes.goals.onSuccessInPublishingThenServicePresentsHomeView] : { user: UserProperties; };
     [scenes.goals.onFailureInValidatingThenServicePresentsError] : { result: SignUpValidationResult; };
     [scenes.goals.onFailureInPublishingThenServicePresentsError] : { error: Error; };
 }>;
@@ -81,8 +79,8 @@ export class SignUpUsecase extends Usecase<Scenes> {
         return User
             .create(id, password)
             .pipe(
-                map(user => {
-                    return this.instantiate({ scene: scenes.goals.onSuccessInPublishingThenServicePresentsHomeView, user });
+                map((userProperties: UserProperties) => {
+                    return this.instantiate({ scene: scenes.goals.onSuccessInPublishingThenServicePresentsHomeView, user: userProperties });
                 })
                 , first() // 一度観測したらsubscriptionを終わらせる
             );
