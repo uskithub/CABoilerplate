@@ -1,7 +1,7 @@
 import { User } from "@/shared/service/domain/authentication/user";
-import ServiceModel from "@domain/services/service";
+import { Application } from "@/shared/service/domain/application/application";
 import { catchError, map, Observable } from "rxjs";
-import { Actor, boundary, Boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
+import { Actor, boundary, Boundary, Context, Empty, Usecase } from "robustive-ts";
 
 /**
  * usecase: サインアウトする
@@ -26,13 +26,13 @@ const scenes = {
 
 type SignOut = typeof scenes[keyof typeof scenes];
 
-type Goals = ContextualizedScenes<{
+type Goals = Context<{
     [scenes.goals.onSuccessThenServicePresentsSignInView]: Empty
     [scenes.goals.onFailureThenServicePresentsError]: { error: Error; }
     [scenes.goals.servicePresentsHomeView]: Empty
 }>;
 
-type Scenes = ContextualizedScenes<{
+type Scenes = Context<{
     [scenes.userStartsSignOutProcess]: Empty
     [scenes.serviceClosesSession]: Empty
     [scenes.userResignSignOut]: Empty
@@ -48,7 +48,7 @@ export type SignOutScenes = Scenes;
 export class SignOutUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
-        return ServiceModel.authorize(actor, this);
+        return Application.authorize(actor, this);
     }
 
     next(): Observable<this> | Boundary {

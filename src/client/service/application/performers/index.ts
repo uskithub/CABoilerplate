@@ -17,11 +17,12 @@ import { isListInsuranceItemsScene } from "@/shared/service/application/usecases
 import { createServiceInProcessPerformer } from "./serviceInProcess";
 
 // System
-import { ContextualizedScenes, Empty, Nobody } from "robustive-ts";
+import { Context, Empty, Nobody } from "robustive-ts";
 import { watch, WatchStopHandle } from "vue";
 import { Log } from "@/shared/service/domain/analytics/log";
 import { createChatPerformer } from "./chat";
 import { isConsultScene } from "@/shared/service/application/usecases/signedInUser/consult";
+import { AssociatedValues } from "robustive-ts/types/usecase";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -49,7 +50,7 @@ export type Dispatcher = {
     stores: Stores;
     change: (actor: Actor) => void;
     commonCompletionProcess: () => void;
-    dispatch: <T extends Record<"scene", string> & object>(context: T) => void;
+    dispatch: (context: Context<AssociatedValues>) => void;
     // accountViewModel: (shared: SharedStore) => HomeViewModel;
     // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
     // createSignUpViewModel: (shared: SharedStore) => SignUpViewModel;

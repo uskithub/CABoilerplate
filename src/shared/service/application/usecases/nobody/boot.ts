@@ -1,9 +1,9 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
-import ServiceModel from "@domain/services/service";
+import { Application } from "@/shared/service/domain/application/application";
 import TaskModel, { Task } from "@domain/entities/task";
-import { User } from "@/shared/service/domain/authentication/user";
+import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { concat, first, map, Observable } from "rxjs";
-import { Actor, Boundary, boundary, ContextualizedScenes, Empty, Usecase, IContext } from "robustive-ts";
+import { Actor, Boundary, boundary, Context, Empty, Usecase } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
 
 /**
@@ -26,13 +26,13 @@ type Boot = typeof scenes[keyof typeof scenes];
 
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
 // https://zenn.dev/eagle/articles/ts-coproduct-introduction
-type Goals = ContextualizedScenes<{
-    [scenes.goals.sessionExistsThenServicePresentsHome]: { user: User; };
+type Goals = Context<{
+    [scenes.goals.sessionExistsThenServicePresentsHome]: { user: UserProperties; };
     [scenes.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
     [scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
 }>;
 
-type Scenes = ContextualizedScenes<{
+type Scenes = Context<{
     [scenes.userOpensSite]: Empty;
     [scenes.serviceChecksSession]: Empty;
     // [Boot.sessionExistsThenPerformObservingUsersTasks]: { user: User; };

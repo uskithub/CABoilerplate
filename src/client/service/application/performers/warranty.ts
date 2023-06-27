@@ -8,10 +8,11 @@ import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
+import { Warranty } from "@/shared/service/domain/entities/warranty";
 
 
 export interface WarrantyStore extends Store {
-    warranties: Post[]
+    warranties: Warranty[]
 }
 export interface WarrantyPerformer extends Performer<WarrantyStore> {
     readonly store: WarrantyStore;

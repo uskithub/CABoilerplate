@@ -13,7 +13,7 @@ export const enum SignInStatus {
     , unknown = "unknown"
 }
 
-export type SignInStatusContext = { kind: SignInStatus.signIn; user: User }
+export type SignInStatusContext = { kind: SignInStatus.signIn; user: UserProperties }
     | { kind: SignInStatus.signingIn }
     | { kind: SignInStatus.signOut }
     | { kind: SignInStatus.signingOut }

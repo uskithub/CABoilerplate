@@ -1,8 +1,7 @@
-import UserModel from "@/shared/service/domain/authentication/user";
-import WarrantyModel from "@domain/entities/warranty";
-import ServiceModel from "@domain/services/service";
+import WarrantyModel, { Warranty } from "@domain/entities/warranty";
+import { Application } from "@/shared/service/domain/application/application";
 import { catchError, map, Observable } from "rxjs";
-import { Actor, boundary, Boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
+import { Actor, boundary, Boundary, Context, Empty, Usecase } from "robustive-ts";
 
 /**
  * usecase: 保証一覧を取得する
@@ -25,12 +24,12 @@ const scenes = {
 
 type GetWarrantyList = typeof scenes[keyof typeof scenes];
 
-type Goals = ContextualizedScenes<{
-    [scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView]: { warranties: Post[]; }
+type Goals = Context<{
+    [scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView]: { warranties: Warranty[];}
     [scenes.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView]: Empty
 }>;
 
-type Scenes = ContextualizedScenes<{
+type Scenes = Context<{
     [scenes.userInitiatesWarrantyListing]: Empty
     [scenes.serviceSelectsWarrantiesThatMeetConditions]: Empty
 }> | Goals;
@@ -45,7 +44,7 @@ export type GetWarrantyListScenes = Scenes;
 export class GetWarrantyListUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
-        return ServiceModel.authorize(actor, this);
+        return Application.authorize(actor, this);
     }
 
     next(): Observable<this> | Boundary {

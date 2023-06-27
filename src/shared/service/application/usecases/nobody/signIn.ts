@@ -1,7 +1,7 @@
 
+import { Application } from "@/shared/service/domain/application/application";
 import { SignInValidationResult, User, UserProperties } from "@/shared/service/domain/authentication/user";
-import ServiceModel from "@domain/services/service";
-import { Actor, boundary, Boundary, ContextualizedScenes, Usecase } from "robustive-ts";
+import { Actor, boundary, Boundary, Context, Usecase } from "robustive-ts";
 import { catchError, map, Observable } from "rxjs";
 
 /**
@@ -45,7 +45,7 @@ export type SignInScenes = Scenes;
 export class SignInUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
-        return ServiceModel.authorize(actor, this);
+        return Application.authorize(actor, this);
     }
 
     next(): Observable<this>|Boundary {

@@ -1,8 +1,8 @@
-import ServiceModel from "@domain/services/service";
+import { Application } from "@/shared/service/domain/application/application";
 import TaskModel, { Task } from "@domain/entities/task";
-import { User } from "@/shared/service/domain/authentication/user";
+import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { concat, map, Observable } from "rxjs";
-import { Actor, Boundary, boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
+import { Actor, Boundary, boundary, Context, Empty, Usecase } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
 
 /**
@@ -24,14 +24,14 @@ type ObservingUsersTasks = typeof scenes[keyof typeof scenes];
 
 // 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
 // https://zenn.dev/eagle/articles/ts-coproduct-introduction
-type Goals = ContextualizedScenes<{
+type Goals = Context<{
     [scenes.goals.serviceDoNothing]: Empty;
     [scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
 }>;
 
-type Scenes = ContextualizedScenes<{
-    [scenes.serviceDetectsSigningIn]: { user: User; };
-    [scenes.startObservingUsersTasks]: { user: User; };
+type Scenes = Context<{
+    [scenes.serviceDetectsSigningIn]: { user: UserProperties; };
+    [scenes.startObservingUsersTasks]: { user: UserProperties; };
 }> | Goals;
 
 export const isObservingUsersTasksGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
@@ -50,10 +50,10 @@ export type ObservingUsersTasksScenes = Scenes;
 export class ObservingUsersTasksUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
-        return ServiceModel.authorize(actor, this);
+        return Application.authorize(actor, this);
     }
 
-    next(): Observable<this>|Boundary {
+    next(): Observable<this> | Boundary {
         switch (this.context.scene) {
         case scenes.serviceDetectsSigningIn: {
             return this.just({ scene: scenes.startObservingUsersTasks, user: this.context.user });
@@ -68,7 +68,7 @@ export class ObservingUsersTasksUsecase extends Usecase<Scenes> {
         }
     }
 
-    private startObservingUsersTasks(user: User): Observable<this> {
+    private startObservingUsersTasks(user: UserProperties): Observable<this> {
         // ユースケースの終わり（バウンダリー）に、オブザーバ（タスクの観測）を結合している
         return concat(
             this.just({ scene: scenes.goals.serviceDoNothing }) 

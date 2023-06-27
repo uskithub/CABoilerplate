@@ -1,6 +1,6 @@
-import ServiceModel from "@domain/services/service";
+import { Application } from "@/shared/service/domain/application/application";
 import { Message, MessageProperties } from "@/shared/service/domain/chat/message";
-import { Actor, boundary, Boundary, ContextualizedScenes, Usecase } from "robustive-ts";
+import { Actor, boundary, Boundary, Context, Usecase } from "robustive-ts";
 import { catchError, from, map, Observable } from "rxjs";
 
 /**
@@ -26,12 +26,12 @@ const scenes = {
 
 type Consult = typeof scenes[keyof typeof scenes];
 
-type Goals = ContextualizedScenes<{
-    [scenes.goals.onSuccessThenServiceDisplaysMessages]: { messages: MessageProperties[]; }
-    [scenes.goals.onFailureThenServicePresentsError]: { error: Error; }
+type Goals = Context<{
+    [scenes.goals.onSuccessThenServiceDisplaysMessages]: { messages: MessageProperties[]; };
+    [scenes.goals.onFailureThenServicePresentsError]: { error: Error; };
 }>;
 
-type Scenes = ContextualizedScenes<{
+type Scenes = Context<{
     [scenes.userInputsQuery]: { messages: MessageProperties[]; }
     [scenes.serviceChecksIfThereAreExistingMessages]: { messages: MessageProperties[]; }
     [scenes.ifThereAreThenServiceGetRelatedVectors]: { messages: MessageProperties[] }
@@ -49,7 +49,7 @@ export type ConsultScenes = Scenes;
 export class ConsultUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
-        return ServiceModel.authorize(actor, this);
+        return Application.authorize(actor, this);
     }
 
     next(): Observable<this>|Boundary {

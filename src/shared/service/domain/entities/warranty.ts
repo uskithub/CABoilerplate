@@ -1,5 +1,4 @@
-import { Observable } from "rxjs";
-import { Post } from "@api";
+import { Observable, map } from "rxjs";
 import dependencies from "../dependencies";
 
 export interface Warranty {
@@ -7,7 +6,15 @@ export interface Warranty {
 }
 
 export default {
-    get: (): Observable<Post[]> => {
-        return dependencies.backend.getWarranties();
+    get: (): Observable<Warranty[]> => {
+        return dependencies.backend.getWarranties()
+            .pipe(
+                map((warranties) => {
+                    if (warranties === null) {
+                        return [] as Warranty[];
+                    }
+                    return warranties;
+                })
+            );
     }
 };

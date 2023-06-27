@@ -1,11 +1,11 @@
 // Service
 import InsuranceItemModel from "@shared/service/domain/ServiceInProcess/models/insuranceItem";
-import ServiceModel from "@domain/services/service";
+import { Application } from "@/shared/service/domain/application/application";
 import { InsuranceItem } from "@/shared/service/infrastructure/API";
 
 // System
 import { map, Observable } from "rxjs";
-import { Actor, boundary, Boundary, ContextualizedScenes, Empty, Usecase } from "robustive-ts";
+import { Actor, boundary, Boundary, Context, Empty, Usecase } from "robustive-ts";
 
 /**
  * usecase: 保険加入アイテム一覧を取得する
@@ -26,12 +26,12 @@ const scenes = {
     }
 } as const;
 
-type Goals = ContextualizedScenes<{
-    [scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView]: { insuranceItems: InsuranceItem[]|null; }
+type Goals = Context<{
+    [scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView]: { insuranceItems: InsuranceItem[] | null; }
     [scenes.goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView]: Empty
 }>;
 
-type Scenes = ContextualizedScenes<{
+type Scenes = Context<{
     [scenes.userInitiatesListing]: Empty
     [scenes.serviceSelectsInsuranceItemsThatMeetConditions]: Empty
 }> | Goals;
@@ -47,7 +47,7 @@ export const isListInsuranceItemsScene = (context: Record<"scene", any> & Record
 export class ListInsuranceItemsUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
-        return ServiceModel.authorize(actor, this);
+        return Application.authorize(actor, this);
     }
 
     next(): Observable<this> | Boundary {

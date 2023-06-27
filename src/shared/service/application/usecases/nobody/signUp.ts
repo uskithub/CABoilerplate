@@ -44,7 +44,7 @@ export type SignUpScenes = Scenes;
 export class SignUpUsecase extends Usecase<Scenes> {
 
     override authorize<T extends Actor<T>>(actor: T): boolean {
-        return ServiceModel.authorize(actor, this);
+        return Application.authorize(actor, this);
     }
 
     next(): Observable<this>|Boundary {
