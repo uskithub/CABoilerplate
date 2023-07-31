@@ -1,82 +1,57 @@
 import { User } from "@/shared/service/domain/authentication/user";
 import { Application } from "@/shared/service/domain/application/application";
 import { catchError, map, Observable } from "rxjs";
-import { Actor, boundary, Boundary, Context, Empty, Usecase } from "robustive-ts";
+import { Actor, BaseScenario, Context, Empty } from "robustive-ts";
+import { SignInUserUsecases } from ".";
+
+const _u = SignInUserUsecases.signOut;
 
 /**
  * usecase: サインアウトする
  */
-const scenes = {
-    /* Basic Courses */
-    userStartsSignOutProcess: "ユーザはサインアウトを開始する"
-    , serviceClosesSession: "サービスはセッションを終了する"
+export type SignOutScenes = {
+    basics : {
+        [_u.basics.userStartsSignOutProcess]: Empty;
+        [_u.basics.serviceClosesSession]: Empty;
+    };
+    alternatives: {
+        [_u.alternatives.userResignSignOut]: Empty;
+    };
+    goals: {
+        [_u.goals.onSuccessThenServicePresentsSignInView]: Empty;
+        [_u.goals.onFailureThenServicePresentsError]: { error: Error; };
+        [_u.goals.servicePresentsHomeView]: Empty;
+    };
+};
 
-    /* Alternate Courses */
-    , userResignSignOut: "ユーザはサインアウトをキャンセルする"
+export class SignOutScenario extends BaseScenario<SignOutScenes> {
 
-    /* Boundaries */
-    , goals: {
-        /* Basic Courses */
-        onSuccessThenServicePresentsSignInView: "成功した場合_サービスはサインイン画面を表示する"
-        /* Alternate Courses */
-        , onFailureThenServicePresentsError: "失敗した場合_サービスはエラーを表示する"
-        , servicePresentsHomeView: "サービスはホーム画面を表示する"
-    }
-} as const;
+    // override authorize<T extends Actor<T>>(actor: T): boolean {
+    //     return Application.authorize(actor, this);
+    // }
 
-type SignOut = typeof scenes[keyof typeof scenes];
-
-type Goals = Context<{
-    [scenes.goals.onSuccessThenServicePresentsSignInView]: Empty
-    [scenes.goals.onFailureThenServicePresentsError]: { error: Error; }
-    [scenes.goals.servicePresentsHomeView]: Empty
-}>;
-
-type Scenes = Context<{
-    [scenes.userStartsSignOutProcess]: Empty
-    [scenes.serviceClosesSession]: Empty
-    [scenes.userResignSignOut]: Empty
-}> | Goals;
-
-export const isSignOutGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isSignOutScene = (context: any): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
-
-export const SignOut = scenes;
-export type SignOutGoals = Goals;
-export type SignOutScenes = Scenes;
-
-export class SignOutUsecase extends Usecase<Scenes> {
-
-    override authorize<T extends Actor<T>>(actor: T): boolean {
-        return Application.authorize(actor, this);
-    }
-
-    next(): Observable<this> | Boundary {
-        switch (this.context.scene) {
-        case scenes.userStartsSignOutProcess: {
-            return this.just({ scene: scenes.serviceClosesSession });
+    next(to: Context<SignOutScenes>): Observable<Context<SignOutScenes>> {
+        switch (to.scene) {
+        case _u.basics.userStartsSignOutProcess: {
+            return this.just(this.basics[_u.basics.serviceClosesSession]());
         }
-        case scenes.serviceClosesSession: {
+        case _u.basics.serviceClosesSession: {
             return this.signOut();
         }
-        case scenes.userResignSignOut: {
-            return this.just({ scene: scenes.goals.servicePresentsHomeView });
+        case _u.alternatives.userResignSignOut: {
+            return this.just(this.goals[_u.goals.servicePresentsHomeView]());
         }
-        case scenes.goals.onSuccessThenServicePresentsSignInView:
-        case scenes.goals.onFailureThenServicePresentsError:
-        case scenes.goals.servicePresentsHomeView: {
-            return boundary;
+        default: {
+            throw new Error(`not implemented: ${ to.scene }`);
         }
         }
     }
 
-    private signOut(): Observable<this> {
+    private signOut(): Observable<Context<SignOutScenes>> {
         return User.signOut()
             .pipe(
-                map(() => {
-                    return this.instantiate({ scene: scenes.goals.onSuccessThenServicePresentsSignInView });
-                })
-                , catchError(error => this.just({ scene: scenes.goals.onFailureThenServicePresentsError, error }))
+                map(() => this.goals[_u.goals.onSuccessThenServicePresentsSignInView]())
+                , catchError((error: Error) => this.just(this.goals[_u.goals.onFailureThenServicePresentsError]({ error })))
             );
     }
 }

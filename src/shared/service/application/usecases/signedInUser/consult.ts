@@ -1,102 +1,77 @@
 import { Application } from "@/shared/service/domain/application/application";
 import { Message, MessageProperties } from "@/shared/service/domain/chat/message";
-import { Actor, boundary, Boundary, Context, Usecase } from "robustive-ts";
+import { Actor, BaseScenario, Context } from "robustive-ts";
 import { catchError, from, map, Observable } from "rxjs";
+import { SignInUserUsecases } from ".";
+
+const _u = SignInUserUsecases.consult;
 
 /**
  * usecase: 相談する
  */
-const scenes = {
-    /* Basic Courses */
-    userInputsQuery: "ユーザは質問を入力する"
-    , serviceChecksIfThereAreExistingMessages: "サービスは既存の会話があるか確認する"
-    , ifThereAreThenServiceGetRelatedVectors: "ある場合_サービスは会話に関連するベクトル情報を取得する"
-    , onSuccessThenServiceAskAI: "成功した場合_サービスはAIに問い合わせする"
-    /* Alternate Courses */
-    , ifNotThenServiceGetRelatedVectors: "ない場合_サービスは質問に関連するベクトル情報を取得する"
+export type ConsultScenes = {
+    basics : {
+        [_u.basics.userInputsQuery]: { messages: MessageProperties[]; };
+        [_u.basics.serviceChecksIfThereAreExistingMessages]: { messages: MessageProperties[]; };
+        [_u.basics.ifThereAreThenServiceGetRelatedVectors]: { messages: MessageProperties[] };
+        [_u.basics.onSuccessThenServiceAskAI]: { messages: MessageProperties[]; embeddings: string };
+    };
+    alternatives: {
+        [_u.alternatives.ifNotThenServiceGetRelatedVectors]: { messages: MessageProperties[] };
+    };
+    goals : {
+        [_u.goals.onSuccessThenServiceDisplaysMessages]: { messages: MessageProperties[]; };
+        [_u.goals.onFailureThenServicePresentsError]: { error: Error; };
+    };
+};
 
-    /* Boundaries */
-    , goals: {
-        /* Basic Courses */
-        onSuccessThenServiceDisplaysMessages: "成功した場合_サービスは会話を表示する"
-        /* Alternate Courses */
-        , onFailureThenServicePresentsError: "失敗した場合_サービスはエラーを表示する"
-    }
-} as const;
+export class ConsultScenario extends BaseScenario<ConsultScenes> {
 
-type Consult = typeof scenes[keyof typeof scenes];
+    // override authorize<T extends Actor<T>>(actor: T): boolean {
+    //     return Application.authorize(actor, this);
+    // }
 
-type Goals = Context<{
-    [scenes.goals.onSuccessThenServiceDisplaysMessages]: { messages: MessageProperties[]; };
-    [scenes.goals.onFailureThenServicePresentsError]: { error: Error; };
-}>;
-
-type Scenes = Context<{
-    [scenes.userInputsQuery]: { messages: MessageProperties[]; }
-    [scenes.serviceChecksIfThereAreExistingMessages]: { messages: MessageProperties[]; }
-    [scenes.ifThereAreThenServiceGetRelatedVectors]: { messages: MessageProperties[] }
-    [scenes.onSuccessThenServiceAskAI]: { messages: MessageProperties[]; embeddings: string }
-    [scenes.ifNotThenServiceGetRelatedVectors]: { messages: MessageProperties[] }
-}> | Goals;
-
-export const isConsultGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isConsultScene = (context: any): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
-
-export const Consult = scenes;
-export type ConsultGoals = Goals;
-export type ConsultScenes = Scenes;
-
-export class ConsultUsecase extends Usecase<Scenes> {
-
-    override authorize<T extends Actor<T>>(actor: T): boolean {
-        return Application.authorize(actor, this);
-    }
-
-    next(): Observable<this>|Boundary {
-        switch (this.context.scene) {
-        case scenes.userInputsQuery: {
-            return this.just({ scene: scenes.serviceChecksIfThereAreExistingMessages, messages: this.context.messages });
+    next(to: Context<ConsultScenes>): Observable<Context<ConsultScenes>> {
+        switch (to.scene) {
+        case _u.basics.userInputsQuery: {
+            return this.just(this.basics[_u.basics.serviceChecksIfThereAreExistingMessages]({ messages: to.messages }));
         }
-        case scenes.serviceChecksIfThereAreExistingMessages : {
-            return this.check(this.context.messages);
+        case _u.basics.serviceChecksIfThereAreExistingMessages: {
+            return this.check(to.messages);
         }
-        case scenes.ifNotThenServiceGetRelatedVectors: {
-            return this.getRelatedEmbeddings(this.context.messages);
+        case _u.alternatives.ifNotThenServiceGetRelatedVectors: {
+            return this.getRelatedEmbeddings(to.messages);
         }
-
-        case scenes.ifThereAreThenServiceGetRelatedVectors: {
-            return this.getRelatedEmbeddings(this.context.messages);
+        case _u.basics.ifThereAreThenServiceGetRelatedVectors: {
+            return this.getRelatedEmbeddings(to.messages);
         }
-
-        case scenes.onSuccessThenServiceAskAI: {
-            return this.ask(this.context.messages, this.context.embeddings);
+        case _u.basics.onSuccessThenServiceAskAI: {
+            return this.ask(to.messages, to.embeddings);
         }
-
-        case scenes.goals.onSuccessThenServiceDisplaysMessages:
-        case scenes.goals.onFailureThenServicePresentsError: {
-            return boundary;
+        default: {
+            throw new Error(`not implemented: ${ to.scene }`);
         }
         }
     }
 
-    private check(messages: MessageProperties[]): Observable<this> {
+    private check(messages: MessageProperties[]): Observable<Context<ConsultScenes>> {
         if (messages.length === 1) {
-            return this.just({ scene: scenes.ifNotThenServiceGetRelatedVectors, messages });
+            return this.just(this.alternatives[_u.alternatives.ifNotThenServiceGetRelatedVectors]({ messages }));
         }
-        return this.just({ scene: scenes.ifThereAreThenServiceGetRelatedVectors, messages });
+        return this.just(this.basics[_u.basics.ifThereAreThenServiceGetRelatedVectors]({ messages }));
     }
 
-    private getRelatedEmbeddings(messages: MessageProperties[]): Observable<this> {
+    private getRelatedEmbeddings(messages: MessageProperties[]): Observable<Context<ConsultScenes>> {
         return from(
             new Message(messages).getRelatedEmbeddings()
-                .then(embeddings => this.instantiate({ scene: scenes.onSuccessThenServiceAskAI, messages, embeddings }))
+                .then(embeddings => this.basics[_u.basics.onSuccessThenServiceAskAI]({messages, embeddings}))
         );
     }
 
-    private ask(messages: MessageProperties[], embeddings: string): Observable<this> {
+    private ask(messages: MessageProperties[], embeddings: string): Observable<Context<ConsultScenes>> {
         return from(
             new Message(messages).createAnswer(embeddings)
-                .then(messages => this.instantiate({ scene: scenes.goals.onSuccessThenServiceDisplaysMessages, messages }))
+                .then(messages => this.goals[_u.goals.onSuccessThenServiceDisplaysMessages]({ messages }))
         );
     }
 }

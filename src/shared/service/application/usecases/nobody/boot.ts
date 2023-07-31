@@ -1,49 +1,29 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import { Application } from "@/shared/service/domain/application/application";
-import TaskModel, { Task } from "@domain/entities/task";
+import { Task } from "@domain/entities/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
-import { concat, first, map, Observable } from "rxjs";
-import { Actor, Boundary, boundary, Context, Empty, Usecase } from "robustive-ts";
+import { first, map, Observable } from "rxjs";
+import { Actor, BaseScenario, Context, Empty } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
+import { NobodyUsecases } from ".";
+
+const _u = NobodyUsecases.boot;
 
 /**
- * usecase: アプリを起動する
+ * usecase: 起動する
  */
-const scenes = {
-    /* Basic Courses */
-    userOpensSite : "ユーザはサイトを開く"
-    , serviceChecksSession : "サービスはセッションがあるかを確認する"
-
-    /* Boundaries */
-    , goals : {
-        sessionExistsThenServicePresentsHome : "セッションがある場合_サービスはホーム画面を表示する"
-        , sessionNotExistsThenServicePresentsSignin : "セッションがない場合_サービスはサインイン画面を表示する"
-        , onUpdateUsersTasksThenServiceUpdateUsersTaskList : "ユーザのタスクが更新された時_サービスはユーザのタスク一覧を更新する"
-    }
-} as const;
-
-type Boot = typeof scenes[keyof typeof scenes];
-
-// 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
-// https://zenn.dev/eagle/articles/ts-coproduct-introduction
-type Goals = Context<{
-    [scenes.goals.sessionExistsThenServicePresentsHome]: { user: UserProperties; };
-    [scenes.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
-    [scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
-}>;
-
-type Scenes = Context<{
-    [scenes.userOpensSite]: Empty;
-    [scenes.serviceChecksSession]: Empty;
-    // [Boot.sessionExistsThenPerformObservingUsersTasks]: { user: User; };
-}> | Goals;
-
-export const isBootGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isBootScene = (context: any): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
-
-export const Boot = scenes;
-export type BootGoals = Goals;
-export type BootScenes = Scenes;
+export type BootScenes = {
+    basics: {
+        [_u.basics.userOpensSite]: Empty;
+        [_u.basics.serviceChecksSession]: Empty;
+    };
+    alternatives: Empty;
+    goals: {
+        [_u.goals.sessionExistsThenServicePresentsHome]: { user: UserProperties; };
+        [_u.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
+        [_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
+    };
+};
 
 /**
  * コンストラクタでSceneが保持するContextを設定します。
@@ -51,39 +31,34 @@ export type BootScenes = Scenes;
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class BootUsecase extends Usecase<Scenes> {
+export class BootScenario extends BaseScenario<BootScenes> {
 
-    override authorize<T extends Actor<T>>(actor: T): boolean {
-        return ServiceModel.authorize(actor, this);
-    }
-
-    next(): Observable<this>|Boundary {
-        switch (this.context.scene) {
-        case scenes.userOpensSite: {
-            return this.just({ scene: Boot.serviceChecksSession });
+    next(to: Context<BootScenes>): Observable<Context<BootScenes>> {
+        switch (to.scene) {
+        case _u.basics.userOpensSite: {
+            console.log("%%%", this);
+            return this.just(this.basics[_u.basics.serviceChecksSession]());
         }
-        case scenes.serviceChecksSession : {
+        case _u.basics.serviceChecksSession: {
             return this.check();
         }
-        case scenes.goals.sessionExistsThenServicePresentsHome:
-        case scenes.goals.sessionNotExistsThenServicePresentsSignin:
-        case scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList: {
-            return boundary;
+        default: {
+            throw new Error(`not implemented: ${ to.scene }`);
         }
         }
     }
 
-    private check(): Observable<this> {
-        return ServiceModel
+    private check(): Observable<Context<BootScenes>> {
+        return Application
             .signInStatus()
             .pipe(
                 map((signInStatusContext) => {
-                    switch(signInStatusContext.kind) {
+                    switch (signInStatusContext.kind) {
                     case SignInStatus.signIn: {
-                        return this.instantiate({ scene: scenes.goals.sessionExistsThenServicePresentsHome, user: signInStatusContext.user });
+                        return this.goals[_u.goals.sessionExistsThenServicePresentsHome]({ user: signInStatusContext.user });
                     }
-                    default: {
-                        return this.instantiate({ scene: scenes.goals.sessionNotExistsThenServicePresentsSignin });
+                    default: {     
+                        return this.goals[_u.goals.sessionNotExistsThenServicePresentsSignin]();
                     }
                     }
                 })

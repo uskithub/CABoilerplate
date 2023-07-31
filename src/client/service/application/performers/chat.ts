@@ -1,3 +1,6 @@
+// service
+import { ConsultScenario, ConsultScenes } from "@/shared/service/application/usecases/signedInUser/consult";
+
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { inject, reactive } from "vue";
@@ -6,7 +9,8 @@ import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { MessageProperties } from "@/shared/service/domain/chat/message";
-import { Consult, ConsultScenes, ConsultUsecase, isConsultGoal } from "@/shared/service/application/usecases/signedInUser/consult";
+import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
+import { Scene } from "robustive-ts";
 
 export interface ChatStore extends Store {
     messages: MessageProperties[]
@@ -14,7 +18,7 @@ export interface ChatStore extends Store {
 
 export interface ChatPerformer extends Performer<ChatStore> {
     readonly store: ChatStore;
-    consult: (context: ConsultScenes, actor: Actor) => void;
+    consult: (context: Scene<ConsultScenes, ConsultScenario>, actor: Actor) => void;
 }
 
 export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
@@ -24,19 +28,19 @@ export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
 
     return {
         store
-        , consult: (context: ConsultScenes, actor: Actor) => {
+        , consult: (from: Scene<ConsultScenes, ConsultScenario>, actor: Actor) => {
+            const _u = SignInUserUsecases.consult;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = new ConsultUsecase(context)
+            subscription = from
                 .interactedBy(actor, {
-                    next: ([lastSceneContext, performedScenario]) => {
-                        if (!isConsultGoal(lastSceneContext)) { return; }
+                    next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case Consult.goals.onSuccessThenServiceDisplaysMessages: {
+                        case _u.goals.onSuccessThenServiceDisplaysMessages: {
                             console.log("OKKKKKK", lastSceneContext.messages);
                             break;
                         }
-                        case Consult.goals.onFailureThenServicePresentsError: {
+                        case _u.goals.onFailureThenServicePresentsError: {
                             console.error(lastSceneContext.error);
                             break;
                         }

@@ -1,7 +1,5 @@
 <script setup lang="ts">
 // service
-import { SignIn } from "@usecases/nobody/signIn";
-import { SignOut } from "@usecases/signedInUser/signOut";
 
 // system
 import { DICTIONARY_KEY } from "@shared/system/localizations";
@@ -10,6 +8,9 @@ import { computed, inject, reactive } from "vue";
 import type { Dispatcher } from "../../application/performers";
 import { DISPATCHER_KEY } from "../../application/performers";
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
+import { U } from "@/shared/service/application/usecases";
+import { NobodyUsecases } from "@/shared/service/application/usecases/nobody";
+import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
@@ -52,7 +53,7 @@ v-container
     v-btn.mr-4(
       :disabled="!state.isValid",
       color="success",
-      @click="dispatch({ scene: SignIn.userStartsSignInProcess, id: state.email, password: state.password })"
+      @click="dispatch(U.signIn.basics[NobodyUsecases.signIn.basics.userStartsSignInProcess]({ id: state.email, password: state.password }))"
     ) Sign In
 
   router-link(to="/signup") -> SignUp
@@ -67,11 +68,11 @@ v-container
           v-btn(
             color="warning",
             text,
-            @click="dispatch({ scene: SignOut.userStartsSignOutProcess, id: state.email, password: state.password })"
+            @click="dispatch(U.signOut.basics[SignInUserUsecases.signOut.basics.userStartsSignOutProcess]())"
           ) Sign Out
           v-btn(
             color="success",
             text,
-            @click="dispatch({ scene: SignOut.userResignSignOut })"
+            @click="dispatch(U.signOut.alternatives[SignInUserUsecases.signOut.alternatives.userResignSignOut]())"
           ) Go Home
 </template>

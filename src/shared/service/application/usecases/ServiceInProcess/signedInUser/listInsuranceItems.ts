@@ -5,72 +5,52 @@ import { InsuranceItem } from "@/shared/service/infrastructure/API";
 
 // System
 import { map, Observable } from "rxjs";
-import { Actor, boundary, Boundary, Context, Empty, Usecase } from "robustive-ts";
+import { Actor, BaseScenario, Context, Empty } from "robustive-ts";
+import { SignInUserUsecases } from "../../signedInUser";
+
+const _u = SignInUserUsecases.listInsuranceItems;
 
 /**
  * usecase: 保険加入アイテム一覧を取得する
  */
-const scenes = {
-    /* Basic Courses */
-    userInitiatesListing: "ユーザは一覧取得を開始する"
-    , serviceSelectsInsuranceItemsThatMeetConditions: "サービスは条件に該当する保険加入アイテムを抽出する"
+export type ListInsuranceItemsScenes = {
+    basics : {
+        [_u.basics.userInitiatesListing]: Empty;
+        [_u.basics.serviceSelectsInsuranceItemsThatMeetConditions]: Empty;
+    };
+    alternatives: Empty;
+    goals : {
+        [_u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView]: { insuranceItems: InsuranceItem[] | null; };
+        [_u.goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView]: Empty;
+    };
+};
 
-    /* Alternate Courses */
+export class ListInsuranceItemsScenario extends BaseScenario<ListInsuranceItemsScenes> {
 
-    /* Boundaries */
-    , goals: {
-        /* Basic Courses */
-        resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView: "結果が1件以上の場合_サービスは保険加入アイテム一覧画面に結果を表示する"
-        /* Alternate Courses */
-        , resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView: "結果が0件の場合_サービスは保険加入アイテム一覧画面に結果なしを表示する"
-    }
-} as const;
+    // override authorize<T extends Actor<T>>(actor: T): boolean {
+    //     return Application.authorize(actor, this);
+    // }
 
-type Goals = Context<{
-    [scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView]: { insuranceItems: InsuranceItem[] | null; }
-    [scenes.goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView]: Empty
-}>;
-
-type Scenes = Context<{
-    [scenes.userInitiatesListing]: Empty
-    [scenes.serviceSelectsInsuranceItemsThatMeetConditions]: Empty
-}> | Goals;
-
-export const ListInsuranceItems = scenes;
-export type ListInsuranceItems = typeof scenes[keyof typeof scenes];
-export type ListInsuranceItemsGoals = Goals;
-export type ListInsuranceItemsScenes = Scenes;
-
-export const isListInsuranceItemsGoal = (context: Record<"scene", any> & Record<string, any>): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isListInsuranceItemsScene = (context: Record<"scene", any> & Record<string, any>): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
-
-export class ListInsuranceItemsUsecase extends Usecase<Scenes> {
-
-    override authorize<T extends Actor<T>>(actor: T): boolean {
-        return Application.authorize(actor, this);
-    }
-
-    next(): Observable<this> | Boundary {
-        switch (this.context.scene) {
-        case scenes.userInitiatesListing: {
-            return this.just({ scene: scenes.serviceSelectsInsuranceItemsThatMeetConditions });
+    next(to: Context<ListInsuranceItemsScenes>): Observable<Context<ListInsuranceItemsScenes>> {
+        switch (to.scene) {
+        case _u.basics.userInitiatesListing: {
+            return this.just(this.basics[_u.basics.serviceSelectsInsuranceItemsThatMeetConditions]());
         }
-        case scenes.serviceSelectsInsuranceItemsThatMeetConditions: {
+        case _u.basics.serviceSelectsInsuranceItemsThatMeetConditions: {
             return this.select();
         }
-        case scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView:
-        case scenes.goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView: {
-            return boundary;
+        default: {
+            throw new Error(`not implemented: ${ to.scene }`);
         }
         }
     }
 
-    private select(): Observable<this> {
+    private select(): Observable<Context<ListInsuranceItemsScenes>> {
         return InsuranceItemModel
             .list()
             .pipe(
                 map((insuranceItems) => {
-                    return this.instantiate({ scene: scenes.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView, insuranceItems });
+                    return this.goals[_u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView]({ insuranceItems });
                 })
                 // , catchError(error => this.just({ scene: SignOut.goals.onFailureThenServicePresentsError, error }))
             );

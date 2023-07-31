@@ -1,86 +1,67 @@
 import { User, type SignUpValidationResult, type UserProperties } from "@/shared/service/domain/authentication/user";
-import ServiceModel from "@domain/services/service";
-import { Actor, boundary, Boundary, ContextualizedScenes, Usecase } from "robustive-ts";
+import { Application } from "@/shared/service/domain/application/application";
+import { Actor, BaseScenario, Empty } from "robustive-ts";
+import type { Context } from "robustive-ts";
 import { first, map, Observable } from "rxjs";
+import { NobodyUsecases } from ".";
+
+const _u = NobodyUsecases.signUp;
 
 /**
  * usecase: サインアップする
  */
-const scenes = {
-    /* Basic Courses */
-    userStartsSignUpProcess : "ユーザはサインアップを開始する"
-    , serviceValidateInputs : "サービスは入力項目に問題がないかを確認する"
-    , onSuccessInValidatingThenServicePublishNewAccount : "入力項目に問題がない場合_サービスはアカウントを新規に発行する"
-
-    /* Boundaries */
-    , goals : {
-        onSuccessInPublishingThenServicePresentsHomeView : "アカウントの発行に成功した場合_サービスはホーム画面を表示する"
-        , onFailureInValidatingThenServicePresentsError : "入力項目に問題がある場合_サービスはエラーを表示する"
-        , onFailureInPublishingThenServicePresentsError : "アカウントの発行に失敗した場合_サービスはエラーを表示する"
+export type SignUpScenes = {
+    basics : {
+        [_u.basics.userStartsSignUpProcess]: { id: string | null; password: string | null; };
+        [_u.basics.serviceValidateInputs]: { id: string | null; password: string | null; };
+        [_u.basics.onSuccessInValidatingThenServicePublishNewAccount]: { id: string; password: string; };
     }
-} as const;
-
-type SignUp = typeof scenes[keyof typeof scenes];
-
-type Goals = ContextualizedScenes<{
-    [scenes.goals.onSuccessInPublishingThenServicePresentsHomeView] : { user: UserProperties; };
-    [scenes.goals.onFailureInValidatingThenServicePresentsError] : { result: SignUpValidationResult; };
-    [scenes.goals.onFailureInPublishingThenServicePresentsError] : { error: Error; };
-}>;
-
-type Scenes = ContextualizedScenes<{
-    [scenes.userStartsSignUpProcess] : { id: string|null; password: string|null; };
-    [scenes.serviceValidateInputs]: { id: string|null; password: string|null; };
-    [scenes.onSuccessInValidatingThenServicePublishNewAccount]: { id: string; password: string; };
-}> | Goals;
-
-export const isSignUpGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isSignUpScene = (context: any): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
-
-export const SignUp = scenes;
-export type SignUpGolas = Goals;
-export type SignUpScenes = Scenes;
-
-export class SignUpUsecase extends Usecase<Scenes> {
-
-    override authorize<T extends Actor<T>>(actor: T): boolean {
-        return Application.authorize(actor, this);
+    alternatives: Empty;
+    goals : {
+        [_u.goals.onSuccessInPublishingThenServicePresentsHomeView]: { user: UserProperties; };
+        [_u.goals.onFailureInValidatingThenServicePresentsError]: { result: SignUpValidationResult; };
+        [_u.goals.onFailureInPublishingThenServicePresentsError]: { error: Error; };
     }
+};
 
-    next(): Observable<this>|Boundary {
-        switch (this.context.scene) {
-        case scenes.userStartsSignUpProcess: {
-            return this.just({ scene: scenes.serviceValidateInputs, id: this.context.id, password: this.context.password });
+export class SignUpScenario extends BaseScenario<SignUpScenes> {
+
+    // override authorize<T extends Actor<T>>(actor: T): boolean {
+    //     return Application.authorize(actor, this);
+    // }
+
+    next(to: Context<SignUpScenes>): Observable<Context<SignUpScenes>> {
+        switch (to.scene) {
+        case _u.basics.userStartsSignUpProcess: {
+            return this.just(this.basics[_u.basics.serviceValidateInputs]({ id: to.id, password: to.password }));
         }
-        case scenes.serviceValidateInputs : {
-            return this.validate(this.context.id, this.context.password);
+        case _u.basics.serviceValidateInputs: {
+            return this.validate(to.id, to.password);
         }
-        case scenes.onSuccessInValidatingThenServicePublishNewAccount: {
-            return this.publishNewAccount(this.context.id, this.context.password);
+        case _u.basics.onSuccessInValidatingThenServicePublishNewAccount: {
+            return this.publishNewAccount(to.id, to.password);
         }
-        case scenes.goals.onSuccessInPublishingThenServicePresentsHomeView:
-        case scenes.goals.onFailureInValidatingThenServicePresentsError:
-        case scenes.goals.onFailureInPublishingThenServicePresentsError: {
-            return boundary;
+        default: {
+            throw new Error(`not implemented: ${ to.scene }`);
         }
         }
     }
 
-    private validate(id: string|null, password: string|null): Observable<this> {
+    private validate(id: string | null, password: string | null): Observable<Context<SignUpScenes>> {
         const result = User.validate(id, password);
         if (result === true && id !== null && password != null) {
-            return this.just({ scene: scenes.onSuccessInValidatingThenServicePublishNewAccount, id, password });
+            return this.just(this.basics[_u.basics.onSuccessInValidatingThenServicePublishNewAccount]({ id, password }));
         } else {
-            return this.just({ scene: scenes.goals.onFailureInValidatingThenServicePresentsError, result });
+            return this.just(this.goals[_u.goals.onFailureInValidatingThenServicePresentsError]({ result }));
         }
     }
 
-    private publishNewAccount(id: string, password: string): Observable<this> {
+    private publishNewAccount(id: string, password: string): Observable<Context<SignUpScenes>> {
         return User
             .create(id, password)
             .pipe(
                 map((userProperties: UserProperties) => {
-                    return this.instantiate({ scene: scenes.goals.onSuccessInPublishingThenServicePresentsHomeView, user: userProperties });
+                    return this.goals[_u.goals.onSuccessInPublishingThenServicePresentsHomeView]({ user: userProperties });
                 })
                 , first() // 一度観測したらsubscriptionを終わらせる
             );

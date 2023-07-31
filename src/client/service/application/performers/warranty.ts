@@ -1,5 +1,5 @@
 // service
-import { GetWarrantyList, GetWarrantyListScenes, GetWarrantyListUsecase, isGetWarrantyListGoal } from "@usecases/signedInUser/getWarrantyList";
+import { GetWarrantyListScenario, GetWarrantyListScenes } from "@usecases/signedInUser/getWarrantyList";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
@@ -9,6 +9,8 @@ import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { Warranty } from "@/shared/service/domain/entities/warranty";
+import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
+import { Scene } from "robustive-ts";
 
 
 export interface WarrantyStore extends Store {
@@ -16,7 +18,7 @@ export interface WarrantyStore extends Store {
 }
 export interface WarrantyPerformer extends Performer<WarrantyStore> {
     readonly store: WarrantyStore;
-    get: (context: GetWarrantyListScenes, actor: Actor) => void;
+    get: (from: Scene<GetWarrantyListScenes, GetWarrantyListScenario>, actor: Actor) => void;
 }
 
 export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerformer {
@@ -31,19 +33,19 @@ export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerform
 
     return {
         store
-        , get: (context: GetWarrantyListScenes, actor: Actor) => {
+        , get: (from: Scene<GetWarrantyListScenes, GetWarrantyListScenario>, actor: Actor) => {
+            const _u = SignInUserUsecases.getWarrabtyList;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = new GetWarrantyListUsecase(context)
+            subscription = from
                 .interactedBy(actor, {
-                    next: ([lastSceneContext, performedScenario]) => {
-                        if (!isGetWarrantyListGoal(lastSceneContext)) { return; }
+                    next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case GetWarrantyList.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
+                        case _u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
                             console.log("OKKKKKK", lastSceneContext.warranties);
                             _store.warranties = lastSceneContext.warranties;
                             break;
-                        case GetWarrantyList.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView:
+                        case _u.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView:
                             _store.warranties = [];
                             break;
                         }

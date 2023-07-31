@@ -2,44 +2,26 @@ import { Application } from "@/shared/service/domain/application/application";
 import TaskModel, { Task } from "@domain/entities/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { concat, map, Observable } from "rxjs";
-import { Actor, Boundary, boundary, Context, Empty, Usecase } from "robustive-ts";
+import { Actor, BaseScenario, Context, Empty } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
+import { ServieceUsecases } from ".";
+
+const _u = ServieceUsecases.observingUsersTasks;
 
 /**
  * usecase: アプリを起動する
  */
-const scenes = {
-    /* Basic Courses */
-    serviceDetectsSigningIn : "サービスはユーザのサインインを検知する"
-    , startObservingUsersTasks : "サービスはユーザのタスクの観測を開始する"
-
-    /* Boundaries */
-    , goals : {
-        serviceDoNothing : "サービスは何もしない"
-        , onUpdateUsersTasksThenServiceUpdateUsersTaskList : "ユーザのタスクが更新された時_サービスはユーザのタスク一覧を更新する"
-    }
-} as const;
-
-type ObservingUsersTasks = typeof scenes[keyof typeof scenes];
-
-// 代数的データ型 @see: https://qiita.com/xmeta/items/91dfb24fa87c3a9f5993#typescript-1
-// https://zenn.dev/eagle/articles/ts-coproduct-introduction
-type Goals = Context<{
-    [scenes.goals.serviceDoNothing]: Empty;
-    [scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
-}>;
-
-type Scenes = Context<{
-    [scenes.serviceDetectsSigningIn]: { user: UserProperties; };
-    [scenes.startObservingUsersTasks]: { user: UserProperties; };
-}> | Goals;
-
-export const isObservingUsersTasksGoal = (context: any): context is Goals => context.scene !== undefined && Object.values(scenes.goals).find(c => { return c === context.scene; }) !== undefined;
-export const isObservingUsersTasksScene = (context: any): context is Scenes => context.scene !== undefined && Object.values(scenes).find(c => { return c === context.scene; }) !== undefined;
-
-export const ObservingUsersTasks = scenes;
-export type ObservingUsersTasksGoals = Goals;
-export type ObservingUsersTasksScenes = Scenes;
+export type ObservingUsersTasksScenes = {
+    basics : {
+        [_u.basics.serviceDetectsSigningIn]: { user: UserProperties; };
+        [_u.basics.startObservingUsersTasks]: { user: UserProperties; };
+    };
+    alternatives: Empty;
+    goals : {
+        [_u.goals.serviceDoNothing]: Empty;
+        [_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
+    };
+};
 
 /**
  * コンストラクタでSceneが保持するContextを設定します。
@@ -47,36 +29,33 @@ export type ObservingUsersTasksScenes = Scenes;
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class ObservingUsersTasksUsecase extends Usecase<Scenes> {
+export class ObservingUsersTasksScenario extends BaseScenario<ObservingUsersTasksScenes> {
 
-    override authorize<T extends Actor<T>>(actor: T): boolean {
-        return Application.authorize(actor, this);
+    // override authorize<T extends Actor<T>>(actor: T): boolean {
+    //     return Application.authorize(actor, this);
+    // }
+
+    next(to: Context<ObservingUsersTasksScenes>): Observable<Context<ObservingUsersTasksScenes>> {
+        switch (to.scene) {
+        case _u.basics.serviceDetectsSigningIn: {
+            return this.just(this.basics[_u.basics.startObservingUsersTasks]({ user: to.user }));
+        }
+        case _u.basics.startObservingUsersTasks: {
+            return this.startObservingUsersTasks(to.user);
+        }
+        default: {
+            throw new Error(`not implemented: ${ to.scene }`);
+        }
+        }
     }
 
-    next(): Observable<this> | Boundary {
-        switch (this.context.scene) {
-        case scenes.serviceDetectsSigningIn: {
-            return this.just({ scene: scenes.startObservingUsersTasks, user: this.context.user });
-        }
-        case scenes.startObservingUsersTasks: {
-            return this.startObservingUsersTasks(this.context.user);
-        }
-        case scenes.goals.serviceDoNothing:
-        case scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList: {
-            return boundary;
-        }
-        }
-    }
-
-    private startObservingUsersTasks(user: UserProperties): Observable<this> {
+    private startObservingUsersTasks(user: UserProperties): Observable<Context<ObservingUsersTasksScenes>> {
         // ユースケースの終わり（バウンダリー）に、オブザーバ（タスクの観測）を結合している
         return concat(
-            this.just({ scene: scenes.goals.serviceDoNothing }) 
+            this.just(this.goals[_u.goals.serviceDoNothing]())
             , TaskModel.observeUserTasks(user.uid)
                 .pipe(
-                    map(changedTasks =>
-                        this.instantiate({ scene: scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList, changedTasks })
-                    )
+                    map(changedTasks => this.goals[_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]({ changedTasks }))
                 )
         );
     }

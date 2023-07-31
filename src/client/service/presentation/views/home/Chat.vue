@@ -2,7 +2,6 @@
 // service
 
 // view
-import DataTable from "../../components/dataTable/dataTable.vue";
 import { Align } from "../../components/dataTable";
 import type { Action, DataTableHeader } from "../../components/dataTable";
 
@@ -10,10 +9,10 @@ import type { Action, DataTableHeader } from "../../components/dataTable";
 import { inject, reactive, ref } from "vue";
 import type { Dispatcher } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
-import { GetWarrantyList } from "@/shared/service/application/usecases/signedInUser/getWarrantyList";
-import { Consult } from "@/shared/service/application/usecases/signedInUser/consult";
 import { Role } from "@/shared/service/domain/chat/message";
 import type { MessageProperties } from "@/shared/service/domain/chat/message";
+import { U } from "@/shared/service/application/usecases";
+import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
 
 
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
@@ -30,8 +29,8 @@ const onClickSendButton = () => {
         role: Role.user
         , content: state.inputText
     } as MessageProperties;
-  
-    dispatch({ scene: Consult.userInputsQuery, messages: [ message ]  }); 
+
+    dispatch(U.consult.basics[SignInUserUsecases.consult.basics.userInputsQuery]({ messages: [ message ]})); 
 };
 
 const items = [

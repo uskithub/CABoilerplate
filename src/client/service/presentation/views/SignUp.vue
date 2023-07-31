@@ -1,7 +1,5 @@
 <script setup lang="ts">
 // service
-import { SignUp } from "@usecases/nobody/signUp";
-import { SignOut } from "@usecases/signedInUser/signOut";
 
 // system
 import { computed, inject, reactive } from "vue";
@@ -10,6 +8,9 @@ import type { Dictionary } from "@shared/system/localizations";
 import { DISPATCHER_KEY } from "../../application/performers";
 import type { Dispatcher } from "../../application/performers";
 import { isSignedInUser } from "@shared/service/application/actors/signedInUser";
+import { U } from "@/shared/service/application/usecases";
+import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
+import { NobodyUsecases } from "@/shared/service/application/usecases/nobody";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
@@ -50,7 +51,7 @@ v-container
     v-btn.mr-4(
       :disabled="!isFormValid",
       color="success",
-      @click="dispatch({ scene: SignUp.userStartsSignUpProcess, id: state.email, password: state.password })"
+      @click="dispatch(U.signUp.basics[NobodyUsecases.signUp.basics.userStartsSignUpProcess]({ id: state.email, password: state.password }))"
     ) {{ t.signUp.buttons.signUp }}
 
   v-row(justify="center")
@@ -63,11 +64,11 @@ v-container
           v-btn(
             color="warning",
             text,
-            @click="dispatch({ scene: SignOut.userStartsSignOutProcess, id: state.email, password: state.password })"
+            @click="dispatch(U.signOut.basics[SignInUserUsecases.signOut.basics.userStartsSignOutProcess]())"
           ) Sign Out
           v-btn(
             color="success",
             text,
-            @click="dispatch({ scene: SignOut.userResignSignOut })"
+            @click="dispatch(U.signOut.alternatives[SignInUserUsecases.signOut.alternatives.userResignSignOut]())"
           ) Go Home
 </template>

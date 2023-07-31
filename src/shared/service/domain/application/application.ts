@@ -41,61 +41,61 @@ export class Application implements Service {
     }
 }
 
-export default {
+// export default {
 
-    authorize: <Context extends IContext, U extends Usecase<ContextualizedScenes<T>>>(actor: Actor, usecase: U): boolean => {
-        switch (usecase.constructor) {
-            /* ServiceInProcess */
-            case ListInsuranceItemsUsecase: {
-                return isSignedInUser(actor);
-            }
-            /* Nobody */
-            case BootUsecase: {
-                return true;
-            }
-            case SignUpUsecase: {
-                return isNobody(actor);
-            }
-            case SignInUsecase: {
-                return isNobody(actor);
-            }
-            case GetWarrantyListUsecase: {
-                return true;
-            }
+//     authorize: <Context extends IContext, U extends Usecase<ContextualizedScenes<T>>>(actor: Actor, usecase: U): boolean => {
+//         switch (usecase.constructor) {
+//         /* ServiceInProcess */
+//         case ListInsuranceItemsUsecase: {
+//             return isSignedInUser(actor);
+//         }
+//         /* Nobody */
+//         case BootUsecase: {
+//             return true;
+//         }
+//         case SignUpUsecase: {
+//             return isNobody(actor);
+//         }
+//         case SignInUsecase: {
+//             return isNobody(actor);
+//         }
+//         case GetWarrantyListUsecase: {
+//             return true;
+//         }
 
-            /* SignedInUser */
-            case SignOutUsecase: {
-                return isSignedInUser(actor);
-            }
-            case ConsultUsecase: {
-                return isSignedInUser(actor);
-            }
-            /* Service */
-            case ObservingUsersTasksUsecase: {
-                return isService(actor);
-            }
-        }
+//         /* SignedInUser */
+//         case SignOutUsecase: {
+//             return isSignedInUser(actor);
+//         }
+//         case ConsultUsecase: {
+//             return isSignedInUser(actor);
+//         }
+//         /* Service */
+//         case ObservingUsersTasksUsecase: {
+//             return isService(actor);
+//         }
+//         }
 
-        const isBoot = (usecase: any): usecase is BootUsecase => usecase.constructor === BootUsecase;
-        const isSignUp = (usecase: any): usecase is SignUpUsecase => usecase.constructor === SignUpUsecase;
-        const isSignIn = (usecase: any): usecase is SignInUsecase => usecase.constructor === SignInUsecase;
-        const isSignOut = (usecase: any): usecase is SignOutUsecase => usecase.constructor === SignOutUsecase;
+//         const isBoot = (usecase: any): usecase is BootUsecase => usecase.constructor === BootUsecase;
+//         const isSignUp = (usecase: any): usecase is SignUpUsecase => usecase.constructor === SignUpUsecase;
+//         const isSignIn = (usecase: any): usecase is SignInUsecase => usecase.constructor === SignInUsecase;
+//         const isSignOut = (usecase: any): usecase is SignOutUsecase => usecase.constructor === SignOutUsecase;
 
-        if (isBoot(usecase)) {
-            if (usecase.context.scene === Boot.userOpensSite) {
-                // TODO
-            }
-            return true;
-        } else if (isSignUp(usecase)) {
-            return true;
-        } else if (isSignIn(usecase)) {
-            return true;
-        } else if (isSignOut(usecase)) {
-            return true;
-        }
+//         if (isBoot(usecase)) {
+//             if (usecase.context.scene === Boot.userOpensSite) {
+//                 // TODO
+//             }
+//             return true;
+//         } else if (isSignUp(usecase)) {
+//             return true;
+//         } else if (isSignIn(usecase)) {
+//             return true;
+//         } else if (isSignOut(usecase)) {
+//             return true;
+//         }
 
-        // 開発時はここでエラーを発生させた方が分かりやすい
-        throw new Error(`USECASE ${usecase.constructor.name} IS NOT AUTHORIZED FOR ACTOR ${actor.constructor.name}`);
-        // return false;
-    }
-};
+//         // 開発時はここでエラーを発生させた方が分かりやすい
+//         throw new Error(`USECASE ${usecase.constructor.name} IS NOT AUTHORIZED FOR ACTOR ${actor.constructor.name}`);
+//         // return false;
+//     }
+// };

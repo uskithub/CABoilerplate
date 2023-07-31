@@ -1,7 +1,9 @@
 // service
-import { isSignInGoal, SignIn, SignInScenes, SignInUsecase } from "@/shared/service/application/usecases/nobody/signIn";
-import { isSignOutGoal, SignOut, SignOutScenes, SignOutUsecase } from "@/shared/service/application/usecases/signedInUser/signOut";
+import { SignInScenario, SignInScenes } from "@/shared/service/application/usecases/nobody/signIn";
+import { SignUpScenario, SignUpScenes } from "@/shared/service/application/usecases/nobody/signUp";
+import { SignOutScenario, SignOutScenes } from "@/shared/service/application/usecases/signedInUser/signOut";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { ObservingUsersTasksScenario, ObservingUsersTasksScenes } from "@usecases/service/observingUsersTasks";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
@@ -9,15 +11,17 @@ import { inject, reactive } from "vue";
 import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { Nobody, ActorNotAuthorizedToInteractIn } from "robustive-ts";
-import { isSignUpGoal, SignUp, SignUpScenes, SignUpUsecase } from "@/shared/service/application/usecases/nobody/signUp";
-import { browserPopupRedirectResolver } from "firebase/auth";
+import { Nobody, ActorNotAuthorizedToInteractIn, Scene } from "robustive-ts";
+
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
-import { isObservingUsersTasksGoal, ObservingUsersTasks, ObservingUsersTasksScenes, ObservingUsersTasksUsecase } from "@usecases/service/observingUsersTasks";
+
 import { Service } from "@/shared/service/application/actors/service";
 import { Actor } from "@/shared/service/application/actors";
+import { NobodyUsecases } from "@/shared/service/application/usecases/nobody";
+import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
+import { ServieceUsecases } from "@/shared/service/application/usecases/service";
 
 type ImmutableTask = Readonly<Task>;
 
@@ -32,10 +36,10 @@ export interface AuthenticationStore extends Store {
 
 export interface AuthenticationPerformer extends Performer<AuthenticationStore> {
     readonly store: AuthenticationStore;
-    signUp: (context: SignUpScenes, actor: Actor) => void;
-    signIn: (context: SignInScenes, actor: Actor) => void;
-    signOut: (context: SignOutScenes, actor: Actor) => void;
-    observingUsersTasks: (context: ObservingUsersTasksScenes, actor: Actor) => void;
+    signUp: (from: Scene<SignUpScenes, SignUpScenario>, actor: Actor) => void;
+    signIn: (from: Scene<SignInScenes, SignInScenario>, actor: Actor) => void;
+    signOut: (from: Scene<SignOutScenes, SignOutScenario>, actor: Actor) => void;
+    observingUsersTasks: (from: Scene<ObservingUsersTasksScenes, ObservingUsersTasksScenario>, actor: Actor) => void;
 }
 
 export function createAuthenticationPerformer(dispatcher: Dispatcher): AuthenticationPerformer {
@@ -52,25 +56,25 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
     });
 
     const _store = store as Mutable<AuthenticationStore>;
-
+    
     return {
         store
-        , signUp: (context: SignUpScenes, actor: Actor) => {
+        , signUp: (from: Scene<SignUpScenes, SignUpScenario>, actor: Actor) => {
+            const _u = NobodyUsecases.signUp;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = new SignUpUsecase(context)
+            subscription = from
                 .interactedBy(actor, {
-                    next: ([ lastSceneContext, performedScenario]) => {
-                        if (!isSignUpGoal(lastSceneContext)) { return; }
+                    next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case SignUp.goals.onSuccessInPublishingThenServicePresentsHomeView:
+                        case _u.goals.onSuccessInPublishingThenServicePresentsHomeView: {
                             const user = lastSceneContext.user;
                             const actor = new SignedInUser(user);
                             _shared.actor = actor;
                             router.replace("/");
                             break;
-
-                        case SignUp.goals.onFailureInValidatingThenServicePresentsError: {
+                        }
+                        case _u.goals.onFailureInValidatingThenServicePresentsError: {
                             if (lastSceneContext.result === true) { return; }
                             const labelMailAddress = t.common.labels.mailAddress;
                             const labelPassword = t.common.labels.password;
@@ -103,7 +107,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                             }
                             break;
                         }
-                        case SignUp.goals.onFailureInPublishingThenServicePresentsError:
+                        case _u.goals.onFailureInPublishingThenServicePresentsError:
                             console.log("SERVICE ERROR:", lastSceneContext.error);
                             break;
                         }
@@ -111,19 +115,19 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                     , complete: dispatcher.commonCompletionProcess
                 });
         }
-        , signIn: (context: SignInScenes, actor: Actor) => {
+        , signIn: (from: Scene<SignInScenes, SignInScenario>, actor: Actor) => {
+            const _u = NobodyUsecases.signIn;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = new SignInUsecase(context)
+            subscription = from
                 .interactedBy(actor, {
-                    next: ([lastSceneContext, performedScenario]) => {
-                        if (!isSignInGoal(lastSceneContext)) { return; }
+                    next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case SignIn.goals.onSuccessInSigningInThenServicePresentsHomeView:
+                        case _u.goals.onSuccessInSigningInThenServicePresentsHomeView:
                             router.replace("/");
                             break;
 
-                        case SignIn.goals.onFailureInValidatingThenServicePresentsError: {
+                        case _u.goals.onFailureInValidatingThenServicePresentsError: {
                             if (lastSceneContext.result === true) { return; }
                             const labelMailAddress = t.common.labels.mailAddress;
                             const labelPassword = t.common.labels.password;
@@ -156,7 +160,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                             }
                             break;
                         }
-                        case SignIn.goals.onFailureInSigningInThenServicePresentsError: {
+                        case _u.goals.onFailureInSigningInThenServicePresentsError: {
                             console.log("SERVICE ERROR:", lastSceneContext.error);
                             _store.signInFailureMessage = lastSceneContext.error.message;
                             break;
@@ -169,40 +173,40 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                     , complete: dispatcher.commonCompletionProcess
                 });
         }
-        , signOut: (context: SignOutScenes, actor: Actor) => {
+        , signOut: (from: Scene<SignOutScenes, SignOutScenario>, actor: Actor) => {
+            const _u = SignInUserUsecases.signOut;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = new SignOutUsecase(context)
+            subscription = from
                 .interactedBy(actor, {
-                    next: ([lastSceneContext, performedScenario]) => {
-                        if (!isSignOutGoal(lastSceneContext)) { return; }
+                    next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case SignOut.goals.onSuccessThenServicePresentsSignInView:
+                        case _u.goals.onSuccessThenServicePresentsSignInView:
                             dispatcher.change(new Nobody());
                             _shared.signInStatus = SignInStatus.signOut;
                             break;
-                        case SignOut.goals.onFailureThenServicePresentsError:
+                        case _u.goals.onFailureThenServicePresentsError:
                             console.log("SERVICE ERROR:", lastSceneContext.error);
                             break;
-                        case SignOut.goals.servicePresentsHomeView:
+                        case _u.goals.servicePresentsHomeView:
                             router.replace("/");
                         }
                     }
                     , complete: dispatcher.commonCompletionProcess
                 });
         }
-        , observingUsersTasks: (context: ObservingUsersTasksScenes, actor: Actor) => {
+        , observingUsersTasks: (from: Scene<ObservingUsersTasksScenes, ObservingUsersTasksScenario>, actor: Actor) => {
+            const _u = ServieceUsecases.observingUsersTasks;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = new ObservingUsersTasksUsecase(context)
+            subscription = from
                 .interactedBy(actor, {
-                    next: ([lastSceneContext, performedScenario]) => {
-                        if (!isObservingUsersTasksGoal(lastSceneContext)) { return; }
+                    next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case ObservingUsersTasks.goals.serviceDoNothing:
+                        case _u.goals.serviceDoNothing:
                             console.log("Started observing user's tasks...");
                             break;
-                        case ObservingUsersTasks.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList:
+                        case _u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList:
                             const mutableUserTasks = _store.userTasks ;
                             lastSceneContext.changedTasks.forEach(changedTask => {
                                 switch (changedTask.kind) {

@@ -1,5 +1,5 @@
 import { Actor } from "@/shared/service/application/actors";
-import { ListInsuranceItems, isListInsuranceItemsGoal, ListInsuranceItemsScenes, ListInsuranceItemsUsecase } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuranceItems";
+import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuranceItems";
 import { InsuranceItem } from "@/shared/service/infrastructure/API";
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
@@ -8,13 +8,15 @@ import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 import { inject, reactive } from "vue";
 import { Subscription } from "rxjs";
 import { useRouter } from "vue-router";
+import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
+import { Scene } from "robustive-ts";
 
 export interface ServiceInProcessStore extends Store {
     insuranceItems: InsuranceItem[]|null
 }
 export interface ServiceInProcessPerformer extends Performer<ServiceInProcessStore> {
     readonly store: ServiceInProcessStore;
-    list: (context: ListInsuranceItemsScenes, actor: Actor) => void;
+    list: (from: Scene<ListInsuranceItemsScenes, ListInsuranceItemsScenario>, actor: Actor) => void;
 }
 
 export function createServiceInProcessPerformer(dispatcher: Dispatcher): ServiceInProcessPerformer {
@@ -29,19 +31,19 @@ export function createServiceInProcessPerformer(dispatcher: Dispatcher): Service
 
     return {
         store
-        , list: (context: ListInsuranceItemsScenes, actor: Actor) => {
+        , list: (from: Scene<ListInsuranceItemsScenes, ListInsuranceItemsScenario>, actor: Actor) => {
+            const _u = SignInUserUsecases.listInsuranceItems;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = new ListInsuranceItemsUsecase(context)
+            subscription = from
                 .interactedBy(actor, {
-                    next: ([lastSceneContext, performedScenario]) => {
-                        if (!isListInsuranceItemsGoal(lastSceneContext)) { return; }
+                    next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case ListInsuranceItems.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView:
+                        case _u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView:
                             console.log("OKKKKKK", lastSceneContext.insuranceItems);
                             _store.insuranceItems = lastSceneContext.insuranceItems;
                             break;
-                        case ListInsuranceItems.goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView:
+                        case _u.goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView:
                             _store.insuranceItems = null;
                             break;
                         }

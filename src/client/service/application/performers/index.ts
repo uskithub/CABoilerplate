@@ -1,28 +1,20 @@
-import { isBootScene } from "@usecases/nobody/boot";
 import { InjectionKey, reactive } from "vue";
 import { createApplicationPerformer } from "./application";
 import { createAuthenticationPerformer } from "./authentication";
 import type { AuthenticationStore } from "./authentication";
-import { isSignUpScene } from "@usecases/nobody/signUp";
-import { isSignInScene } from "@usecases/nobody/signIn";
-import { isSignOutScene } from "@usecases/signedInUser/signOut";
-import { Usecases } from "@/shared/service/application/usecases";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { Actor } from "@/shared/service/application/actors";
-import { isObservingUsersTasksScene } from "@usecases/service/observingUsersTasks";
 import { Service } from "@/shared/service/application/actors/service";
-import { isGetWarrantyListScene } from "@/shared/service/application/usecases/signedInUser/getWarrantyList";
-import { createWarrantyPerformer} from "./warranty";
-import { isListInsuranceItemsScene } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuranceItems";
+import { createWarrantyPerformer } from "./warranty";
 import { createServiceInProcessPerformer } from "./serviceInProcess";
 
 // System
-import { Context, Empty, Nobody } from "robustive-ts";
+import { Nobody } from "robustive-ts";
 import { watch, WatchStopHandle } from "vue";
 import { Log } from "@/shared/service/domain/analytics/log";
 import { createChatPerformer } from "./chat";
-import { isConsultScene } from "@/shared/service/application/usecases/signedInUser/consult";
-import { AssociatedValues } from "robustive-ts/types/usecase";
+import type { Usecase, Usecases } from "robustive-ts/types/usecase";
+import { UsecaseDefinitions } from "@/shared/service/application/usecases";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -33,7 +25,7 @@ export interface Store { }
 export interface Performer<T extends Store> { readonly store: T; }
 
 type ImmutableActor = Readonly<Actor>;
-type ImmutableUsecase = Readonly<Usecases>;
+type ImmutableUsecase = Readonly<Usecases<UsecaseDefinitions>>;
 
 export interface SharedStore extends Store {
     readonly actor: ImmutableActor;
@@ -50,7 +42,7 @@ export type Dispatcher = {
     stores: Stores;
     change: (actor: Actor) => void;
     commonCompletionProcess: () => void;
-    dispatch: (context: Context<AssociatedValues>) => void;
+    dispatch: (usecase: Usecases<UsecaseDefinitions>) => void;
     // accountViewModel: (shared: SharedStore) => HomeViewModel;
     // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
     // createSignUpViewModel: (shared: SharedStore) => SignUpViewModel;
@@ -80,7 +72,7 @@ export function createDispatcher(): Dispatcher {
             const _shared = shared as Mutable<SharedStore>;
             _shared.executingUsecase = null;
         }
-        , dispatch(context) {}
+        , dispatch(usecase: Usecases<UsecaseDefinitions>) {}
     } as Dispatcher;
 
     const performers = {
@@ -93,80 +85,92 @@ export function createDispatcher(): Dispatcher {
 
     dispatcher.stores.authentication = performers.authentication.store;
 
-    dispatcher.dispatch = (context) => {
+    dispatcher.dispatch = (usecase: Usecases<UsecaseDefinitions>) => {
         const _shared = shared as Mutable<SharedStore>;
         const actor = shared.actor;
+        // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
 
-        new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user }}).record();
+        console.log("###", usecase);
 
+        switch (usecase.name) {
         /* Nobody */
-        if (isBootScene(context)) {
-            console.info("[DISPATCH] Boot:", context);
-            _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.application.boot(context, actor);
-        } else if (isSignUpScene(context)) {
-            console.info("[DISPATCH] SignUp", context);
-            _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.authentication.signUp(context, actor);
-        } else if (isSignInScene(context)) {
-            console.info("[DISPATCH] SignIn", context);
-            _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.authentication.signIn(context, actor);
+        case "boot": {
+            console.info("[DISPATCH] Boot:", usecase.from);
+            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
+            performers.application.boot(usecase.from, actor);
+            return;
+        }
+        case "signUp": {
+            console.info("[DISPATCH] SignUp", usecase.from);
+            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
+            performers.authentication.signUp(usecase.from, actor);
+            return;
+        }
+        case "signIn": {
+            console.info("[DISPATCH] SignIn", usecase.from);
+            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
+            performers.authentication.signIn(usecase.from, actor);
+            return;
         }
 
         /* Service */
-        else if (isObservingUsersTasksScene(context)) {
-            console.info("[DISPATCH] ObservingUsersTasks:", context);
+        case "observingUsersTasks": {
+            console.info("[DISPATCH] ObservingUsersTasks:", usecase.from);
             // 観測し続けるのでステータス管理しない
             // _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.authentication.observingUsersTasks(context, new Service());
-        } 
+            performers.authentication.observingUsersTasks(usecase.from, new Service());
+            return;
+        }
+        }
 
         // 初回表示時対応
         // signInStatus が不明の場合、signInUserでないと実行できないUsecaseがエラーになるので、
         // ステータスが変わるのを監視し、その後実行し直す
-        else if (shared.signInStatus === SignInStatus.unknown) {
+        if (shared.signInStatus === SignInStatus.unknown) {
             console.info("[DISPATCH] signInStatus が 不明のため、ユースケースの実行を保留します...");
-            let stopHandle: WatchStopHandle|null = null;
+            let stopHandle: WatchStopHandle | null = null;
             stopHandle = watch(() => shared.signInStatus, (newValue) => {
+                console.log("%%%%%", newValue);
                 if (newValue !== SignInStatus.unknown) {
                     console.log(`[DISPATCH] signInStatus が "${ newValue }" に変わったため、保留したユースケースを再開します...`);
-                    dispatcher.dispatch(context);
+                    dispatcher.dispatch(usecase);
                     stopHandle?.();
                 }
             });
         }
 
-        /* ServiceInProcess */
-        else if (isListInsuranceItemsScene(context)) {
-            console.info("[DISPATCH] ListInsuranceItem:", context);
-            _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.serviceInProcess.list(context, actor);
-        }
-
         /* SignedInUser */
-        else if (isSignOutScene(context)) {
-            console.info("[DISPATCH] SignOut", context);
-            _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.authentication.signOut(context, actor);
-        } else if (isGetWarrantyListScene(context)) {
-            console.info("[DISPATCH] GetWarrantyList", context);
-            _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.warranty.get(context, actor);
+        switch (usecase.name) {
+        case "listInsuranceItems": {
+            console.info("[DISPATCH] ListInsuranceItem:", usecase.from);
+            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
+            performers.serviceInProcess.list(usecase.from, actor);
+            break;
         }
-
-        /* Chat */
-        else if (isConsultScene(context)) {
-            console.info("[DISPATCH] Consult", context);
-            _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.chat.consult(context, actor);
+        case "signOut": {
+            console.info("[DISPATCH] SignOut", usecase.from);
+            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
+            performers.authentication.signOut(usecase.from, actor);
+            break;
         }
-
-        else {
-            throw new Error(`dispatch先が定義されていません: ${context.scene as string}`);
+        case "getWarrantyList": {
+            console.info("[DISPATCH] GetWarrantyList", usecase.from);
+            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
+            performers.warranty.get(usecase.from, actor);
+            break;
+        }
+        case "consult": {
+            console.info("[DISPATCH] Consult", usecase.from);
+            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
+            performers.chat.consult(usecase.from, actor);
+            break;
+        }
+        // default: {
+        //     throw new Error(`dispatch先が定義されていません: ${ usecase.name }`);
+        // }
         }
     };
-
+    
     return dispatcher;
 }
 
