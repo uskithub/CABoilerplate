@@ -7,13 +7,12 @@ import { inject, reactive } from "vue";
 import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { Nobody as NobodyActor, ActorNotAuthorizedToInteractIn } from "robustive-ts";
+import { Nobody as NobodyActor } from "robustive-ts";
 
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 
-import { Service } from "@/shared/service/application/actors/service";
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/usecases/nobody";
 import { SignInUser } from "@/shared/service/application/usecases/signedInUser";
