@@ -28,10 +28,6 @@ export type SignInScenes = {
 
 export class SignInScenario extends MyBaseScenario<SignInScenes> {
 
-    // override authorize<T extends Actor<T>>(actor: T): boolean {
-    //     return Application.authorize(actor, this);
-    // }
-
     next(to: MutableContext<SignInScenes>): Observable<Context<SignInScenes>> {
         switch (to.scene) {
         case _u.basics.userStartsSignInProcess: {

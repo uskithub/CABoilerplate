@@ -27,10 +27,6 @@ export type SignOutScenes = {
 
 export class SignOutScenario extends MyBaseScenario<SignOutScenes> {
 
-    // override authorize<T extends Actor<T>>(actor: T): boolean {
-    //     return Application.authorize(actor, this);
-    // }
-
     next(to: MutableContext<SignOutScenes>): Observable<Context<SignOutScenes>> {
         switch (to.scene) {
         case _u.basics.userStartsSignOutProcess: {

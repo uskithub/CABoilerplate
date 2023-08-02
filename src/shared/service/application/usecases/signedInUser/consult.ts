@@ -28,10 +28,6 @@ export type ConsultScenes = {
 
 export class ConsultScenario extends MyBaseScenario<ConsultScenes> {
 
-    // override authorize<T extends Actor<T>>(actor: T): boolean {
-    //     return Application.authorize(actor, this);
-    // }
-
     next(to: MutableContext<ConsultScenes>): Observable<Context<ConsultScenes>> {
         switch (to.scene) {
         case _u.basics.userInputsQuery: {

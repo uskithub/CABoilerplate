@@ -32,10 +32,6 @@ export type ObservingUsersTasksScenes = {
  */
 export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTasksScenes> {
 
-    // override authorize<T extends Actor<T>>(actor: T): boolean {
-    //     return Application.authorize(actor, this);
-    // }
-
     next(to: MutableContext<ObservingUsersTasksScenes>): Observable<Context<ObservingUsersTasksScenes>> {
         switch (to.scene) {
         case _u.basics.serviceDetectsSigningIn: {

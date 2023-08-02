@@ -26,10 +26,6 @@ export type GetWarrantyListScenes = {
 
 export class GetWarrantyListScenario extends MyBaseScenario<GetWarrantyListScenes> {
 
-    // override authorize<T extends Actor<T>>(actor: T): boolean {
-    //     return Application.authorize(actor, this);
-    // }
-
     next(to: MutableContext<GetWarrantyListScenes>): Observable<Context<GetWarrantyListScenes>> {
         switch (to.scene) {
         case _u.basics.userInitiatesWarrantyListing: {

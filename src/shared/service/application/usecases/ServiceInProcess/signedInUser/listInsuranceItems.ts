@@ -28,10 +28,6 @@ export type ListInsuranceItemsScenes = {
 
 export class ListInsuranceItemsScenario extends MyBaseScenario<ListInsuranceItemsScenes> {
 
-    // override authorize<T extends Actor<T>>(actor: T): boolean {
-    //     return Application.authorize(actor, this);
-    // }
-
     next(to: MutableContext<ListInsuranceItemsScenes>): Observable<Context<ListInsuranceItemsScenes>> {
         switch (to.scene) {
         case _u.basics.userInitiatesListing: {
