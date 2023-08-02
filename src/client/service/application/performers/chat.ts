@@ -1,5 +1,4 @@
 // service
-import { ConsultScenario, ConsultScenes } from "@/shared/service/application/usecases/signedInUser/consult";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
@@ -10,7 +9,8 @@ import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { MessageProperties } from "@/shared/service/domain/chat/message";
 import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
-import { Scene } from "robustive-ts";
+import { Usecase } from "robustive-ts";
+import { UsecaseDefinitions } from "@/shared/service/application/usecases";
 
 export interface ChatStore extends Store {
     messages: MessageProperties[]
@@ -18,7 +18,7 @@ export interface ChatStore extends Store {
 
 export interface ChatPerformer extends Performer<ChatStore> {
     readonly store: ChatStore;
-    consult: (context: Scene<ConsultScenes, ConsultScenario>, actor: Actor) => void;
+    consult: (usecase: Usecase<UsecaseDefinitions, "consult">, actor: Actor) => void;
 }
 
 export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
@@ -28,11 +28,11 @@ export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
 
     return {
         store
-        , consult: (from: Scene<ConsultScenes, ConsultScenario>, actor: Actor) => {
+        , consult: (usecase: Usecase<UsecaseDefinitions, "consult">, actor: Actor) => {
             const _u = SignInUserUsecases.consult;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = from
+            subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {

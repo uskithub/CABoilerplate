@@ -1,9 +1,10 @@
 import { User, type SignUpValidationResult, type UserProperties } from "@/shared/service/domain/authentication/user";
 import { Application } from "@/shared/service/domain/application/application";
-import { Actor, BaseScenario, Empty } from "robustive-ts";
-import type { Context } from "robustive-ts";
+import { Empty } from "robustive-ts";
+import type { Context, MutableContext } from "robustive-ts";
 import { first, map, Observable } from "rxjs";
 import { NobodyUsecases } from ".";
+import { MyBaseScenario } from "../common";
 
 const _u = NobodyUsecases.signUp;
 
@@ -24,13 +25,13 @@ export type SignUpScenes = {
     }
 };
 
-export class SignUpScenario extends BaseScenario<SignUpScenes> {
+export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
 
     // override authorize<T extends Actor<T>>(actor: T): boolean {
     //     return Application.authorize(actor, this);
     // }
 
-    next(to: Context<SignUpScenes>): Observable<Context<SignUpScenes>> {
+    next(to: MutableContext<SignUpScenes>): Observable<Context<SignUpScenes>> {
         switch (to.scene) {
         case _u.basics.userStartsSignUpProcess: {
             return this.just(this.basics[_u.basics.serviceValidateInputs]({ id: to.id, password: to.password }));

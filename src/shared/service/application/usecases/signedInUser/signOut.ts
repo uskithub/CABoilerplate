@@ -1,8 +1,9 @@
 import { User } from "@/shared/service/domain/authentication/user";
 import { Application } from "@/shared/service/domain/application/application";
 import { catchError, map, Observable } from "rxjs";
-import { Actor, BaseScenario, Context, Empty } from "robustive-ts";
+import { Context, Empty, MutableContext } from "robustive-ts";
 import { SignInUserUsecases } from ".";
+import { MyBaseScenario } from "../common";
 
 const _u = SignInUserUsecases.signOut;
 
@@ -24,13 +25,13 @@ export type SignOutScenes = {
     };
 };
 
-export class SignOutScenario extends BaseScenario<SignOutScenes> {
+export class SignOutScenario extends MyBaseScenario<SignOutScenes> {
 
     // override authorize<T extends Actor<T>>(actor: T): boolean {
     //     return Application.authorize(actor, this);
     // }
 
-    next(to: Context<SignOutScenes>): Observable<Context<SignOutScenes>> {
+    next(to: MutableContext<SignOutScenes>): Observable<Context<SignOutScenes>> {
         switch (to.scene) {
         case _u.basics.userStartsSignOutProcess: {
             return this.just(this.basics[_u.basics.serviceClosesSession]());

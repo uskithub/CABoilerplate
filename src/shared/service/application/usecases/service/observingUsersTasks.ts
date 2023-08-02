@@ -2,9 +2,10 @@ import { Application } from "@/shared/service/domain/application/application";
 import TaskModel, { Task } from "@domain/entities/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { concat, map, Observable } from "rxjs";
-import { Actor, BaseScenario, Context, Empty } from "robustive-ts";
+import { Context, Empty, MutableContext } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
 import { ServieceUsecases } from ".";
+import { MyBaseScenario } from "../common";
 
 const _u = ServieceUsecases.observingUsersTasks;
 
@@ -29,13 +30,13 @@ export type ObservingUsersTasksScenes = {
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class ObservingUsersTasksScenario extends BaseScenario<ObservingUsersTasksScenes> {
+export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTasksScenes> {
 
     // override authorize<T extends Actor<T>>(actor: T): boolean {
     //     return Application.authorize(actor, this);
     // }
 
-    next(to: Context<ObservingUsersTasksScenes>): Observable<Context<ObservingUsersTasksScenes>> {
+    next(to: MutableContext<ObservingUsersTasksScenes>): Observable<Context<ObservingUsersTasksScenes>> {
         switch (to.scene) {
         case _u.basics.serviceDetectsSigningIn: {
             return this.just(this.basics[_u.basics.startObservingUsersTasks]({ user: to.user }));

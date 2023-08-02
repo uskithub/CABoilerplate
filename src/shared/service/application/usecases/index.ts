@@ -7,8 +7,11 @@ import { SignOutScenario, SignOutScenes } from "./signedInUser/signOut";
 import { ObservingUsersTasksScenario, ObservingUsersTasksScenes } from "./service/observingUsersTasks";
 import { GetWarrantyListScenario, GetWarrantyListScenes } from "./signedInUser/getWarrantyList";
 import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "./ServiceInProcess/signedInUser/listInsuranceItems";
-import { UsecaseSelector } from "robustive-ts";
+import { BaseScenario, Context, MutableContext, Scenes, UsecaseSelector } from "robustive-ts";
 import { ConsultScenario, ConsultScenes } from "./signedInUser/consult";
+import { IActor } from "robustive-ts/types/actor";
+import { Observable } from "rxjs";
+import { Actor } from "../actors";
 
 // export type Usecases = 
 //     /* ServiceInProcess */

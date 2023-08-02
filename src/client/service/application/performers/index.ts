@@ -95,30 +95,30 @@ export function createDispatcher(): Dispatcher {
         switch (usecase.name) {
         /* Nobody */
         case "boot": {
-            console.info("[DISPATCH] Boot:", usecase.from);
+            console.info("[DISPATCH] Boot:", usecase);
             // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
-            performers.application.boot(usecase.from, actor);
+            performers.application.boot(usecase, actor);
             return;
         }
         case "signUp": {
-            console.info("[DISPATCH] SignUp", usecase.from);
+            console.info("[DISPATCH] SignUp", usecase);
             // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
-            performers.authentication.signUp(usecase.from, actor);
+            performers.authentication.signUp(usecase, actor);
             return;
         }
         case "signIn": {
-            console.info("[DISPATCH] SignIn", usecase.from);
+            console.info("[DISPATCH] SignIn", usecase);
             // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
-            performers.authentication.signIn(usecase.from, actor);
+            performers.authentication.signIn(usecase, actor);
             return;
         }
 
         /* Service */
         case "observingUsersTasks": {
-            console.info("[DISPATCH] ObservingUsersTasks:", usecase.from);
+            console.info("[DISPATCH] ObservingUsersTasks:", usecase);
             // 観測し続けるのでステータス管理しない
             // _shared.executingUsecase = { executing: context, startAt: new Date() };
-            performers.authentication.observingUsersTasks(usecase.from, new Service());
+            performers.authentication.observingUsersTasks(usecase, new Service());
             return;
         }
         }
@@ -142,27 +142,27 @@ export function createDispatcher(): Dispatcher {
         /* SignedInUser */
         switch (usecase.name) {
         case "listInsuranceItems": {
-            console.info("[DISPATCH] ListInsuranceItem:", usecase.from);
+            console.info("[DISPATCH] ListInsuranceItem:", usecase);
             // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
-            performers.serviceInProcess.list(usecase.from, actor);
+            performers.serviceInProcess.list(usecase, actor);
             break;
         }
         case "signOut": {
-            console.info("[DISPATCH] SignOut", usecase.from);
+            console.info("[DISPATCH] SignOut", usecase);
             // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
-            performers.authentication.signOut(usecase.from, actor);
+            performers.authentication.signOut(usecase, actor);
             break;
         }
         case "getWarrantyList": {
-            console.info("[DISPATCH] GetWarrantyList", usecase.from);
+            console.info("[DISPATCH] GetWarrantyList", usecase);
             // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
-            performers.warranty.get(usecase.from, actor);
+            performers.warranty.get(usecase, actor);
             break;
         }
         case "consult": {
-            console.info("[DISPATCH] Consult", usecase.from);
+            console.info("[DISPATCH] Consult", usecase);
             // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
-            performers.chat.consult(usecase.from, actor);
+            performers.chat.consult(usecase, actor);
             break;
         }
         // default: {

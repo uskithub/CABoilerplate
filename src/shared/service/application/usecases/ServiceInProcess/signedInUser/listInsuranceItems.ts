@@ -5,8 +5,9 @@ import { InsuranceItem } from "@/shared/service/infrastructure/API";
 
 // System
 import { map, Observable } from "rxjs";
-import { Actor, BaseScenario, Context, Empty } from "robustive-ts";
+import { Context, Empty, MutableContext } from "robustive-ts";
 import { SignInUserUsecases } from "../../signedInUser";
+import { MyBaseScenario } from "../../common";
 
 const _u = SignInUserUsecases.listInsuranceItems;
 
@@ -25,13 +26,13 @@ export type ListInsuranceItemsScenes = {
     };
 };
 
-export class ListInsuranceItemsScenario extends BaseScenario<ListInsuranceItemsScenes> {
+export class ListInsuranceItemsScenario extends MyBaseScenario<ListInsuranceItemsScenes> {
 
     // override authorize<T extends Actor<T>>(actor: T): boolean {
     //     return Application.authorize(actor, this);
     // }
 
-    next(to: Context<ListInsuranceItemsScenes>): Observable<Context<ListInsuranceItemsScenes>> {
+    next(to: MutableContext<ListInsuranceItemsScenes>): Observable<Context<ListInsuranceItemsScenes>> {
         switch (to.scene) {
         case _u.basics.userInitiatesListing: {
             return this.just(this.basics[_u.basics.serviceSelectsInsuranceItemsThatMeetConditions]());

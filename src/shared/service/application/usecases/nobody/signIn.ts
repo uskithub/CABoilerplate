@@ -1,9 +1,10 @@
 
 import { Application } from "@/shared/service/domain/application/application";
 import { SignInValidationResult, User, UserProperties } from "@/shared/service/domain/authentication/user";
-import { Actor, BaseScenario, Context, Empty } from "robustive-ts";
+import { Context, Empty, MutableContext } from "robustive-ts";
 import { catchError, map, Observable } from "rxjs";
 import { NobodyUsecases } from ".";
+import { MyBaseScenario } from "../common";
 
 const _u = NobodyUsecases.signIn;
 
@@ -25,13 +26,13 @@ export type SignInScenes = {
 };
 
 
-export class SignInScenario extends BaseScenario<SignInScenes> {
+export class SignInScenario extends MyBaseScenario<SignInScenes> {
 
     // override authorize<T extends Actor<T>>(actor: T): boolean {
     //     return Application.authorize(actor, this);
     // }
 
-    next(to: Context<SignInScenes>): Observable<Context<SignInScenes>> {
+    next(to: MutableContext<SignInScenes>): Observable<Context<SignInScenes>> {
         switch (to.scene) {
         case _u.basics.userStartsSignInProcess: {
             return this.just(this.basics[_u.basics.serviceValidateInputs]({ id: to.id, password: to.password }));

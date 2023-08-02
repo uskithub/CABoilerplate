@@ -1,5 +1,4 @@
 import { Actor } from "@/shared/service/application/actors";
-import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "@/shared/service/application/usecases/ServiceInProcess/signedInUser/listInsuranceItems";
 import { InsuranceItem } from "@/shared/service/infrastructure/API";
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
@@ -9,14 +8,15 @@ import { inject, reactive } from "vue";
 import { Subscription } from "rxjs";
 import { useRouter } from "vue-router";
 import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
-import { Scene } from "robustive-ts";
+import { Usecase } from "robustive-ts";
+import { UsecaseDefinitions } from "@/shared/service/application/usecases";
 
 export interface ServiceInProcessStore extends Store {
     insuranceItems: InsuranceItem[]|null
 }
 export interface ServiceInProcessPerformer extends Performer<ServiceInProcessStore> {
     readonly store: ServiceInProcessStore;
-    list: (from: Scene<ListInsuranceItemsScenes, ListInsuranceItemsScenario>, actor: Actor) => void;
+    list: (usecase: Usecase<UsecaseDefinitions, "listInsuranceItems">, actor: Actor) => void;
 }
 
 export function createServiceInProcessPerformer(dispatcher: Dispatcher): ServiceInProcessPerformer {
@@ -31,11 +31,11 @@ export function createServiceInProcessPerformer(dispatcher: Dispatcher): Service
 
     return {
         store
-        , list: (from: Scene<ListInsuranceItemsScenes, ListInsuranceItemsScenario>, actor: Actor) => {
+        , list: (usecase: Usecase<UsecaseDefinitions, "listInsuranceItems">, actor: Actor) => {
             const _u = SignInUserUsecases.listInsuranceItems;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = from
+            subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {

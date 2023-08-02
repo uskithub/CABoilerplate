@@ -1,5 +1,4 @@
 // service
-import { GetWarrantyListScenario, GetWarrantyListScenes } from "@usecases/signedInUser/getWarrantyList";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
@@ -10,7 +9,8 @@ import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { Warranty } from "@/shared/service/domain/entities/warranty";
 import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
-import { Scene } from "robustive-ts";
+import { Usecase } from "robustive-ts";
+import { UsecaseDefinitions } from "@/shared/service/application/usecases";
 
 
 export interface WarrantyStore extends Store {
@@ -18,7 +18,7 @@ export interface WarrantyStore extends Store {
 }
 export interface WarrantyPerformer extends Performer<WarrantyStore> {
     readonly store: WarrantyStore;
-    get: (from: Scene<GetWarrantyListScenes, GetWarrantyListScenario>, actor: Actor) => void;
+    get: (usecase: Usecase<UsecaseDefinitions, "getWarrantyList">, actor: Actor) => void;
 }
 
 export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerformer {
@@ -33,11 +33,11 @@ export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerform
 
     return {
         store
-        , get: (from: Scene<GetWarrantyListScenes, GetWarrantyListScenario>, actor: Actor) => {
-            const _u = SignInUserUsecases.getWarrabtyList;
+        , get: (usecase: Usecase<UsecaseDefinitions, "getWarrantyList">, actor: Actor) => {
+            const _u = SignInUserUsecases.getWarrantyList;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = from
+            subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {

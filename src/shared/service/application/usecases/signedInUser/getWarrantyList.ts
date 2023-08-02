@@ -1,8 +1,9 @@
 import WarrantyModel, { Warranty } from "@domain/entities/warranty";
 import { Application } from "@/shared/service/domain/application/application";
 import { catchError, map, Observable } from "rxjs";
-import { Actor, BaseScenario, Context, Empty } from "robustive-ts";
+import { Context, Empty, MutableContext } from "robustive-ts";
 import { SignInUserUsecases } from ".";
+import { MyBaseScenario } from "../common";
 
 const _u = SignInUserUsecases.getWarrantyList;
 
@@ -23,13 +24,13 @@ export type GetWarrantyListScenes = {
     };
 };
 
-export class GetWarrantyListScenario extends BaseScenario<GetWarrantyListScenes> {
+export class GetWarrantyListScenario extends MyBaseScenario<GetWarrantyListScenes> {
 
     // override authorize<T extends Actor<T>>(actor: T): boolean {
     //     return Application.authorize(actor, this);
     // }
 
-    next(to: Context<GetWarrantyListScenes>): Observable<Context<GetWarrantyListScenes>> {
+    next(to: MutableContext<GetWarrantyListScenes>): Observable<Context<GetWarrantyListScenes>> {
         switch (to.scene) {
         case _u.basics.userInitiatesWarrantyListing: {
             return this.just(this.basics[_u.basics.serviceSelectsWarrantiesThatMeetConditions]());

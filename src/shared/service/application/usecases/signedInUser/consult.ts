@@ -1,8 +1,9 @@
 import { Application } from "@/shared/service/domain/application/application";
 import { Message, MessageProperties } from "@/shared/service/domain/chat/message";
-import { Actor, BaseScenario, Context } from "robustive-ts";
+import { Context, MutableContext } from "robustive-ts";
 import { catchError, from, map, Observable } from "rxjs";
 import { SignInUserUsecases } from ".";
+import { MyBaseScenario } from "../common";
 
 const _u = SignInUserUsecases.consult;
 
@@ -25,13 +26,13 @@ export type ConsultScenes = {
     };
 };
 
-export class ConsultScenario extends BaseScenario<ConsultScenes> {
+export class ConsultScenario extends MyBaseScenario<ConsultScenes> {
 
     // override authorize<T extends Actor<T>>(actor: T): boolean {
     //     return Application.authorize(actor, this);
     // }
 
-    next(to: Context<ConsultScenes>): Observable<Context<ConsultScenes>> {
+    next(to: MutableContext<ConsultScenes>): Observable<Context<ConsultScenes>> {
         switch (to.scene) {
         case _u.basics.userInputsQuery: {
             return this.just(this.basics[_u.basics.serviceChecksIfThereAreExistingMessages]({ messages: to.messages }));

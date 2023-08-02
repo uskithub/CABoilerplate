@@ -1,9 +1,5 @@
 // service
-import { SignInScenario, SignInScenes } from "@/shared/service/application/usecases/nobody/signIn";
-import { SignUpScenario, SignUpScenes } from "@/shared/service/application/usecases/nobody/signUp";
-import { SignOutScenario, SignOutScenes } from "@/shared/service/application/usecases/signedInUser/signOut";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
-import { ObservingUsersTasksScenario, ObservingUsersTasksScenes } from "@usecases/service/observingUsersTasks";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
@@ -11,7 +7,7 @@ import { inject, reactive } from "vue";
 import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { Nobody, ActorNotAuthorizedToInteractIn, Scene } from "robustive-ts";
+import { Nobody, ActorNotAuthorizedToInteractIn, Usecase } from "robustive-ts";
 
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
@@ -22,6 +18,7 @@ import { Actor } from "@/shared/service/application/actors";
 import { NobodyUsecases } from "@/shared/service/application/usecases/nobody";
 import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
 import { ServieceUsecases } from "@/shared/service/application/usecases/service";
+import { UsecaseDefinitions } from "@/shared/service/application/usecases";
 
 type ImmutableTask = Readonly<Task>;
 
@@ -36,10 +33,10 @@ export interface AuthenticationStore extends Store {
 
 export interface AuthenticationPerformer extends Performer<AuthenticationStore> {
     readonly store: AuthenticationStore;
-    signUp: (from: Scene<SignUpScenes, SignUpScenario>, actor: Actor) => void;
-    signIn: (from: Scene<SignInScenes, SignInScenario>, actor: Actor) => void;
-    signOut: (from: Scene<SignOutScenes, SignOutScenario>, actor: Actor) => void;
-    observingUsersTasks: (from: Scene<ObservingUsersTasksScenes, ObservingUsersTasksScenario>, actor: Actor) => void;
+    signUp: (usecase: Usecase<UsecaseDefinitions, "signUp">, actor: Actor) => void;
+    signIn: (usecase: Usecase<UsecaseDefinitions, "signIn">, actor: Actor) => void;
+    signOut: (usecase: Usecase<UsecaseDefinitions, "signOut">, actor: Actor) => void;
+    observingUsersTasks: (usecase: Usecase<UsecaseDefinitions, "observingUsersTasks">, actor: Actor) => void;
 }
 
 export function createAuthenticationPerformer(dispatcher: Dispatcher): AuthenticationPerformer {
@@ -59,11 +56,11 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
     
     return {
         store
-        , signUp: (from: Scene<SignUpScenes, SignUpScenario>, actor: Actor) => {
+        , signUp: (usecase: Usecase<UsecaseDefinitions, "signUp">, actor: Actor) => {
             const _u = NobodyUsecases.signUp;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = from
+            subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
@@ -115,11 +112,11 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                     , complete: dispatcher.commonCompletionProcess
                 });
         }
-        , signIn: (from: Scene<SignInScenes, SignInScenario>, actor: Actor) => {
+        , signIn: (usecase: Usecase<UsecaseDefinitions, "signIn">, actor: Actor) => {
             const _u = NobodyUsecases.signIn;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = from
+            subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
@@ -173,11 +170,11 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                     , complete: dispatcher.commonCompletionProcess
                 });
         }
-        , signOut: (from: Scene<SignOutScenes, SignOutScenario>, actor: Actor) => {
+        , signOut: (usecase: Usecase<UsecaseDefinitions, "signOut">, actor: Actor) => {
             const _u = SignInUserUsecases.signOut;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = from
+            subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
@@ -195,11 +192,11 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                     , complete: dispatcher.commonCompletionProcess
                 });
         }
-        , observingUsersTasks: (from: Scene<ObservingUsersTasksScenes, ObservingUsersTasksScenario>, actor: Actor) => {
+        , observingUsersTasks: (usecase: Usecase<UsecaseDefinitions, "observingUsersTasks">, actor: Actor) => {
             const _u = ServieceUsecases.observingUsersTasks;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
-            subscription = from
+            subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {

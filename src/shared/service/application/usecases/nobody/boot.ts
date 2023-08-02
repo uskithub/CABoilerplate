@@ -3,9 +3,10 @@ import { Application } from "@/shared/service/domain/application/application";
 import { Task } from "@domain/entities/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { first, map, Observable } from "rxjs";
-import { Actor, BaseScenario, Context, Empty } from "robustive-ts";
+import { Context, Empty, MutableContext } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
 import { NobodyUsecases } from ".";
+import { MyBaseScenario } from "../common";
 
 const _u = NobodyUsecases.boot;
 
@@ -31,12 +32,12 @@ export type BootScenes = {
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class BootScenario extends BaseScenario<BootScenes> {
+export class BootScenario extends MyBaseScenario<BootScenes> {
 
-    next(to: Context<BootScenes>): Observable<Context<BootScenes>> {
+    next(to: MutableContext<BootScenes>): Observable<Context<BootScenes>> {
         switch (to.scene) {
         case _u.basics.userOpensSite: {
-            console.log("%%%", this);
+            console.log("%%%", this.basics[_u.basics.serviceChecksSession]());
             return this.just(this.basics[_u.basics.serviceChecksSession]());
         }
         case _u.basics.serviceChecksSession: {
