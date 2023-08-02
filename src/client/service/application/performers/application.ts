@@ -44,7 +44,6 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                             const actor = new SignedInUser(user);
                             dispatcher.change(actor);
                             _shared.signInStatus = SignInStatus.signIn;
-                            console.log("hhhh", _shared.actor, _shared.signInStatus);
                             // controller.dispatch({ scene: ObservingUsersTasks.serviceDetectsSigningIn, user });
                             break;
                         }

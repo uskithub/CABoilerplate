@@ -89,8 +89,6 @@ export function createDispatcher(): Dispatcher {
         const actor = shared.actor;
         // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
 
-        console.log("###", usecase);
-
         switch (usecase.name) {
         /* Nobody */
         case "boot": {
@@ -99,6 +97,28 @@ export function createDispatcher(): Dispatcher {
             performers.application.boot(usecase, actor);
             return;
         }
+        }
+
+        // 初回表示時対応
+        // signInStatus が不明の場合、signInUserでないと実行できないUsecaseがエラーになるので、
+        // ステータスが変わるのを監視し、その後実行し直す
+        if (shared.signInStatus === SignInStatus.unknown) {
+            console.info("[DISPATCH] signInStatus が 不明のため、ユースケースの実行を保留します...");
+            let stopHandle: WatchStopHandle | null = null;
+            stopHandle = watch(() => shared.signInStatus, (newValue) => {
+                if (newValue !== SignInStatus.unknown) {
+                    console.log(`[DISPATCH] signInStatus が "${ newValue }" に変わったため、保留したユースケースを再開します...`);
+                    dispatcher.dispatch(usecase);
+                    stopHandle?.();
+                }
+            });
+            return;
+        }
+
+        _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
+
+        switch (usecase.name) {
+        /* Nobody */
         case "signUp": {
             console.info("[DISPATCH] SignUp", usecase);
             _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
@@ -111,7 +131,7 @@ export function createDispatcher(): Dispatcher {
             performers.authentication.signIn(usecase, actor);
             return;
         }
-
+    
         /* Service */
         case "observingUsersTasks": {
             console.info("[DISPATCH] ObservingUsersTasks:", usecase);
@@ -120,29 +140,8 @@ export function createDispatcher(): Dispatcher {
             performers.authentication.observingUsersTasks(usecase, new Service());
             return;
         }
-        }
-
-        // 初回表示時対応
-        // signInStatus が不明の場合、signInUserでないと実行できないUsecaseがエラーになるので、
-        // ステータスが変わるのを監視し、その後実行し直す
-        if (shared.signInStatus === SignInStatus.unknown) {
-            console.info("[DISPATCH] signInStatus が 不明のため、ユースケースの実行を保留します...");
-            let stopHandle: WatchStopHandle | null = null;
-            stopHandle = watch(() => shared.signInStatus, (newValue) => {
-                console.log("%%%%%", newValue);
-                if (newValue !== SignInStatus.unknown) {
-                    console.log(`[DISPATCH] signInStatus が "${ newValue }" に変わったため、保留したユースケースを再開します...`);
-                    dispatcher.dispatch(usecase);
-                    stopHandle?.();
-                }
-            });
-            return;
-        }
-
+        
         /* SignedInUser */
-        _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
-
-        switch (usecase.name) {
         case "listInsuranceItems": {
             console.info("[DISPATCH] ListInsuranceItem:", usecase);
             performers.serviceInProcess.list(usecase, actor);

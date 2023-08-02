@@ -10,11 +10,8 @@ provide(DISPATCHER_KEY, dispatcher);
 
 const { stores, dispatch } = dispatcher;
 
-console.log("APPPPP");
-
 if (stores.shared.signInStatus === SignInStatus.unknown) {
-  const u = U.boot.basics[NobodyUsecases.boot.basics.userOpensSite]();
-    dispatch(u);
+    dispatch(U.boot.basics[NobodyUsecases.boot.basics.userOpensSite]());
 }
 </script>
 

@@ -50,6 +50,6 @@ const app = createApp(App);
 loadRouter(app);
 loadVuetify(app);
 
-app.mount("#app");
 app.provide(DICTIONARY_KEY, dictionary);
+app.mount("#app");
 

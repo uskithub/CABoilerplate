@@ -42,7 +42,7 @@ export const U = {
 
 export type UsecaseKeys = keyof UsecaseDefinitions;
 export type Usecases = _Usecases<UsecaseDefinitions>;
-export type Usecase<T extends keyof UsecaseDefinitions> =  _Usecase<UsecaseDefinitions, T>;
+export type Usecase<T extends keyof UsecaseDefinitions> = _Usecase<UsecaseDefinitions, T>;
 
 export type UsecaseLog = {
     [U in keyof UsecaseDefinitions] : { executing: U, startAt: Date }

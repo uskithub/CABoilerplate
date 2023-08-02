@@ -37,7 +37,6 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
     next(to: MutableContext<BootScenes>): Observable<Context<BootScenes>> {
         switch (to.scene) {
         case _u.basics.userOpensSite: {
-            console.log("%%%", this.basics[_u.basics.serviceChecksSession]());
             return this.just(this.basics[_u.basics.serviceChecksSession]());
         }
         case _u.basics.serviceChecksSession: {
