@@ -10,23 +10,6 @@ import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "./ServiceI
 import { Usecase as _Usecase, Usecases as _Usecases, UsecaseSelector } from "robustive-ts";
 import { ConsultScenario, ConsultScenes } from "./signedInUser/consult";
 
-// export type Usecases = 
-//     /* ServiceInProcess */
-//     | { executing : ListInsuranceItemsScenario, startAt: Date }
-
-//     /* Nobody */
-//     | { executing : BootScenario, startAt: Date }
-//     | { executing : SignUpScenario, startAt: Date }
-//     | { executing : SignInScenario, startAt: Date }
-
-//     /* SignedIn */
-//     | { executing : SignOutScenario, startAt: Date }
-//     | { executing : GetWarrantyListScenario, startAt: Date }
-
-//     /* Service */
-//     | { executing : ObservingUsersTasksScenario, startAt: Date }
-// ;
-
 type UsecaseDefinitions = {
     /* nobody */
     boot : { scenes: BootScenes; scenario: BootScenario; };
@@ -60,3 +43,7 @@ export const U = {
 export type UsecaseKeys = keyof UsecaseDefinitions;
 export type Usecases = _Usecases<UsecaseDefinitions>;
 export type Usecase<T extends keyof UsecaseDefinitions> =  _Usecase<UsecaseDefinitions, T>;
+
+export type UsecaseLog = {
+    [U in keyof UsecaseDefinitions] : { executing: U, startAt: Date }
+}[keyof UsecaseDefinitions];

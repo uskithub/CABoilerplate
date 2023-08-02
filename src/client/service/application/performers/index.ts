@@ -13,7 +13,7 @@ import { Nobody } from "robustive-ts";
 import { watch, WatchStopHandle } from "vue";
 import { Log } from "@/shared/service/domain/analytics/log";
 import { createChatPerformer } from "./chat";
-import { Usecases } from "@/shared/service/application/usecases";
+import { Usecases, UsecaseLog } from "@/shared/service/application/usecases";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -24,11 +24,11 @@ export interface Store { }
 export interface Performer<T extends Store> { readonly store: T; }
 
 type ImmutableActor = Readonly<Actor>;
-type ImmutableUsecase = Readonly<Usecases>;
+type ImmutableUsecaseLog = Readonly<UsecaseLog>;
 
 export interface SharedStore extends Store {
     readonly actor: ImmutableActor;
-    readonly executingUsecase: ImmutableUsecase | null;
+    readonly executingUsecase: ImmutableUsecaseLog | null;
     readonly signInStatus: SignInStatus;
 }
 
@@ -95,19 +95,19 @@ export function createDispatcher(): Dispatcher {
         /* Nobody */
         case "boot": {
             console.info("[DISPATCH] Boot:", usecase);
-            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
+            _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
             performers.application.boot(usecase, actor);
             return;
         }
         case "signUp": {
             console.info("[DISPATCH] SignUp", usecase);
-            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
+            _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
             performers.authentication.signUp(usecase, actor);
             return;
         }
         case "signIn": {
             console.info("[DISPATCH] SignIn", usecase);
-            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
+            _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
             performers.authentication.signIn(usecase, actor);
             return;
         }
@@ -116,7 +116,7 @@ export function createDispatcher(): Dispatcher {
         case "observingUsersTasks": {
             console.info("[DISPATCH] ObservingUsersTasks:", usecase);
             // 観測し続けるのでステータス管理しない
-            // _shared.executingUsecase = { executing: context, startAt: new Date() };
+            // _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
             performers.authentication.observingUsersTasks(usecase, new Service());
             return;
         }
@@ -140,34 +140,32 @@ export function createDispatcher(): Dispatcher {
         }
 
         /* SignedInUser */
+        _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
+
         switch (usecase.name) {
         case "listInsuranceItems": {
             console.info("[DISPATCH] ListInsuranceItem:", usecase);
-            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
             performers.serviceInProcess.list(usecase, actor);
             break;
         }
         case "signOut": {
             console.info("[DISPATCH] SignOut", usecase);
-            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
             performers.authentication.signOut(usecase, actor);
             break;
         }
         case "getWarrantyList": {
             console.info("[DISPATCH] GetWarrantyList", usecase);
-            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
             performers.warranty.get(usecase, actor);
             break;
         }
         case "consult": {
             console.info("[DISPATCH] Consult", usecase);
-            // _shared.executingUsecase = { executing: usecase.from.context, startAt: new Date() };
             performers.chat.consult(usecase, actor);
             break;
         }
-        // default: {
-        //     throw new Error(`dispatch先が定義されていません: ${ usecase.name }`);
-        // }
+        default: {
+            throw new Error(`dispatch先が定義されていません: ${ usecase.name }`);
+        }
         }
     };
     
