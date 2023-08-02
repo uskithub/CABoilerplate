@@ -12,7 +12,7 @@ import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Actor } from "@/shared/service/application/actors";
-import { NobodyUsecases } from "@/shared/service/application/usecases/nobody";
+import { Nobody } from "@/shared/service/application/usecases/nobody";
 import { Usecase } from "@/shared/service/application/usecases";
 
 
@@ -32,7 +32,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
     return {
         store
         , boot: (usecase: Usecase<"boot">, actor: Actor) => {
-            const _u = NobodyUsecases.boot;
+            const _u = Nobody.boot;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase

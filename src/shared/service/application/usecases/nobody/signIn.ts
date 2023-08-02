@@ -3,10 +3,10 @@ import { Application } from "@/shared/service/domain/application/application";
 import { SignInValidationResult, User, UserProperties } from "@/shared/service/domain/authentication/user";
 import { Context, Empty, MutableContext } from "robustive-ts";
 import { catchError, map, Observable } from "rxjs";
-import { NobodyUsecases } from ".";
+import { Nobody } from ".";
 import { MyBaseScenario } from "../common";
 
-const _u = NobodyUsecases.signIn;
+const _u = Nobody.signIn;
 
 /**
  * usecase: サインインする

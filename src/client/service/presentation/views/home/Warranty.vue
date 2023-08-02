@@ -11,12 +11,12 @@ import { inject, reactive, ref } from "vue";
 import type { Dispatcher } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
 import { U } from "@/shared/service/application/usecases";
-import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
+import { SignInUser } from "@/shared/service/application/usecases/signedInUser";
 
 
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
 
-dispatch(U.getWarrantyList.basics[SignInUserUsecases.getWarrantyList.basics.userInitiatesWarrantyListing]()); 
+dispatch(U.getWarrantyList.basics[SignInUser.getWarrantyList.basics.userInitiatesWarrantyListing]()); 
 
 // const state = reactive<{
 //   isDrawerOpen: boolean;

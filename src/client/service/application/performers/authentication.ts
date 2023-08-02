@@ -7,7 +7,7 @@ import { inject, reactive } from "vue";
 import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { Nobody, ActorNotAuthorizedToInteractIn } from "robustive-ts";
+import { Nobody as NobodyActor, ActorNotAuthorizedToInteractIn } from "robustive-ts";
 
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
@@ -15,8 +15,8 @@ import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 
 import { Service } from "@/shared/service/application/actors/service";
 import { Actor } from "@/shared/service/application/actors";
-import { NobodyUsecases } from "@/shared/service/application/usecases/nobody";
-import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
+import { Nobody } from "@/shared/service/application/usecases/nobody";
+import { SignInUser } from "@/shared/service/application/usecases/signedInUser";
 import { ServieceUsecases } from "@/shared/service/application/usecases/service";
 import { Usecase } from "@/shared/service/application/usecases";
 
@@ -57,7 +57,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
     return {
         store
         , signUp: (usecase: Usecase<"signUp">, actor: Actor) => {
-            const _u = NobodyUsecases.signUp;
+            const _u = Nobody.signUp;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
@@ -113,7 +113,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                 });
         }
         , signIn: (usecase: Usecase<"signIn">, actor: Actor) => {
-            const _u = NobodyUsecases.signIn;
+            const _u = Nobody.signIn;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
@@ -171,7 +171,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                 });
         }
         , signOut: (usecase: Usecase<"signOut">, actor: Actor) => {
-            const _u = SignInUserUsecases.signOut;
+            const _u = SignInUser.signOut;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
@@ -179,7 +179,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
                         case _u.goals.onSuccessThenServicePresentsSignInView:
-                            dispatcher.change(new Nobody());
+                            dispatcher.change(new NobodyActor());
                             _shared.signInStatus = SignInStatus.signOut;
                             break;
                         case _u.goals.onFailureThenServicePresentsError:

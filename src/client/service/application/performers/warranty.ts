@@ -8,7 +8,7 @@ import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { Warranty } from "@/shared/service/domain/entities/warranty";
-import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
+import { SignInUser } from "@/shared/service/application/usecases/signedInUser";
 import { Usecase } from "@/shared/service/application/usecases";
 
 export interface WarrantyStore extends Store {
@@ -32,7 +32,7 @@ export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerform
     return {
         store
         , get: (usecase: Usecase<"getWarrantyList">, actor: Actor) => {
-            const _u = SignInUserUsecases.getWarrantyList;
+            const _u = SignInUser.getWarrantyList;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase

@@ -2,10 +2,10 @@ import { Application } from "@/shared/service/domain/application/application";
 import { Message, MessageProperties } from "@/shared/service/domain/chat/message";
 import { Context, MutableContext } from "robustive-ts";
 import { catchError, from, map, Observable } from "rxjs";
-import { SignInUserUsecases } from ".";
+import { SignInUser } from ".";
 import { MyBaseScenario } from "../common";
 
-const _u = SignInUserUsecases.consult;
+const _u = SignInUser.consult;
 
 /**
  * usecase: 相談する

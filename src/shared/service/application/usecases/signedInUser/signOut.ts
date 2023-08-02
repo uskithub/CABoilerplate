@@ -2,10 +2,10 @@ import { User } from "@/shared/service/domain/authentication/user";
 import { Application } from "@/shared/service/domain/application/application";
 import { catchError, map, Observable } from "rxjs";
 import { Context, Empty, MutableContext } from "robustive-ts";
-import { SignInUserUsecases } from ".";
+import { SignInUser } from ".";
 import { MyBaseScenario } from "../common";
 
-const _u = SignInUserUsecases.signOut;
+const _u = SignInUser.signOut;
 
 /**
  * usecase: サインアウトする

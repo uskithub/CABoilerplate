@@ -5,10 +5,10 @@ import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { first, map, Observable } from "rxjs";
 import { Context, Empty, MutableContext } from "robustive-ts";
 import { ChangedItem } from "../../../domain/interfaces/backend";
-import { NobodyUsecases } from ".";
+import { Nobody } from ".";
 import { MyBaseScenario } from "../common";
 
-const _u = NobodyUsecases.boot;
+const _u = Nobody.boot;
 
 /**
  * usecase: 起動する

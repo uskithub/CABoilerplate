@@ -6,10 +6,10 @@ import { InsuranceItem } from "@/shared/service/infrastructure/API";
 // System
 import { map, Observable } from "rxjs";
 import { Context, Empty, MutableContext } from "robustive-ts";
-import { SignInUserUsecases } from "../../signedInUser";
+import { SignInUser } from "../../signedInUser";
 import { MyBaseScenario } from "../../common";
 
-const _u = SignInUserUsecases.listInsuranceItems;
+const _u = SignInUser.listInsuranceItems;
 
 /**
  * usecase: 保険加入アイテム一覧を取得する

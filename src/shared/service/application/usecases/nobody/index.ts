@@ -1,4 +1,4 @@
-export const NobodyUsecases = {
+export const Nobody = {
     boot : {
         basics: {
             userOpensSite: "ユーザはサイトを開く"

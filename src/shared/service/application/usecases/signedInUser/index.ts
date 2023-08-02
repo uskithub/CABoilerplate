@@ -1,4 +1,4 @@
-export const SignInUserUsecases = {
+export const SignInUser = {
     signOut : {
         basics : {
             userStartsSignOutProcess: "ユーザはサインアウトを開始する"

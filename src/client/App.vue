@@ -3,7 +3,7 @@ import { provide } from "vue";
 import { DISPATCHER_KEY, createDispatcher } from "@/client/service/application/performers";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { U } from "@/shared/service/application/usecases";
-import { NobodyUsecases } from "@/shared/service/application/usecases/nobody";
+import { Nobody } from "@/shared/service/application/usecases/nobody";
 
 const dispatcher = createDispatcher();
 provide(DISPATCHER_KEY, dispatcher);
@@ -11,7 +11,7 @@ provide(DISPATCHER_KEY, dispatcher);
 const { stores, dispatch } = dispatcher;
 
 if (stores.shared.signInStatus === SignInStatus.unknown) {
-    dispatch(U.boot.basics[NobodyUsecases.boot.basics.userOpensSite]());
+    dispatch(U.boot.basics[Nobody.boot.basics.userOpensSite]());
 }
 </script>
 
