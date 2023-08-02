@@ -6,9 +6,9 @@ import { SignInStatusContext } from "../interfaces/authenticator";
 import { Observable } from "rxjs";
 import { Actor } from "../../application/actors";
 import { Service } from "@/shared/system/interfaces/architecture";
-import { UsecaseDefinitions } from "../../application/usecases";
 import { isNobody } from "robustive-ts";
 import { isSignedInUser } from "../../application/actors/signedInUser";
+import { UsecaseKeys } from "../../application/usecases";
 
 export class Application implements Service {
 
@@ -26,7 +26,7 @@ export class Application implements Service {
      * @param usecase 
      * @returns 
      */
-    static authorize(actor: Actor, usecase: keyof UsecaseDefinitions): boolean {
+    static authorize(actor: Actor, usecase: UsecaseKeys): boolean {
 
         switch (usecase) {
         /* Nobody */

@@ -7,7 +7,7 @@ import { inject, reactive } from "vue";
 import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { Nobody, ActorNotAuthorizedToInteractIn, Usecase } from "robustive-ts";
+import { Nobody, ActorNotAuthorizedToInteractIn } from "robustive-ts";
 
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
@@ -18,7 +18,7 @@ import { Actor } from "@/shared/service/application/actors";
 import { NobodyUsecases } from "@/shared/service/application/usecases/nobody";
 import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
 import { ServieceUsecases } from "@/shared/service/application/usecases/service";
-import { UsecaseDefinitions } from "@/shared/service/application/usecases";
+import { Usecase } from "@/shared/service/application/usecases";
 
 type ImmutableTask = Readonly<Task>;
 
@@ -33,10 +33,10 @@ export interface AuthenticationStore extends Store {
 
 export interface AuthenticationPerformer extends Performer<AuthenticationStore> {
     readonly store: AuthenticationStore;
-    signUp: (usecase: Usecase<UsecaseDefinitions, "signUp">, actor: Actor) => void;
-    signIn: (usecase: Usecase<UsecaseDefinitions, "signIn">, actor: Actor) => void;
-    signOut: (usecase: Usecase<UsecaseDefinitions, "signOut">, actor: Actor) => void;
-    observingUsersTasks: (usecase: Usecase<UsecaseDefinitions, "observingUsersTasks">, actor: Actor) => void;
+    signUp: (usecase: Usecase<"signUp">, actor: Actor) => void;
+    signIn: (usecase: Usecase<"signIn">, actor: Actor) => void;
+    signOut: (usecase: Usecase<"signOut">, actor: Actor) => void;
+    observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor) => void;
 }
 
 export function createAuthenticationPerformer(dispatcher: Dispatcher): AuthenticationPerformer {
@@ -56,7 +56,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
     
     return {
         store
-        , signUp: (usecase: Usecase<UsecaseDefinitions, "signUp">, actor: Actor) => {
+        , signUp: (usecase: Usecase<"signUp">, actor: Actor) => {
             const _u = NobodyUsecases.signUp;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
@@ -112,7 +112,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                     , complete: dispatcher.commonCompletionProcess
                 });
         }
-        , signIn: (usecase: Usecase<UsecaseDefinitions, "signIn">, actor: Actor) => {
+        , signIn: (usecase: Usecase<"signIn">, actor: Actor) => {
             const _u = NobodyUsecases.signIn;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
@@ -170,7 +170,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                     , complete: dispatcher.commonCompletionProcess
                 });
         }
-        , signOut: (usecase: Usecase<UsecaseDefinitions, "signOut">, actor: Actor) => {
+        , signOut: (usecase: Usecase<"signOut">, actor: Actor) => {
             const _u = SignInUserUsecases.signOut;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
@@ -192,7 +192,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                     , complete: dispatcher.commonCompletionProcess
                 });
         }
-        , observingUsersTasks: (usecase: Usecase<UsecaseDefinitions, "observingUsersTasks">, actor: Actor) => {
+        , observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor) => {
             const _u = ServieceUsecases.observingUsersTasks;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;

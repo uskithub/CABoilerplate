@@ -8,15 +8,14 @@ import { inject, reactive } from "vue";
 import { Subscription } from "rxjs";
 import { useRouter } from "vue-router";
 import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
-import { Usecase } from "robustive-ts";
-import { UsecaseDefinitions } from "@/shared/service/application/usecases";
+import { Usecase } from "@/shared/service/application/usecases";
 
 export interface ServiceInProcessStore extends Store {
     insuranceItems: InsuranceItem[]|null
 }
 export interface ServiceInProcessPerformer extends Performer<ServiceInProcessStore> {
     readonly store: ServiceInProcessStore;
-    list: (usecase: Usecase<UsecaseDefinitions, "listInsuranceItems">, actor: Actor) => void;
+    list: (usecase: Usecase<"listInsuranceItems">, actor: Actor) => void;
 }
 
 export function createServiceInProcessPerformer(dispatcher: Dispatcher): ServiceInProcessPerformer {
@@ -31,7 +30,7 @@ export function createServiceInProcessPerformer(dispatcher: Dispatcher): Service
 
     return {
         store
-        , list: (usecase: Usecase<UsecaseDefinitions, "listInsuranceItems">, actor: Actor) => {
+        , list: (usecase: Usecase<"listInsuranceItems">, actor: Actor) => {
             const _u = SignInUserUsecases.listInsuranceItems;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;

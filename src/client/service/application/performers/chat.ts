@@ -9,8 +9,7 @@ import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { MessageProperties } from "@/shared/service/domain/chat/message";
 import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
-import { Usecase } from "robustive-ts";
-import { UsecaseDefinitions } from "@/shared/service/application/usecases";
+import { Usecase } from "@/shared/service/application/usecases";
 
 export interface ChatStore extends Store {
     messages: MessageProperties[]
@@ -18,7 +17,7 @@ export interface ChatStore extends Store {
 
 export interface ChatPerformer extends Performer<ChatStore> {
     readonly store: ChatStore;
-    consult: (usecase: Usecase<UsecaseDefinitions, "consult">, actor: Actor) => void;
+    consult: (usecase: Usecase<"consult">, actor: Actor) => void;
 }
 
 export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
@@ -28,7 +27,7 @@ export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
 
     return {
         store
-        , consult: (usecase: Usecase<UsecaseDefinitions, "consult">, actor: Actor) => {
+        , consult: (usecase: Usecase<"consult">, actor: Actor) => {
             const _u = SignInUserUsecases.consult;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;

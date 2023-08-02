@@ -9,16 +9,14 @@ import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { Warranty } from "@/shared/service/domain/entities/warranty";
 import { SignInUserUsecases } from "@/shared/service/application/usecases/signedInUser";
-import { Usecase } from "robustive-ts";
-import { UsecaseDefinitions } from "@/shared/service/application/usecases";
-
+import { Usecase } from "@/shared/service/application/usecases";
 
 export interface WarrantyStore extends Store {
     warranties: Warranty[]
 }
 export interface WarrantyPerformer extends Performer<WarrantyStore> {
     readonly store: WarrantyStore;
-    get: (usecase: Usecase<UsecaseDefinitions, "getWarrantyList">, actor: Actor) => void;
+    get: (usecase: Usecase<"getWarrantyList">, actor: Actor) => void;
 }
 
 export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerformer {
@@ -33,7 +31,7 @@ export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerform
 
     return {
         store
-        , get: (usecase: Usecase<UsecaseDefinitions, "getWarrantyList">, actor: Actor) => {
+        , get: (usecase: Usecase<"getWarrantyList">, actor: Actor) => {
             const _u = SignInUserUsecases.getWarrantyList;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;

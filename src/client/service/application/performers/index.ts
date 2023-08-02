@@ -13,8 +13,7 @@ import { Nobody } from "robustive-ts";
 import { watch, WatchStopHandle } from "vue";
 import { Log } from "@/shared/service/domain/analytics/log";
 import { createChatPerformer } from "./chat";
-import type { Usecase, Usecases } from "robustive-ts/types/usecase";
-import { UsecaseDefinitions } from "@/shared/service/application/usecases";
+import { Usecases } from "@/shared/service/application/usecases";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -25,7 +24,7 @@ export interface Store { }
 export interface Performer<T extends Store> { readonly store: T; }
 
 type ImmutableActor = Readonly<Actor>;
-type ImmutableUsecase = Readonly<Usecases<UsecaseDefinitions>>;
+type ImmutableUsecase = Readonly<Usecases>;
 
 export interface SharedStore extends Store {
     readonly actor: ImmutableActor;
@@ -42,7 +41,7 @@ export type Dispatcher = {
     stores: Stores;
     change: (actor: Actor) => void;
     commonCompletionProcess: () => void;
-    dispatch: (usecase: Usecases<UsecaseDefinitions>) => void;
+    dispatch: (usecase: Usecases) => void;
     // accountViewModel: (shared: SharedStore) => HomeViewModel;
     // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
     // createSignUpViewModel: (shared: SharedStore) => SignUpViewModel;
@@ -72,7 +71,7 @@ export function createDispatcher(): Dispatcher {
             const _shared = shared as Mutable<SharedStore>;
             _shared.executingUsecase = null;
         }
-        , dispatch(usecase: Usecases<UsecaseDefinitions>) {}
+        , dispatch(usecase: Usecases) {}
     } as Dispatcher;
 
     const performers = {
@@ -85,7 +84,7 @@ export function createDispatcher(): Dispatcher {
 
     dispatcher.stores.authentication = performers.authentication.store;
 
-    dispatcher.dispatch = (usecase: Usecases<UsecaseDefinitions>) => {
+    dispatcher.dispatch = (usecase: Usecases) => {
         const _shared = shared as Mutable<SharedStore>;
         const actor = shared.actor;
         // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
@@ -137,6 +136,7 @@ export function createDispatcher(): Dispatcher {
                     stopHandle?.();
                 }
             });
+            return;
         }
 
         /* SignedInUser */

@@ -7,11 +7,8 @@ import { SignOutScenario, SignOutScenes } from "./signedInUser/signOut";
 import { ObservingUsersTasksScenario, ObservingUsersTasksScenes } from "./service/observingUsersTasks";
 import { GetWarrantyListScenario, GetWarrantyListScenes } from "./signedInUser/getWarrantyList";
 import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "./ServiceInProcess/signedInUser/listInsuranceItems";
-import { BaseScenario, Context, MutableContext, Scenes, UsecaseSelector } from "robustive-ts";
+import { Usecase as _Usecase, Usecases as _Usecases, UsecaseSelector } from "robustive-ts";
 import { ConsultScenario, ConsultScenes } from "./signedInUser/consult";
-import { IActor } from "robustive-ts/types/actor";
-import { Observable } from "rxjs";
-import { Actor } from "../actors";
 
 // export type Usecases = 
 //     /* ServiceInProcess */
@@ -30,7 +27,7 @@ import { Actor } from "../actors";
 //     | { executing : ObservingUsersTasksScenario, startAt: Date }
 // ;
 
-export type UsecaseDefinitions = {
+type UsecaseDefinitions = {
     /* nobody */
     boot : { scenes: BootScenes; scenario: BootScenario; };
     signIn : { scenes: SignInScenes; scenario: SignInScenario; };
@@ -59,3 +56,7 @@ export const U = {
     /* service actor */
     , observingUsersTasks : usecases.observingUsersTasks(ObservingUsersTasksScenario)
 };
+
+export type UsecaseKeys = keyof UsecaseDefinitions;
+export type Usecases = _Usecases<UsecaseDefinitions>;
+export type Usecase<T extends keyof UsecaseDefinitions> =  _Usecase<UsecaseDefinitions, T>;

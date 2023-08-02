@@ -6,20 +6,20 @@ import { inject, reactive } from "vue";
 import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { ActorNotAuthorizedToInteractIn, Usecase } from "robustive-ts";
+import { ActorNotAuthorizedToInteractIn } from "robustive-ts";
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Actor } from "@/shared/service/application/actors";
 import { NobodyUsecases } from "@/shared/service/application/usecases/nobody";
-import { UsecaseDefinitions } from "@/shared/service/application/usecases";
+import { Usecase } from "@/shared/service/application/usecases";
 
 
 export type ApplicationStore = Store
 export interface ApplicationPerformer extends Performer<ApplicationStore> {
     readonly store: ApplicationStore;
-    boot: (usecase: Usecase<UsecaseDefinitions, "boot">, actor: Actor) => void;
+    boot: (usecase: Usecase<"boot">, actor: Actor) => void;
 }
 
 export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationPerformer {
@@ -31,7 +31,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
 
     return {
         store
-        , boot: (usecase: Usecase<UsecaseDefinitions, "boot">, actor: Actor) => {
+        , boot: (usecase: Usecase<"boot">, actor: Actor) => {
             const _u = NobodyUsecases.boot;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
