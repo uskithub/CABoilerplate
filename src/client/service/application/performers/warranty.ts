@@ -32,18 +32,18 @@ export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerform
     return {
         store
         , get: (usecase: Usecase<"getWarrantyList">, actor: Actor) => {
-            const _u = SignInUser.getWarrantyList;
+            const goals = SignInUser.getWarrantyList.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case _u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
+                        case goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
                             console.log("OKKKKKK", lastSceneContext.warranties);
                             _store.warranties = lastSceneContext.warranties;
                             break;
-                        case _u.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView:
+                        case goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView:
                             _store.warranties = [];
                             break;
                         }

@@ -31,18 +31,18 @@ export function createServiceInProcessPerformer(dispatcher: Dispatcher): Service
     return {
         store
         , list: (usecase: Usecase<"listInsuranceItems">, actor: Actor) => {
-            const _u = SignInUser.listInsuranceItems;
+            const goals = SignInUser.listInsuranceItems.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case _u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView:
+                        case goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView:
                             console.log("OKKKKKK", lastSceneContext.insuranceItems);
                             _store.insuranceItems = lastSceneContext.insuranceItems;
                             break;
-                        case _u.goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView:
+                        case goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView:
                             _store.insuranceItems = null;
                             break;
                         }

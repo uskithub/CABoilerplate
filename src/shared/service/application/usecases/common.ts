@@ -1,4 +1,4 @@
-import { BaseScenario, Context, MutableContext, Scenes } from "robustive-ts";
+import { BaseScenario, Context, IActor, MutableContext, Scenes } from "robustive-ts";
 import { Observable } from "rxjs";
 import { Application } from "../../domain/application/application";
 import { Actor } from "../actors";

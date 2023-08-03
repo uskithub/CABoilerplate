@@ -28,18 +28,18 @@ export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
     return {
         store
         , consult: (usecase: Usecase<"consult">, actor: Actor) => {
-            const _u = SignInUser.consult;
+            const goals = SignInUser.consult.goals;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case _u.goals.onSuccessThenServiceDisplaysMessages: {
+                        case goals.onSuccessThenServiceDisplaysMessages: {
                             console.log("OKKKKKK", lastSceneContext.messages);
                             break;
                         }
-                        case _u.goals.onFailureThenServicePresentsError: {
+                        case goals.onFailureThenServicePresentsError: {
                             console.error(lastSceneContext.error);
                             break;
                         }

@@ -29,14 +29,14 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
     return {
         store
         , boot: (usecase: Usecase<"boot">, actor: Actor) => {
-            const _u = Nobody.boot;
+            const goals = Nobody.boot.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case _u.goals.sessionExistsThenServicePresentsHome: {
+                        case goals.sessionExistsThenServicePresentsHome: {
                             const user = { ...lastSceneContext.user };
                             const actor = new SignedInUser(user);
                             dispatcher.change(actor);
@@ -44,7 +44,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                             // controller.dispatch({ scene: ObservingUsersTasks.serviceDetectsSigningIn, user });
                             break;
                         }
-                        case _u.goals.sessionNotExistsThenServicePresentsSignin: {
+                        case goals.sessionNotExistsThenServicePresentsSignin: {
                             _shared.signInStatus = SignInStatus.signOut;
                             router.replace("/signin")
                                 .catch((error: Error) => {
