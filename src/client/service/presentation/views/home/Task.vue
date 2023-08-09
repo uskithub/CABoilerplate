@@ -7,7 +7,7 @@ import TaskModel from "@/shared/service/domain/entities/task";
 import { tree, findNodeById } from "vue3-tree";
 
 // system
-import { inject, reactive, ref } from "vue";
+import { inject, reactive, ref, watch } from "vue";
 import type { Dispatcher } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
 import type { Treenode } from "vue3-tree";
@@ -70,6 +70,14 @@ const state = reactive<{
     // , swtTree: new TaskTreenode(taskTree as Task)
     , swtTree: new TaskTreenode(swtTree as Task)
     , isEditing: false
+});
+
+watch(stores.authentication.userTasks, (newVal: Task[]) => {
+    console.log("呼ばれた", newVal);
+    // if (tasks === null) return;
+    const tree = new TaskTreenode(newVal[0]);
+    console.log("tree", tree);
+    state.donedleTree = tree;
 });
 
 // console.log("iii", state.swtTree, state.swtTree.subtrees, state.swtTree.subtrees.length);
