@@ -19,6 +19,7 @@ type SignInStatusContext = {
     [SignInStatus.signingIn] : Empty;
     [SignInStatus.signOut] : Empty;
     [SignInStatus.signingOut] : Empty;
+    [SignInStatus.unknown] : Empty;
 };
 
 export const SignInStatuses = new SwiftEnum<SignInStatusContext>();

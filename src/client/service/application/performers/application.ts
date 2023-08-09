@@ -6,7 +6,7 @@ import { inject, reactive } from "vue";
 import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
+import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/usecases/nobody";

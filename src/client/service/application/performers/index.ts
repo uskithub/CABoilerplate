@@ -2,7 +2,7 @@ import { InjectionKey, reactive } from "vue";
 import { createApplicationPerformer } from "./application";
 import { createAuthenticationPerformer } from "./authentication";
 import type { AuthenticationStore } from "./authentication";
-import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
+import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { Actor } from "@/shared/service/application/actors";
 import { Service } from "@/shared/service/application/actors/service";
 import { createWarrantyPerformer } from "./warranty";
@@ -56,7 +56,7 @@ export function createDispatcher(): Dispatcher {
     const shared = reactive<SharedStore>({
         actor: new Nobody()
         , executingUsecase: null
-        , signInStatus: SignInStatus.unknown
+        , signInStatus: SignInStatuses.unknown()
     });
 
     const dispatcher = {

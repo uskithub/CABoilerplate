@@ -10,7 +10,7 @@ provide(DISPATCHER_KEY, dispatcher);
 
 const { stores, dispatch } = dispatcher;
 
-if (stores.shared.signInStatus === SignInStatus.unknown) {
+if (stores.shared.signInStatus.case === SignInStatus.unknown) {
     dispatch(U.boot.basics[Nobody.boot.basics.userOpensSite]());
 }
 </script>
