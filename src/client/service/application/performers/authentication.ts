@@ -17,7 +17,7 @@ import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/usecases/nobody";
 import { SignInUser } from "@/shared/service/application/usecases/signedInUser";
 import { Service } from "@/shared/service/application/usecases/service";
-import { Usecase } from "@/shared/service/application/usecases";
+import { U, Usecase } from "@/shared/service/application/usecases";
 
 type ImmutableTask = Readonly<Task>;
 
@@ -121,7 +121,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                         switch (lastSceneContext.scene) {
                         case goals.onSuccessInSigningInThenServicePresentsHomeView:
                             router.replace("/");
-                            dispatcher.dispatch(U.observingUsersTasks.basics[Service.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }));
+                            dispatcher.dispatch(U.observingUsersTasks.basics[Service.observingUsersTasks.basics.serviceDetectsSigningIn]({ user : lastSceneContext.user }));
                             break;
 
                         case goals.onFailureInValidatingThenServicePresentsError: {

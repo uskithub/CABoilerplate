@@ -1,4 +1,4 @@
-import { Authenticator, SignInStatus, SignInStatusContext } from "@interfaces/authenticator";
+import { Authenticator, SignInStatus, SignInStatuses } from "@interfaces/authenticator";
 import { FirebaseApp, FirebaseError } from "firebase/app";
 import { Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, Unsubscribe, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { Observable, ReplaySubject } from "rxjs";
@@ -7,7 +7,7 @@ import { User, UserProperties } from "@/shared/service/domain/authentication/use
 export class FirebaseAuthenticator implements Authenticator {
     #auth: Auth;
     #unscriber: Unsubscribe;
-    #signInStatus: ReplaySubject<SignInStatusContext>;
+    #signInStatus: ReplaySubject<SignInStatus>;
 
     constructor(app: FirebaseApp) {
         this.#auth = getAuth(app);
@@ -23,15 +23,15 @@ export class FirebaseAuthenticator implements Authenticator {
                     , isMailAddressVerified: user.emailVerified
                 };
                 console.log("onAuthStateChanged: signIn", _user);
-                this.#signInStatus.next({ kind: SignInStatus.signIn, user: _user });
+                this.#signInStatus.next(SignInStatuses.signIn({ user : _user }));
             } else {
                 console.log("onAuthStateChanged: signOut");
-                this.#signInStatus.next({ kind: SignInStatus.signOut });
+                this.#signInStatus.next(SignInStatuses.signOut());
             }
         });
     }
 
-    signInStatus(): Observable<SignInStatusContext> {
+    signInStatus(): Observable<SignInStatus> {
         return this.#signInStatus.asObservable();
     }
 

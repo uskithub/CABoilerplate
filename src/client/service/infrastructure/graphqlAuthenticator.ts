@@ -1,4 +1,4 @@
-import { Authenticator, SignInStatusContext } from "@/shared/service/domain/interfaces/authenticator";
+import { Authenticator, SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { Unsubscribe } from "firebase/auth";
 import { Observable, ReplaySubject } from "rxjs";
 import { ApolloClient, InMemoryCache, NormalizedCacheObject, ApolloProvider, useQuery, gql } from "@apollo/client";
@@ -6,7 +6,7 @@ import { ApolloClient, InMemoryCache, NormalizedCacheObject, ApolloProvider, use
 export class GraphqlAuthenticator implements Authenticator {
     #client: ApolloClient<NormalizedCacheObject>;
     #unscriber: Unsubscribe;
-    #signInStatus: ReplaySubject<SignInStatusContext>;
+    #signInStatus: ReplaySubject<SignInStatus>;
 
     constructor() {
         this.#client = new ApolloClient({
@@ -27,7 +27,7 @@ export class GraphqlAuthenticator implements Authenticator {
             .then(result => console.log("◯◯", result));
     }
 
-    signInStatus(): Observable<SignInStatusContext> {
+    signInStatus(): Observable<SignInStatus> {
         return this.#signInStatus.asObservable();
     }
 }

@@ -6,7 +6,7 @@ import { inject, reactive } from "vue";
 import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
+import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/usecases/nobody";
@@ -42,12 +42,12 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                             const user = { ...lastSceneContext.user };
                             const actor = new SignedInUser(user);
                             dispatcher.change(actor);
-                            _shared.signInStatus = SignInStatus.signIn;
+                            _shared.signInStatus = SignInStatuses.signIn({ user });
                             dispatcher.dispatch(U.observingUsersTasks.basics[Service.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }));
                             break;
                         }
                         case goals.sessionNotExistsThenServicePresentsSignin: {
-                            _shared.signInStatus = SignInStatus.signOut;
+                            _shared.signInStatus = SignInStatuses.signOut();
                             router.replace("/signin")
                                 .catch((error: Error) => {
                                 });

@@ -4,19 +4,19 @@ import { Task } from "../entities/task";
 import { Warranty } from "../entities/warranty";
 
 export const ItemChangeType = {
-    "added" : "added"
-    , "modified" : "modified"
-    , "removed" : "removed"
+    added : "added"
+    , modified : "modified"
+    , removed : "removed"
 } as const;
 
-type ItemChangeType<T> = {
+type ItemChangeContext<T> = {
     [ItemChangeType.added] : { id: string; item: T; };
     [ItemChangeType.modified] : { id: string; item: T; };
     [ItemChangeType.removed] : { id: string; };
 };
 
-export const ChangedTasks = new SwiftEnum<ItemChangeType<Task>>();
-export type ChangedTask = SwiftEnumCases<ItemChangeType<Task>>;
+export const ChangedTasks = new SwiftEnum<ItemChangeContext<Task>>();
+export type ChangedTask = SwiftEnumCases<ItemChangeContext<Task>>;
 
 export interface Backend {
 

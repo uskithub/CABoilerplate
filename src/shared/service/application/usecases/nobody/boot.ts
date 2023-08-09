@@ -52,10 +52,10 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
         return Application
             .signInStatus()
             .pipe(
-                map((signInStatusContext) => {
-                    switch (signInStatusContext.kind) {
+                map((signInStatus) => {
+                    switch (signInStatus.case) {
                     case SignInStatus.signIn: {
-                        return this.goals[_u.goals.sessionExistsThenServicePresentsHome]({ user: signInStatusContext.user });
+                        return this.goals[_u.goals.sessionExistsThenServicePresentsHome]({ user: signInStatus.user });
                     }
                     default: {     
                         return this.goals[_u.goals.sessionNotExistsThenServicePresentsSignin]();

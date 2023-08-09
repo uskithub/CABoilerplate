@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dependencies from "../dependencies";
-import { SignInStatusContext } from "../interfaces/authenticator";
+import { SignInStatus } from "../interfaces/authenticator";
 
 // import { Usecase, Nobody, Actor } from "robustive-ts";
 import { Observable } from "rxjs";
@@ -17,7 +17,7 @@ export class Application implements Service {
      * アプリはユーザがサインインしているかどうかを知ることができなければならない。
      * @returns 
      */
-    static signInStatus(): Observable<SignInStatusContext> {
+    static signInStatus(): Observable<SignInStatus> {
         return dependencies.auth.signInStatus();
     }
 

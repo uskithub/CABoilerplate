@@ -1,29 +1,34 @@
 import { Observable } from "rxjs";
-import { User } from "../models/user";
 import { UserProperties } from "../authentication/user";
+import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
+import { Empty } from "robustive-ts";
 
 /**
  * サインインステータス
  */
-export const enum SignInStatus {
-    signIn = "signIn"
-    , signingIn = "signingIn"
-    , signOut = "signOut"
-    , signingOut = "signingOut"
-    , unknown = "unknown"
-}
+export const SignInStatus = {
+    signIn : "signIn"
+    , signingIn : "signingIn"
+    , signOut : "signOut"
+    , signingOut : "signingOut"
+    , unknown : "unknown"
+} as const;
 
-export type SignInStatusContext = { kind: SignInStatus.signIn; user: UserProperties }
-    | { kind: SignInStatus.signingIn }
-    | { kind: SignInStatus.signOut }
-    | { kind: SignInStatus.signingOut }
-    ;
+type SignInStatusContext = { 
+    [SignInStatus.signIn] : { user: UserProperties; };
+    [SignInStatus.signingIn] : Empty;
+    [SignInStatus.signOut] : Empty;
+    [SignInStatus.signingOut] : Empty;
+};
+
+export const SignInStatuses = new SwiftEnum<SignInStatusContext>();
+export type SignInStatus = SwiftEnumCases<SignInStatusContext>;
 
 export interface Authenticator {
     /**
      * サインインステータスの監視を開始します。
      */
-    signInStatus: () => Observable<SignInStatusContext>;
+    signInStatus: () => Observable<SignInStatus>;
 
     /**
      * アカウントを作成します。
