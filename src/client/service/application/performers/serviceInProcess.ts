@@ -47,7 +47,7 @@ export function createServiceInProcessPerformer(dispatcher: Dispatcher): Service
                             break;
                         }
                     }
-                    , complete: dispatcher.commonCompletionProcess
+                    , complete: () => dispatcher.commonCompletionProcess(subscription)
                 });
         }
     };

@@ -3,11 +3,11 @@ import TaskModel, { Task } from "@domain/entities/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { concat, map, Observable } from "rxjs";
 import { Context, Empty, MutableContext } from "robustive-ts";
-import { ChangedItem } from "../../../domain/interfaces/backend";
-import { ServieceUsecases } from ".";
+import { Service } from ".";
 import { MyBaseScenario } from "../common";
+import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
 
-const _u = ServieceUsecases.observingUsersTasks;
+const _u = Service.observingUsersTasks;
 
 /**
  * usecase: アプリを起動する
@@ -20,7 +20,7 @@ export type ObservingUsersTasksScenes = {
     alternatives: Empty;
     goals : {
         [_u.goals.serviceDoNothing]: Empty;
-        [_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
+        [_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedTask[] };
     };
 };
 

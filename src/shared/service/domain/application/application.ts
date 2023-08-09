@@ -9,6 +9,7 @@ import { Service } from "@/shared/system/interfaces/architecture";
 import { isNobody } from "robustive-ts";
 import { isSignedInUser } from "../../application/actors/signedInUser";
 import { UsecaseKeys } from "../../application/usecases";
+import { isService } from "../../application/actors/service";
 
 export class Application implements Service {
 
@@ -40,9 +41,11 @@ export class Application implements Service {
         case "signOut": 
         case "consult": 
         case "getWarrantyList": 
-        case "listInsuranceItems": 
-        case "observingUsersTasks":{
+        case "listInsuranceItems": {
             return isSignedInUser(actor);
+        }
+        case "observingUsersTasks": {
+            return isService(actor);
         }
         }
 

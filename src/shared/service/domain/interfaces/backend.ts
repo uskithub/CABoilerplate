@@ -1,28 +1,29 @@
 import { Observable } from "rxjs";
-import { Task } from "../models/task";
-import { Warranty } from "../models/warranty";
+import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
+import { Task } from "../entities/task";
+import { Warranty } from "../entities/warranty";
 
+export const ItemChangeType = {
+    "added" : "added"
+    , "modified" : "modified"
+    , "removed" : "removed"
+} as const;
 
-export const enum ItemChangeType {
-    added = "added"
-    , modified = "modified"
-    , removed = "removed"
-}
+type ItemChangeType<T> = {
+    [ItemChangeType.added] : { id: string; item: T; };
+    [ItemChangeType.modified] : { id: string; item: T; };
+    [ItemChangeType.removed] : { id: string; };
+};
 
-export type AddedItem<T> = { kind: ItemChangeType.added; id: string; item: T }
-export type ModifiedItem<T> = { kind: ItemChangeType.modified; id: string; item: T }
-export type RemovedItem = { kind: ItemChangeType.removed; id: string }
-
-export type ChangedItem<T> = AddedItem<T>|ModifiedItem<T>|RemovedItem;
-
+export const ChangedTasks = new SwiftEnum<ItemChangeType<Task>>();
+export type ChangedTask = SwiftEnumCases<ItemChangeType<Task>>;
 
 export interface Backend {
 
     /**
      * ユーザのタスクを観測し、変更を通知します。
      */
-    observeTasks: (userId: string) => Observable<ChangedItem<Task>[]>;
+    observeTasks: (userId: string) => Observable<ChangedTask[]>;
 
-    
-    getWarranties: () => Observable<Warranty[]|null>;
+    // getWarranties: () => Observable<Warranty[]|null>;
 }

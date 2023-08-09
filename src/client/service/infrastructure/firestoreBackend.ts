@@ -1,5 +1,4 @@
-import { Backend, ChangedItem, ItemChangeType } from "@/shared/service/domain/interfaces/backend";
-import { Task } from "@/shared/service/domain/models/task";
+import { Backend, ChangedItem, ChangedTask, ChangedTasks, ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { collection, addDoc, Firestore, onSnapshot, doc, where, query, DocumentChangeType } from "firebase/firestore";
 import { Observable } from "rxjs";
 import { convert, FSTask, LayerTypeStatusValues } from "./entities/tasks";
@@ -19,14 +18,6 @@ const CollectionType = {
 
 type CollectionType = typeof CollectionType[keyof typeof CollectionType];
 
-const itemChangeTypeFrom = (docChangeType: DocumentChangeType): ItemChangeType => {
-    switch (docChangeType) {
-    case "added": return ItemChangeType.added;
-    case "modified": return ItemChangeType.modified;
-    case "removed": return ItemChangeType.removed;
-    }
-};
-
 export class FirestoreBackend implements Backend {
     #db: Firestore;
     unsubscribers: Array<() => void>; // TODO: サインアウト時に unscribe する
@@ -41,7 +32,7 @@ export class FirestoreBackend implements Backend {
      * @param userId
      * @returns
      */
-    observeTasks(userId: string): Observable<ChangedItem<Task>[]> {
+    observeTasks(userId: string): Observable<ChangedTask[]> {
         return new Observable(subscriber => {
             const unsubscribe = onSnapshot(
                 query(
@@ -57,11 +48,7 @@ export class FirestoreBackend implements Backend {
                             const taskId = change.doc.id;
                             const taskData = change.doc.data() as FSTask;
                             // ここで Work を取ってくると見ないタスクのものまで取ってきてしまうのでやらないこと
-                            return {
-                                kind: itemChangeTypeFrom(change.type)
-                                , id: taskId
-                                , item: convert(taskId, taskData)
-                            };
+                            return ChangedTasks[change.type]({ id: taskId, item: convert(taskId, taskData) });
                         });
                     subscriber.next(changedItems);
                 });

@@ -1,4 +1,4 @@
-export const ServieceUsecases = {
+export const Service = {
     observingUsersTasks : {
         basics : {
             serviceDetectsSigningIn: "サービスはユーザのサインインを検知する"

@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import dependencies from "../dependencies";
-import { ChangedItem } from "../interfaces/backend";
+import { ChangedTask } from "../interfaces/backend";
 
 export interface Nodable {
     id: number;
@@ -115,7 +115,7 @@ export default {
             ];
         }
     }
-    , observeUserTasks: (userId: string): Observable<ChangedItem<Task>[]> => {
+    , observeUserTasks: (userId: string): Observable<ChangedTask[]> => {
         return dependencies.backend.observeTasks(userId);
     }
 };

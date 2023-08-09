@@ -16,7 +16,7 @@ import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/usecases/nobody";
 import { SignInUser } from "@/shared/service/application/usecases/signedInUser";
-import { ServieceUsecases } from "@/shared/service/application/usecases/service";
+import { Service } from "@/shared/service/application/usecases/service";
 import { Usecase } from "@/shared/service/application/usecases";
 
 type ImmutableTask = Readonly<Task>;
@@ -104,11 +104,11 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                             break;
                         }
                         case goals.onFailureInPublishingThenServicePresentsError:
-                            console.log("SERVICE ERROR:", lastSceneContext.error);
+                            console.error("SERVICE ERROR:", lastSceneContext.error);
                             break;
                         }
                     }
-                    , complete: dispatcher.commonCompletionProcess
+                    , complete: () => dispatcher.commonCompletionProcess(subscription)
                 });
         }
         , signIn: (usecase: Usecase<"signIn">, actor: Actor) => {
@@ -157,7 +157,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                             break;
                         }
                         case goals.onFailureInSigningInThenServicePresentsError: {
-                            console.log("SERVICE ERROR:", lastSceneContext.error);
+                            console.error("SERVICE ERROR:", lastSceneContext.error);
                             _store.signInFailureMessage = lastSceneContext.error.message;
                             break;
                         }
@@ -166,7 +166,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                     , error: (e) => {
                         _store.signInFailureMessage = e.message;
                     }
-                    , complete: dispatcher.commonCompletionProcess
+                    , complete: () => dispatcher.commonCompletionProcess(subscription)
                 });
         }
         , signOut: (usecase: Usecase<"signOut">, actor: Actor) => {
@@ -182,30 +182,31 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                             _shared.signInStatus = SignInStatus.signOut;
                             break;
                         case goals.onFailureThenServicePresentsError:
-                            console.log("SERVICE ERROR:", lastSceneContext.error);
+                            console.error("SERVICE ERROR:", lastSceneContext.error);
                             break;
                         case goals.servicePresentsHomeView:
                             router.replace("/");
                         }
                     }
-                    , complete: dispatcher.commonCompletionProcess
+                    , complete: () => dispatcher.commonCompletionProcess(subscription)
                 });
         }
         , observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor) => {
-            const goals = ServieceUsecases.observingUsersTasks.goals;
+            const goals = Service.observingUsersTasks.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
                 .interactedBy(actor, {
                     next: ([lastSceneContext]) => {
                         switch (lastSceneContext.scene) {
-                        case goals.serviceDoNothing:
+                        case goals.serviceDoNothing: {
                             console.log("Started observing user's tasks...");
                             break;
-                        case goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList:
-                            const mutableUserTasks = _store.userTasks ;
+                        }
+                        case goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList: {
+                            const mutableUserTasks = _store.userTasks as Mutable<Task[]>;
                             lastSceneContext.changedTasks.forEach(changedTask => {
-                                switch (changedTask.kind) {
+                                switch (changedTask.case) {
                                 case ItemChangeType.added: {
                                     // hot reloadで増えてしまうので、同じものを予め削除しておく
                                     for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
@@ -241,7 +242,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                                 }
                                 }
                             });
-                            console.log("user's tasks: ", _store.userTasks);
+                        }
                         }
                     }
                 });

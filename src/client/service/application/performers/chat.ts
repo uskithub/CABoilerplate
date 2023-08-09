@@ -45,6 +45,7 @@ export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
                         }
                         }
                     }
+                    , complete: () => dispatcher.commonCompletionProcess(subscription)
                 });
         }
     };

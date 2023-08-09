@@ -29,8 +29,8 @@ import { OpenaiAssistance } from "@/shared/service/infrastructure/openai/openaiA
 const firebaseApp = initializeApp(firebaseConfig);
 dependencies.auth = new FirebaseAuthenticator(firebaseApp);
 // dependencies.auth = new GraphqlAuthenticator();
-// dependencies.backend = new FirestoreBackend(getFirestore(firebaseApp));
-dependencies.backend = new AmplifyBackend();
+dependencies.backend = new FirestoreBackend(getFirestore(firebaseApp));
+// dependencies.backend = new AmplifyBackend();
 dependencies.serviceInProcess = new ServiceInProcessApi();
 dependencies.analytics = new FirebaseAnalytics();
 OpenaiAssistance.instantiate().then(assistance => {

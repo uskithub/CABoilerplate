@@ -1,4 +1,4 @@
-import { Log, Task, TaskStatus, TaskType } from "@/shared/service/domain/models/task";
+import { Log, Task, TaskStatus, TaskType } from "@/shared/service/domain/entities/task";
 import { FieldValue, Timestamp } from "firebase/firestore";
 
 export const LayerTypeStatusValues = {
@@ -360,5 +360,5 @@ export function convert(id: string, task: FSTask, logs: Log[]|null = [], descend
 
         , lastTimeWorkedAt: task.lastTimeWorkedAt ? convertTimestamp(task.lastTimeWorkedAt) : undefined
         , createdAt: convertTimestamp(task.createdAt)
-    };
+    } as Task;
 }

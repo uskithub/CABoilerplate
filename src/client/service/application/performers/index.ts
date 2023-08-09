@@ -14,6 +14,7 @@ import { watch, WatchStopHandle } from "vue";
 import { Log } from "@/shared/service/domain/analytics/log";
 import { createChatPerformer } from "./chat";
 import { Usecases, UsecaseLog } from "@/shared/service/application/usecases";
+import { Subscription } from "rxjs";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -40,7 +41,7 @@ type Stores = {
 export type Dispatcher = {
     stores: Stores;
     change: (actor: Actor) => void;
-    commonCompletionProcess: () => void;
+    commonCompletionProcess: (subscription: Subscription | null) => void;
     dispatch: (usecase: Usecases) => void;
     // accountViewModel: (shared: SharedStore) => HomeViewModel;
     // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
@@ -67,7 +68,8 @@ export function createDispatcher(): Dispatcher {
             const _shared = shared as Mutable<SharedStore>;
             _shared.actor = actor;
         }
-        , commonCompletionProcess: () => {
+        , commonCompletionProcess: (subscription: Subscription | null) => {
+            subscription?.unsubscribe();
             const _shared = shared as Mutable<SharedStore>;
             _shared.executingUsecase = null;
         }

@@ -48,7 +48,7 @@ export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerform
                             break;
                         }
                     }
-                    , complete: dispatcher.commonCompletionProcess
+                    , complete: () => dispatcher.commonCompletionProcess(subscription)
                 });
         }
     };

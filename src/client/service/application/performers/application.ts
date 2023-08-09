@@ -11,6 +11,8 @@ import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/usecases/nobody";
 import { Usecase } from "@/shared/service/application/usecases";
+import { U } from "@/shared/service/application/usecases";
+import { Service } from "@/shared/service/application/usecases/service";
 
 
 export type ApplicationStore = Store
@@ -41,7 +43,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                             const actor = new SignedInUser(user);
                             dispatcher.change(actor);
                             _shared.signInStatus = SignInStatus.signIn;
-                            // controller.dispatch({ scene: ObservingUsersTasks.serviceDetectsSigningIn, user });
+                            dispatcher.dispatch(U.observingUsersTasks.basics[Service.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }));
                             break;
                         }
                         case goals.sessionNotExistsThenServicePresentsSignin: {
@@ -53,7 +55,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                         }
                         }
                     }
-                    , complete: dispatcher.commonCompletionProcess
+                    , complete: () => dispatcher.commonCompletionProcess(subscription)
                 });
         }
     };
