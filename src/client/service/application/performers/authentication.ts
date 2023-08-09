@@ -121,6 +121,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                         switch (lastSceneContext.scene) {
                         case goals.onSuccessInSigningInThenServicePresentsHomeView:
                             router.replace("/");
+                            dispatcher.dispatch(U.observingUsersTasks.basics[Service.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }));
                             break;
 
                         case goals.onFailureInValidatingThenServicePresentsError: {
