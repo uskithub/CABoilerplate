@@ -1,4 +1,4 @@
-import { Backend, ChangedItem, ChangedTask, ChangedTasks, ItemChangeType } from "@/shared/service/domain/interfaces/backend";
+import { Backend, ChangedTask, ChangedTasks } from "@/shared/service/domain/interfaces/backend";
 import { collection, addDoc, Firestore, onSnapshot, doc, where, query, DocumentChangeType } from "firebase/firestore";
 import { Observable } from "rxjs";
 import { convert, FSTask, LayerTypeStatusValues } from "./entities/tasks";

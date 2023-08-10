@@ -4,9 +4,9 @@ import { Task } from "@domain/entities/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { first, map, Observable } from "rxjs";
 import { Context, Empty, MutableContext } from "robustive-ts";
-import { ChangedItem } from "../../../domain/interfaces/backend";
 import { Nobody } from ".";
 import { MyBaseScenario } from "../common";
+import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
 
 const _u = Nobody.boot;
 
@@ -22,7 +22,7 @@ export type BootScenes = {
     goals: {
         [_u.goals.sessionExistsThenServicePresentsHome]: { user: UserProperties; };
         [_u.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
-        [_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedItem<Task>[] };
+        [_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedTask[] };
     };
 };
 
