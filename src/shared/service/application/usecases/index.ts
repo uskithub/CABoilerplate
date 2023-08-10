@@ -10,7 +10,7 @@ import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "./ServiceI
 import { Usecase as _Usecase, Usecases as _Usecases, UsecaseSelector } from "robustive-ts";
 import { ConsultScenario, ConsultScenes } from "./signedInUser/consult";
 
-type UsecaseDefinitions = {
+export type UsecaseDefinitions = {
     /* nobody */
     boot : { scenes: BootScenes; scenario: BootScenario; };
     signIn : { scenes: SignInScenes; scenario: SignInScenario; };
