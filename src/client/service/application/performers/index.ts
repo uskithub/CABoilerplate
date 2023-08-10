@@ -104,12 +104,12 @@ export function createDispatcher(): Dispatcher {
         // 初回表示時対応
         // signInStatus が不明の場合、signInUserでないと実行できないUsecaseがエラーになるので、
         // ステータスが変わるのを監視し、その後実行し直す
-        if (shared.signInStatus === SignInStatus.unknown) {
+        if (shared.signInStatus.case === SignInStatus.unknown) {
             console.info("[DISPATCH] signInStatus が 不明のため、ユースケースの実行を保留します...");
             let stopHandle: WatchStopHandle | null = null;
             stopHandle = watch(() => shared.signInStatus, (newValue) => {
-                if (newValue !== SignInStatus.unknown) {
-                    console.log(`[DISPATCH] signInStatus が "${ newValue }" に変わったため、保留したユースケースを再開します...`);
+                if (newValue.case !== SignInStatus.unknown) {
+                    console.log(`[DISPATCH] signInStatus が "${ newValue.case as string }" に変わったため、保留したユースケースを再開します...`);
                     dispatcher.dispatch(usecase);
                     stopHandle?.();
                 }
