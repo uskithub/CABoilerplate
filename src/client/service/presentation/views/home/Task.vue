@@ -177,9 +177,9 @@ const onToggleEditing = (id: string, isEditing: boolean) => {
 v-container
   //- div [{{ user.store.signInStatus }}]
   //- div [{{ shared.user?.mailAddress }}]
-  //- template(v-if="user.store.signInStatus === null")
+  //- template(v-if="user.store.signInStatus.case === SignInStatus.unknown")
   //-   v-progress-circular(:size="70", :width="7", color="purple", indeterminate)
-  //- template(v-else-if="user.store.signInStatus === SignInStatus.signOut")
+  //- template(v-else-if="user.store.signInStatus.case === SignInStatus.signOut")
   //-   h1 Home {{ shared.user?.mailAddress }}
   //-   ul
   //-     li

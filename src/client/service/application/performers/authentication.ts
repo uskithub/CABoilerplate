@@ -11,7 +11,7 @@ import { Nobody as NobodyActor } from "robustive-ts";
 
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
-import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
+import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/usecases/nobody";
@@ -180,7 +180,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                         switch (lastSceneContext.scene) {
                         case goals.onSuccessThenServicePresentsSignInView:
                             dispatcher.change(new NobodyActor());
-                            _shared.signInStatus = SignInStatus.signOut;
+                            _shared.signInStatus = SignInStatuses.signOut();
                             break;
                         case goals.onFailureThenServicePresentsError:
                             console.error("SERVICE ERROR:", lastSceneContext.error);

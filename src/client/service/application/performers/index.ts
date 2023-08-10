@@ -73,7 +73,8 @@ export function createDispatcher(): Dispatcher {
             const _shared = shared as Mutable<SharedStore>;
             _shared.executingUsecase = null;
         }
-        , dispatch(usecase: Usecases) {}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        , dispatch() {}
     } as Dispatcher;
 
     const performers = {
