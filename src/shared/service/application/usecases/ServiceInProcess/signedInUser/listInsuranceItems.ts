@@ -1,13 +1,10 @@
-// Service
 import InsuranceItemModel from "@shared/service/domain/ServiceInProcess/models/insuranceItem";
-import { Application } from "@/shared/service/domain/application/application";
 import { InsuranceItem } from "@/shared/service/infrastructure/API";
-
-// System
-import { map, Observable } from "rxjs";
-import { Context, Empty, MutableContext } from "robustive-ts";
 import { SignInUser } from "../../signedInUser";
 import { MyBaseScenario } from "../../common";
+
+import type { Context, Empty, MutableContext } from "robustive-ts";
+import { map, Observable } from "rxjs";
 
 const _u = SignInUser.listInsuranceItems;
 

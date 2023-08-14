@@ -1,11 +1,12 @@
-import { Application } from "@/shared/service/domain/application/application";
-import TaskModel, { Task } from "@domain/entities/task";
+import TaskModel from "@domain/entities/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
-import { concat, map, Observable } from "rxjs";
-import { Context, Empty, MutableContext } from "robustive-ts";
+import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
 import { Service } from ".";
 import { MyBaseScenario } from "../common";
-import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
+
+import type { Context, Empty, MutableContext } from "robustive-ts";
+import { concat, map, Observable } from "rxjs";
+
 
 const _u = Service.observingUsersTasks;
 

@@ -1,17 +1,15 @@
 import WarrantyModel, { Warranty } from "@domain/entities/warranty";
-import { Application } from "@/shared/service/domain/application/application";
-import { catchError, map, Observable } from "rxjs";
-import { Context, Empty, MutableContext } from "robustive-ts";
 import { SignInUser } from ".";
 import { MyBaseScenario } from "../common";
+
+import type { Context, Empty, MutableContext } from "robustive-ts";
+import { map, Observable } from "rxjs";
 
 const _u = SignInUser.getWarrantyList;
 
 /**
  * usecase: 保証一覧を取得する
  */
-
-
 export type GetWarrantyListScenes = {
     basics : {
         [_u.basics.userInitiatesWarrantyListing]: Empty;

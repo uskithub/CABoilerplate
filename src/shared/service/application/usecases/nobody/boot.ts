@@ -1,12 +1,12 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import { Application } from "@/shared/service/domain/application/application";
-import { Task } from "@domain/entities/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
-import { first, map, Observable } from "rxjs";
-import { Context, Empty, MutableContext } from "robustive-ts";
+import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
 import { Nobody } from ".";
 import { MyBaseScenario } from "../common";
-import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
+
+import type { Context, Empty, MutableContext } from "robustive-ts";
+import { first, map, Observable } from "rxjs";
 
 const _u = Nobody.boot;
 
@@ -65,17 +65,4 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
                 , first() // 一度観測したらsubscriptionを終わらせる
             );
     }
-
-    // private startObservingUsersTasks(user: User): Observable<this> {
-    //     // ユースケースの終わり（バウンダリー）に、オブザーバ（タスクの観測）を結合している
-    //     return concat(
-    //         this.just({ scene: scenes.goals.servicePresentsHome, user: user }) as Observable<this>
-    //         , TaskModel.observeUserTasks(user.uid)
-    //             .pipe(
-    //                 map(changedTasks =>
-    //                     this.instantiate({ scene: scenes.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList, changedTasks })
-    //                 )
-    //             )
-    //     );
-    // }
 }

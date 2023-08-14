@@ -1,9 +1,9 @@
-import { Application } from "@/shared/service/domain/application/application";
 import { Message, MessageProperties } from "@/shared/service/domain/chat/message";
-import { Context, MutableContext } from "robustive-ts";
-import { catchError, from, map, Observable } from "rxjs";
 import { SignInUser } from ".";
 import { MyBaseScenario } from "../common";
+
+import type { Context, MutableContext } from "robustive-ts";
+import { from, Observable } from "rxjs";
 
 const _u = SignInUser.consult;
 
