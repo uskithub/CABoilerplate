@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // service
 import type { Task } from "@/shared/service/domain/entities/task";
+import { TaskType } from "@/shared/service/domain/entities/task";
 import TaskModel from "@/shared/service/domain/entities/task";
 
 // view
@@ -171,6 +172,47 @@ const onToggleEditing = (id: string, isEditing: boolean) => {
     state.isEditing = isEditing;
 };
 
+const typeSorter = (a: TaskType, b: TaskType): number => {
+    const valuator = (taskType: TaskType): number => {
+        switch (taskType) {
+        case TaskType.requirement: { return 4; }
+        case TaskType.milestone:   { return 3; }
+        case TaskType.issue:       { return 2; }
+        case TaskType.todo:        { return 1; }
+        default:                   { return 9; }
+        }
+    };
+    return valuator(a) - valuator(b);
+};
+
+const headers = [
+    { title: "プロジェクト", key: "project" }
+    , { title: "種類", key: "type", sort: typeSorter }
+    , { title: "タスク名", key: "title" }
+    , { title: "取り組んでいない期間", key: "periodOfNoDoing" }
+];
+
+const colorOfTaskType = (taskType: string): string => {
+    switch(taskType) {
+    case TaskType.requirement: { return "red"; }
+    case TaskType.milestone:   { return "green"; }
+    case TaskType.issue:       { return "amber"; }
+    case TaskType.todo:        { return "blue-grey"; }
+    default:                   { return "gray"; }
+    }
+};
+
+const ID_LENGTH = "KmE1NPxsOyvUJpTvFEBY".length;
+
+const detectProjectName = (ancestorIds: string|null, id: string): string|null => {
+    if (ancestorIds === null ) return null;
+    const rootTaskId = ancestorIds.substring(0, ID_LENGTH);
+    console.log(id, rootTaskId, ID_LENGTH);
+    // const idx = stores.currentUser._projects.findIndex(p => p.id === rootTaskId);
+    // if (idx > -1) return stores.currentUser._projects[idx].title;
+    return null;
+};
+
 </script>
 
 <template lang="pug">
@@ -191,6 +233,20 @@ v-container
   //-     li(v-for="task in user.store.userTasks", :key="task.id")
   //-       | {{ task.title }}
   //- br
+  v-data-table.elevation-1(
+    :headers="headers"
+    :items="stores.authentication.userTasks"
+    :items-per-page="25"
+    multi-sort
+  )
+    //- template(v-slot:item.project="{ item }") {{ detectProjectName(item.ancestorIds, item.id) }}
+    //- template(v-slot:item.type="{ item }")
+    //-   v-chip(:color="colorOfTaskType(item.type)") {{ item.type }}
+    //- template(v-slot:item.title="{ item }")
+    //-   v-list-item(two-line)
+    //-     v-list-item-content
+    //-       v-list-item-subtitle {{ item.ancestors.map(t => t.title).reverse().join(" > ") }}
+    //-       v-list-item-title {{ item.title }}
   tree(
     :node="state.donedleTree"
     @arrange="onArrange1"

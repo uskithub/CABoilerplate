@@ -1,127 +1,137 @@
 import { Log, Task, TaskStatus, TaskType } from "@/shared/service/domain/entities/task";
 import { FieldValue, Timestamp } from "firebase/firestore";
 
-export const LayerTypeStatusValues = {
+export const LayerStatusTypeValues = {
     /* layer */
-    organization : "O"
-    , project    : "P"
-    , task       : "T"
-
-    /* type */
-    , publicNpo                      : "z00"
-    , publicEdu                      : "y00"
-    , publicOrganizationSubscribing  : "n00"
-    , publicOrganization             : "a00"
-    , privateNpo                     : "900"
-    , privateEdu                     : "800"
-    , privateOrganizationSubscribing : "500"
-    , privateOrganization            : "100"
-
-    , publicProject     : "n0"
-    , publicSubproject  : "a0"
-    , privateProject    : "50"
-    , privateSubproject : "10"
-
-    , milestone         : "9"
-    , requirement       : "8"
-    , issue             : "5"
-    , todo              : "1"
-
+    layers : {
+        organization : "O"
+        , project    : "P"
+        , task       : "T"
+    }
+    
     /* status */
-    , preinitiation     : "A"
-    , open              : "B"
-    , backlog           : "N"
-    , closed            : "Z"
+    , statuses : {
+        preinitiation       : "A"
+        , open              : "B"
+        , backlog           : "N"
+        , closed            : "Z"
+    }
+    /* type */
+    , types : {
+        // organization types
+        organization : {
+            publicNpo                        : "z00"
+            , publicEdu                      : "y00"
+            , publicOrganizationSubscribing  : "n00"
+            , publicOrganization             : "a00"
+            , privateNpo                     : "900"
+            , privateEdu                     : "800"
+            , privateOrganizationSubscribing : "500"
+            , privateOrganization            : "100"
+        }
+        // project types
+        , project : {
+            publicProject       : "n0"
+            , publicSubproject  : "a0"
+            , privateProject    : "50"
+            , privateSubproject : "10"
+        }
+        // task types
+        , task : {
+            milestone           : "9"
+            , requirement       : "8"
+            , issue             : "5"
+            , todo              : "1"
+        }
+    }
 } as const;
 
-export type LayerTypeStatusValues = typeof LayerTypeStatusValues[keyof typeof LayerTypeStatusValues];
+export type LayerStatusType = string;
 
-export type LayerTypeStatus = string;
-
-export function encodeTypeAndStatus(type: TaskType, status: TaskStatus): LayerTypeStatus {
-    let _layer: LayerTypeStatusValues;
-    let _type: LayerTypeStatusValues;
-    let _status: LayerTypeStatusValues;
+export function encodeTypeAndStatus(type: TaskType, status: TaskStatus): LayerStatusType {
+    let _layer: string;
+    let _type: string;
+    let _status: string;
 
     switch(type) {
     case TaskType.publicNpo: {
-        _layer = LayerTypeStatusValues.organization;
-        _type = LayerTypeStatusValues.publicNpo;
+        _layer = LayerStatusTypeValues.layers.organization;
+        _type = LayerStatusTypeValues.types.organization.publicNpo;
         break;
     }
     case TaskType.publicEdu: {
-        _layer = LayerTypeStatusValues.organization;
-        _type = LayerTypeStatusValues.publicEdu;
+        _layer = LayerStatusTypeValues.layers.organization;
+        _type = LayerStatusTypeValues.types.organization.publicEdu;
         break;
     }
     case TaskType.publicOrganizationSubscribing: {
-        _layer = LayerTypeStatusValues.organization;
-        _type = LayerTypeStatusValues.publicOrganizationSubscribing;
+        _layer = LayerStatusTypeValues.layers.organization;
+        _type = LayerStatusTypeValues.types.organization.publicOrganizationSubscribing;
         break;
     }
     case TaskType.publicOrganization: {
-        _layer = LayerTypeStatusValues.organization;
-        _type = LayerTypeStatusValues.publicOrganization;
+        _layer = LayerStatusTypeValues.layers.organization;
+        _type = LayerStatusTypeValues.types.organization.publicOrganization;
         break;
     }
     case TaskType.privateNpo: {
-        _layer = LayerTypeStatusValues.organization;
-        _type = LayerTypeStatusValues.privateNpo;
+        _layer = LayerStatusTypeValues.layers.organization;
+        _type = LayerStatusTypeValues.types.organization.privateNpo;
         break;
     }
     case TaskType.privateEdu: {
-        _layer = LayerTypeStatusValues.organization;
-        _type = LayerTypeStatusValues.privateEdu;
+        _layer = LayerStatusTypeValues.layers.organization;
+        _type = LayerStatusTypeValues.types.organization.privateEdu;
         break;
     }
     case TaskType.privateOrganizationSubscribing: {
-        _layer = LayerTypeStatusValues.organization;
-        _type = LayerTypeStatusValues.privateOrganizationSubscribing;
+        _layer = LayerStatusTypeValues.layers.organization;
+        _type = LayerStatusTypeValues.types.organization.privateOrganizationSubscribing;
         break;
     }
     case TaskType.privateOrganization: {
-        _layer = LayerTypeStatusValues.organization;
-        _type = LayerTypeStatusValues.privateOrganization;
+        _layer = LayerStatusTypeValues.layers.organization;
+        _type = LayerStatusTypeValues.types.organization.privateOrganization;
         break;
     }
     case TaskType.publicProject: {
-        _layer = LayerTypeStatusValues.project;
-        _type = LayerTypeStatusValues.publicProject;
+        _layer = LayerStatusTypeValues.layers.project;
+        _type = LayerStatusTypeValues.types.project.publicProject;
         break;
     }
     case TaskType.publicSubproject: {
-        _layer = LayerTypeStatusValues.project;
-        _type = LayerTypeStatusValues.publicSubproject;
+        _layer = LayerStatusTypeValues.layers.project;
+        _type = LayerStatusTypeValues.types.project.publicSubproject;
         break;
     }
     case TaskType.privateProject: {
-        _layer = LayerTypeStatusValues.project;
-        _type = LayerTypeStatusValues.privateProject;
+        _layer = LayerStatusTypeValues.layers.project;
+        _type = LayerStatusTypeValues.types.project.privateProject;
         break;
     }
     case TaskType.privateSubproject: {
-        _layer = LayerTypeStatusValues.project;
-        _type = LayerTypeStatusValues.privateSubproject;
+        _layer = LayerStatusTypeValues.layers.project;
+        _type = LayerStatusTypeValues.types.project.privateSubproject;
         break;
     }
     case TaskType.milestone: {
-        _layer = LayerTypeStatusValues.task;
-        _type = LayerTypeStatusValues.milestone;
+        _layer = LayerStatusTypeValues.layers.task;
+        _type = LayerStatusTypeValues.types.task.milestone;
         break;
     }
     case TaskType.requirement: {
-        _layer = LayerTypeStatusValues.task;
-        _type = LayerTypeStatusValues.requirement;
+        _layer = LayerStatusTypeValues.layers.task;
+        _type = LayerStatusTypeValues.types.task.requirement;
         break;
     }
     case TaskType.issue: {
-        _layer = LayerTypeStatusValues.task;
-        _type = LayerTypeStatusValues.issue;
+        _layer = LayerStatusTypeValues.layers.task;
+        _type = LayerStatusTypeValues.types.task.issue;
         break;
     }
     case TaskType.todo: {
-        _layer = LayerTypeStatusValues.task;
-        _type = LayerTypeStatusValues.todo;
+        _layer = LayerStatusTypeValues.layers.task;
+        _type = LayerStatusTypeValues.types.task.todo;
         break;
     }
     default: {
@@ -131,19 +141,19 @@ export function encodeTypeAndStatus(type: TaskType, status: TaskStatus): LayerTy
 
     switch(status) {
     case TaskStatus.preinitiation: {
-        _status = LayerTypeStatusValues.preinitiation;
+        _status = LayerStatusTypeValues.statuses.preinitiation;
         break;
     }
     case TaskStatus.open: {
-        _status = LayerTypeStatusValues.open;
+        _status = LayerStatusTypeValues.statuses.open;
         break;
     }
     case TaskStatus.backlog: {
-        _status = LayerTypeStatusValues.backlog;
+        _status = LayerStatusTypeValues.statuses.backlog;
         break;
     }
     case TaskStatus.closed: {
-        _status = LayerTypeStatusValues.closed;
+        _status = LayerStatusTypeValues.statuses.closed;
         break;
     }
     default: {
@@ -154,72 +164,72 @@ export function encodeTypeAndStatus(type: TaskType, status: TaskStatus): LayerTy
     return `${ _layer }${ _status }${ _type }`;
 }
 
-export function decodeTypeAndStatus(value: LayerTypeStatus): [ TaskType, TaskStatus ] {
+export function decodeTypeAndStatus(value: LayerStatusType): [ TaskType, TaskStatus ] {
     let type: TaskType = TaskType.unkown;
     let status: TaskStatus = TaskStatus.unkown;
     
     switch(value.slice(2)) {
-    case LayerTypeStatusValues.publicNpo: {
+    case LayerStatusTypeValues.types.organization.publicNpo: {
         type = TaskType.publicNpo;
         break;
     }
-    case LayerTypeStatusValues.publicEdu: {
+    case LayerStatusTypeValues.types.organization.publicEdu: {
         type = TaskType.publicEdu;
         break;
     }
-    case LayerTypeStatusValues.publicOrganizationSubscribing: {
+    case LayerStatusTypeValues.types.organization.publicOrganizationSubscribing: {
         type = TaskType.publicOrganizationSubscribing;
         break;
     }
-    case LayerTypeStatusValues.publicOrganization: {
+    case LayerStatusTypeValues.types.organization.publicOrganization: {
         type = TaskType.publicOrganization;
         break;
     }
-    case LayerTypeStatusValues.privateOrganization: {
+    case LayerStatusTypeValues.types.organization.privateOrganization: {
         type = TaskType.privateOrganization;
         break;
     }
-    case LayerTypeStatusValues.privateNpo: {
+    case LayerStatusTypeValues.types.organization.privateNpo: {
         type = TaskType.privateNpo;
         break;
     }
-    case LayerTypeStatusValues.privateEdu: {
+    case LayerStatusTypeValues.types.organization.privateEdu: {
         type = TaskType.privateEdu;
         break;
     }
-    case LayerTypeStatusValues.privateOrganizationSubscribing: {
+    case LayerStatusTypeValues.types.organization.privateOrganizationSubscribing: {
         type = TaskType.privateOrganizationSubscribing;
         break;
     }
-    case LayerTypeStatusValues.publicProject: {
+    case LayerStatusTypeValues.types.project.publicProject: {
         type = TaskType.publicProject;
         break;
     }
-    case LayerTypeStatusValues.publicSubproject: {
+    case LayerStatusTypeValues.types.project.publicSubproject: {
         type = TaskType.publicSubproject;
         break;
     }
-    case LayerTypeStatusValues.privateProject: {
+    case LayerStatusTypeValues.types.project.privateProject: {
         type = TaskType.privateProject;
         break;
     }
-    case LayerTypeStatusValues.privateSubproject: {
+    case LayerStatusTypeValues.types.project.privateSubproject: {
         type = TaskType.privateSubproject;
         break;
     }
-    case LayerTypeStatusValues.milestone: {
+    case LayerStatusTypeValues.types.task.milestone: {
         type = TaskType.milestone;
         break;
     }
-    case LayerTypeStatusValues.requirement: {
+    case LayerStatusTypeValues.types.task.requirement: {
         type = TaskType.requirement;
         break;
     }
-    case LayerTypeStatusValues.issue: {
+    case LayerStatusTypeValues.types.task.issue: {
         type = TaskType.issue;
         break;
     }
-    case LayerTypeStatusValues.todo: {
+    case LayerStatusTypeValues.types.task.todo: {
         type = TaskType.todo;
         break;
     }
@@ -230,19 +240,19 @@ export function decodeTypeAndStatus(value: LayerTypeStatus): [ TaskType, TaskSta
 
     }
     switch(value.slice(1, 2)) {
-    case LayerTypeStatusValues.preinitiation: {
+    case LayerStatusTypeValues.statuses.preinitiation: {
         status = TaskStatus.preinitiation;
         break;
     }
-    case LayerTypeStatusValues.open: {
+    case LayerStatusTypeValues.statuses.open: {
         status = TaskStatus.open;
         break;
     }
-    case LayerTypeStatusValues.backlog: {
+    case LayerStatusTypeValues.statuses.backlog: {
         status = TaskStatus.backlog;
         break;
     }
-    case LayerTypeStatusValues.closed: {
+    case LayerStatusTypeValues.statuses.closed: {
         status = TaskStatus.closed;
         break;
     }
@@ -258,7 +268,7 @@ export function decodeTypeAndStatus(value: LayerTypeStatus): [ TaskType, TaskSta
 
 export interface FSTask {
     id: string;
-    typeStatus: LayerTypeStatus;
+    typeStatus: LayerStatusType;
 
     title: string;
     purpose: string|null;

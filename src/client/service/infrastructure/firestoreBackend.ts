@@ -1,7 +1,7 @@
 import { Backend, ChangedTask, ChangedTasks } from "@/shared/service/domain/interfaces/backend";
 import { collection, addDoc, Firestore, onSnapshot, doc, where, query, DocumentChangeType } from "firebase/firestore";
 import { Observable } from "rxjs";
-import { convert, FSTask, LayerTypeStatusValues } from "./entities/tasks";
+import { convert, FSTask, LayerStatusTypeValues } from "./entities/tasks";
 
 const CollectionType = {
     users : "users"
@@ -37,9 +37,9 @@ export class FirestoreBackend implements Backend {
             const unsubscribe = onSnapshot(
                 query(
                     collection(this.#db, CollectionType.tasks)
-                    // Closed含まない: A1 <= x < Z1
-                    , where("typeStatus", ">=", `${ LayerTypeStatusValues.task }${ LayerTypeStatusValues.preinitiation }${ LayerTypeStatusValues.todo }`)
-                    , where("typeStatus", "<", `${ LayerTypeStatusValues.task }${ LayerTypeStatusValues.closed }${ LayerTypeStatusValues.todo }`)
+                    // Closed含まない: TA1 <= x < TZ1
+                    , where("typeStatus", ">=", `${ LayerStatusTypeValues.layers.task }${ LayerStatusTypeValues.statuses.preinitiation }${ LayerStatusTypeValues.types.task.todo }`)
+                    , where("typeStatus", "<",  `${ LayerStatusTypeValues.layers.task }${ LayerStatusTypeValues.statuses.closed }${ LayerStatusTypeValues.types.task.todo }`)
                     , where("involved", "array-contains", userId)
                 )
                 , (snapshot) => {
