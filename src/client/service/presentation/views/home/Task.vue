@@ -6,12 +6,11 @@ import TaskModel from "@/shared/service/domain/entities/task";
 
 // view
 import { tree, findNodeById } from "vue3-tree";
-
 // system
-import { inject, reactive, ref, watch } from "vue";
+import { inject, reactive, watch } from "vue";
 import type { Dispatcher } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
-import type { Treenode } from "vue3-tree";
+import type { TreeEventHandlers, Treenode } from "vue3-tree";
 import "vue3-tree/style.css";
 
 // stubs
@@ -81,63 +80,63 @@ watch(stores.authentication.userTasks, (newVal: Task[]) => {
     state.donedleTree = tree;
 });
 
-// console.log("iii", state.swtTree, state.swtTree.subtrees, state.swtTree.subtrees.length);
-
-const onArrange1 = (
-    node: TaskTreenode
-    , from: {
-        id: string
-        , node: TaskTreenode
+const handlers: TreeEventHandlers<TaskTreenode> = {
+    "arrange" : (node: TaskTreenode, from: { id: string; node: TaskTreenode; }, to: { id: string; node: TaskTreenode; }, index: number) => {
+        const _from = findNodeById(from.id, state.donedleTree);
+        const _to = findNodeById(to.id, state.donedleTree);
+        if (_from === null || _to === null) return;
+        // 元親から削除
+        _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
+        // 新親に追加
+        _to.content.children.splice(index, 0, node.content);
+        _to.isFolding = false;
     }
-    , to: {
-        id: string
-        , node: TaskTreenode
+    , "toggle-folding" : (id: string) => {
+        const node = findNodeById(id, state.donedleTree);
+        if (node === null) return;
+        node.isFolding = !node.isFolding;
     }
-    , index: number
-) => {
-    const _from = findNodeById(from.id, state.donedleTree);
-    const _to = findNodeById(to.id, state.donedleTree);
-    if (_from === null || _to === null) return;
-    // 元親から削除
-    _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
-    // 新親に追加
-    _to.content.children.splice(index, 0, node.content);
-    _to.isFolding = false;
+    , "toggle-editing" : (id: string, isEditing: boolean) => {
+        const node = findNodeById(id, state.swtTree);
+        if (node === null) return;
+        state.isEditing = isEditing;
+    }
+    , "update-node" : (newValue: TaskTreenode) => {
+        const node = findNodeById(newValue.id, state.donedleTree);
+        if (node === null) return;
+        node.update(newValue.content);
+    }
 };
 
-const onArrange2 = (
-    node: TaskTreenode
-    , from: {
-        id: string
-        , node: TaskTreenode
+const handlers2: TreeEventHandlers<TaskTreenode> = {
+    "arrange" : (node: TaskTreenode, from: { id: string; node: TaskTreenode; }, to: { id: string; node: TaskTreenode; }, index: number) => {
+        const _from = findNodeById(from.id, state.swtTree);
+        const _to = findNodeById(to.id, state.swtTree);
+        if (_from === null || _to === null) return;
+        // 元親から削除
+        _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
+        // 新親に追加
+        _to.subtrees.splice(index, 0, node);
+        _to.isFolding = false;
     }
-    , to: {
-        id: string
-        , node: TaskTreenode
+    , "toggle-folding" : (id: string) => {
+        const node = findNodeById(id, state.swtTree);
+        if (node === null) return;
+        node.isFolding = !node.isFolding;
     }
-    , index: number
-) => {
-    const _from = findNodeById(from.id, state.swtTree);
-    const _to = findNodeById(to.id, state.swtTree);
-    if (_from === null || _to === null) return;
-    // 元親から削除
-    _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
-    // 新親に追加
-    _to.subtrees.splice(index, 0, node);
-    _to.isFolding = false;
+    , "toggle-editing" : (id: string, isEditing: boolean) => {
+        const node = findNodeById(id, state.swtTree);
+        if (node === null) return;
+        state.isEditing = isEditing;
+    }
+    , "update-node" : (newValue: TaskTreenode) => {
+        const node = findNodeById(newValue.id, state.swtTree) as TaskTreenode;
+        if (node === null) return;
+        node.update(newValue.content);
+        // TODO reaciveを起こさないといけない
+    }
 };
 
-const onToggleFolding1 = (id: string) => {
-    const node = findNodeById(id, state.donedleTree);
-    if (node === null) return;
-    node.isFolding = !node.isFolding;
-};
-
-const onToggleFolding2 = (id: string) => {
-    const node = findNodeById(id, state.swtTree);
-    if (node === null) return;
-    node.isFolding = !node.isFolding;
-};
 
 const onClickExport = (event: MouseEvent, node: TaskTreenode) => {
     console.log("export", node);
@@ -150,26 +149,6 @@ const onClickExport = (event: MouseEvent, node: TaskTreenode) => {
     } else {
         alert("failed!");
     }
-};
-
-const onUpdateName1 = (id: string, newName: string) => {
-    const node = findNodeById(id, state.donedleTree);
-    if (node === null) return;
-    node.name = newName;
-};
-
-const onUpdateName2 = (newValue: TaskTreenode) => {
-    const node = findNodeById(newValue.id, state.swtTree) as TaskTreenode;
-    if (node === null) return;
-    console.log(node);
-    node.update(newValue.content);
-    // TODO reaciveを起こさないといけない
-};
-
-const onToggleEditing = (id: string, isEditing: boolean) => {
-    const node = findNodeById(id, state.swtTree);
-    if (node === null) return;
-    state.isEditing = isEditing;
 };
 
 const typeSorter = (a: TaskType, b: TaskType): number => {
@@ -249,9 +228,10 @@ v-container
     //-       v-list-item-title {{ item.title }}
   tree(
     :node="state.donedleTree"
-    @arrange="onArrange1"
-    @toggle-folding="onToggleFolding1"
-    @update-node="onUpdateName1"
+    @arrange="handlers['arrange']"
+    @toggle-folding="handlers['toggle-folding']"
+    @toggle-editing="handlers['toggle-editing']"
+    @update-node="handlers['update-node']"
   )
     template(v-slot="slotProps")
       input(
@@ -271,10 +251,10 @@ v-container
   br
   tree(
     :node="state.swtTree"
-    @arrange="onArrange2"
-    @toggle-folding="onToggleFolding2"
-    @update-node="onUpdateName2"
-    @toggle-editing="onToggleEditing"
+    @arrange="handlers2['arrange']"
+    @toggle-folding="handlers2['toggle-folding']"
+    @toggle-editing="handlers2['toggle-editing']"
+    @update-node="handlers2['update-node']"
   )
     template(v-slot="slotProps")
       v-dialog(v-model="slotProps.isEditing" persistent)
