@@ -115,7 +115,7 @@ export default {
             ];
         }
     }
-    , observeUserTasks: (userId: string): Observable<ChangedTask[]> => {
+    , observeUsersTasks: (userId: string): Observable<ChangedTask[]> => {
         return dependencies.backend.observeTasks(userId);
     }
 };

@@ -25,5 +25,11 @@ export interface Backend {
      */
     observeTasks: (userId: string) => Observable<ChangedTask[]>;
 
+    /**
+     * ユーザのプロジェクトを取得します。
+     * @param userId 
+     * @param projectId 
+     */
+    observeProjects(userId: string): Observable<ChangedTask[]>;
     // getWarranties: () => Observable<Warranty[]|null>;
 }

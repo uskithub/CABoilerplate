@@ -12,8 +12,6 @@ import type { Dispatcher } from "../../application/performers";
 import { DISPATCHER_KEY } from "../../application/performers";
 import "vue3-tree/style.css";
 
-
-
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
 
 // const state = reactive<{
@@ -30,6 +28,7 @@ const items: Array<DrawerItem> = [
     , { type: DrawerContentType.header, title: "Menu2" } as DrawerItem
     , { type: DrawerContentType.link, title: "Chat", href: "/" } as DrawerItem
     , { type: DrawerContentType.link, title: "タスク一覧", href: "/tasks" } as DrawerItem
+    , { type: DrawerContentType.link, title: "プロジェクト", href: "/projects" } as DrawerItem
     , { type: DrawerContentType.link, title: "link3", href: "/link3" } as DrawerItem
 ];
 

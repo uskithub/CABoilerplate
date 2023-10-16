@@ -1,5 +1,5 @@
 import { InjectionKey, reactive } from "vue";
-import { createApplicationPerformer } from "./application";
+import { ApplicationStore, createApplicationPerformer } from "./application";
 import { createAuthenticationPerformer } from "./authentication";
 import type { AuthenticationStore } from "./authentication";
 import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
@@ -15,6 +15,7 @@ import { Log } from "@/shared/service/domain/analytics/log";
 import { createChatPerformer } from "./chat";
 import { Usecases, UsecaseLog } from "@/shared/service/application/usecases";
 import { Subscription } from "rxjs";
+import { Application } from "@/shared/service/domain/application/application";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -35,6 +36,7 @@ export interface SharedStore extends Store {
 
 type Stores = {
     shared: SharedStore;
+    application: ApplicationStore;
     authentication: AuthenticationStore;
 };
 
@@ -42,7 +44,7 @@ export type Dispatcher = {
     stores: Stores;
     change: (actor: Actor) => void;
     commonCompletionProcess: (subscription: Subscription | null) => void;
-    dispatch: (usecase: Usecases) => void;
+    dispatch: (usecase: Usecases) => Subscription | null;
     // accountViewModel: (shared: SharedStore) => HomeViewModel;
     // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
     // createSignUpViewModel: (shared: SharedStore) => SignUpViewModel;
@@ -62,6 +64,7 @@ export function createDispatcher(): Dispatcher {
     const dispatcher = {
         stores: {
             shared
+            , application: {} as ApplicationStore
             , authentication: {} as AuthenticationStore
         }
         , change(actor: Actor) {
@@ -74,7 +77,7 @@ export function createDispatcher(): Dispatcher {
             _shared.executingUsecase = null;
         }
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        , dispatch() {}
+        , dispatch() { return null; }
     } as Dispatcher;
 
     const performers = {
@@ -85,9 +88,10 @@ export function createDispatcher(): Dispatcher {
         , chat: createChatPerformer(dispatcher)
     };
 
+    dispatcher.stores.application = performers.application.store;
     dispatcher.stores.authentication = performers.authentication.store;
 
-    dispatcher.dispatch = (usecase: Usecases) => {
+    dispatcher.dispatch = (usecase: Usecases): Subscription | null => {
         const _shared = shared as Mutable<SharedStore>;
         const actor = shared.actor;
         // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
@@ -98,7 +102,7 @@ export function createDispatcher(): Dispatcher {
             console.info("[DISPATCH] Boot:", usecase);
             _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
             performers.application.boot(usecase, actor);
-            return;
+            return null;
         }
         }
 
@@ -115,7 +119,7 @@ export function createDispatcher(): Dispatcher {
                     stopHandle?.();
                 }
             });
-            return;
+            return null;
         }
 
         _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
@@ -126,13 +130,13 @@ export function createDispatcher(): Dispatcher {
             console.info("[DISPATCH] SignUp", usecase);
             _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
             performers.authentication.signUp(usecase, actor);
-            return;
+            return null;
         }
         case "signIn": {
             console.info("[DISPATCH] SignIn", usecase);
             _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
             performers.authentication.signIn(usecase, actor);
-            return;
+            return null;
         }
     
         /* Service */
@@ -140,8 +144,12 @@ export function createDispatcher(): Dispatcher {
             console.info("[DISPATCH] ObservingUsersTasks:", usecase);
             // 観測し続けるのでステータス管理しない
             // _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
-            performers.authentication.observingUsersTasks(usecase, new Service());
-            return;
+            return performers.application.observingUsersTasks(usecase, new Service());
+        }
+
+        case "observingUsersProjects": {
+            console.info("[DISPATCH] observingUsersProjects:", usecase);
+            return performers.application.observingUsersProjects(usecase, new Service());
         }
         
         /* SignedInUser */
@@ -169,6 +177,7 @@ export function createDispatcher(): Dispatcher {
             throw new Error(`dispatch先が定義されていません: ${ usecase.name }`);
         }
         }
+        return null;
     };
     
     return dispatcher;

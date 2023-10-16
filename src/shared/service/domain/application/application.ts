@@ -44,7 +44,8 @@ export class Application implements Service {
         case "listInsuranceItems": {
             return isSignedInUser(actor);
         }
-        case "observingUsersTasks": {
+        case "observingUsersTasks":
+        case "observingUsersProjects": {
             return isService(actor);
         }
         }

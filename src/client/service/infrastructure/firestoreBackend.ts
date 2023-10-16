@@ -1,7 +1,7 @@
 import { Backend, ChangedTask, ChangedTasks } from "@/shared/service/domain/interfaces/backend";
-import { collection, addDoc, Firestore, onSnapshot, doc, where, query, DocumentChangeType } from "firebase/firestore";
+import { addDoc, collection, collectionGroup, doc, DocumentChangeType, Firestore, getDocs, onSnapshot, orderBy, where, query } from "firebase/firestore";
 import { Observable } from "rxjs";
-import { convert, FSTask, LayerStatusTypeValues } from "./entities/tasks";
+import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./entities/tasks";
 
 const CollectionType = {
     users : "users"
@@ -53,6 +53,67 @@ export class FirestoreBackend implements Backend {
                     subscriber.next(changedItems);
                 });
             
+            this.unsubscribers.push(unsubscribe);
+        });
+    }
+
+    observeProjects(userId: string): Observable<ChangedTask[]> {
+        return new Observable(subscriber => {
+            const unsubscribe = onSnapshot(
+                query(
+                    collection(this.#db, CollectionType.tasks)
+                    , where("typeStatus", ">=", `${ LayerStatusTypeValues.layers.project }${ LayerStatusTypeValues.statuses.preinitiation }${ LayerStatusTypeValues.types.project.privateSubproject }`)
+                    , where("typeStatus", "<",  `${ LayerStatusTypeValues.layers.project }${ LayerStatusTypeValues.statuses.closed }${ LayerStatusTypeValues.types.project.privateSubproject }`)
+                    , where("involved", "array-contains", userId)
+                )
+                , (snapshot) => {
+                    const promises = snapshot.docChanges()
+                        .map(change => {
+                            const taskId = change.doc.id;
+                            const taskData = change.doc.data() as FSTask;
+                            if (change.type === "added") {
+                                return Promise.resolve(ChangedTasks[change.type]({ id: taskId, item: convert(taskId, taskData) }));
+                            } else if (change.type === "modified") {
+                                // childrenを取得
+                                return getDocs(
+                                    collection(this.#db, CollectionType.tasks)
+                                    // indexの前方一致
+                                    , where("ancestorIds", ">=", `${ taskData.ancestorIds || "" }${ taskId }`)
+                                    , where("involved", "array-contains", userId)
+                                )
+                                    .then((querySnapshot) => {
+                                        const descendants = new Array<Task>();
+                                        querySnapshot.forEach(doc => {
+                                            const taskData = doc.data() as FSTask;
+                                            descendants.push(convert(taskData.id, taskData));
+                                        });
+                                        // logsを取得する
+                                        return getDocs(
+                                            collectionGroup(this.#db, CollectionType.logs)
+                                            // タスクの arrange時、log の ancestorIds も操作する必要がある
+                                            , where("ancestorIds", ">=", `${ taskData.ancestorIds || "" }${ taskId }`)
+                                            , orderBy("ancestorIds")
+                                            , orderBy("startedAt", "desc")
+                                        )
+                                            .then(querySnapshot => {
+                                                const logs = new Array<Log>();
+                                                querySnapshot.forEach(doc => {
+                                                    const logData = doc.data() as FSLog;
+                                                    logs.push(convertLog(logData));
+                                                });
+                                                return ChangedTasks[change.type]({ id: taskId, item: convert(taskId, taskData, logs, descendants)} );
+                                            });
+                                    });
+                            } else {
+                                return Promise.reject("removedは未実装");
+                            }
+                        });
+
+                    Promise
+                        .all(promises)
+                        .then((changedItems) => subscriber.next(changedItems))
+                        .catch((error) => subscriber.error(error));
+                });
             this.unsubscribers.push(unsubscribe);
         });
     }

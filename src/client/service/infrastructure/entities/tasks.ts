@@ -372,3 +372,16 @@ export function convert(id: string, task: FSTask, logs: Log[]|null = [], descend
         , createdAt: convertTimestamp(task.createdAt)
     } as Task;
 }
+
+
+export function convertLog(log: FSLog): Log {
+    return {
+        id: log.id
+        , ancestorIds: log.ancestorIds
+        , userIds: log.userIds
+        , type: log.type
+        , message: (log.message !== null && log.message !== undefined) ? log.message : null
+        , startedAt: log.startedAt.toDate()
+        , finishedAt: (log.finishedAt !== null && log.finishedAt !== undefined) ? log.finishedAt.toDate() : null
+    };
+}

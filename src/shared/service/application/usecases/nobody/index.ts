@@ -7,7 +7,6 @@ export const Nobody = {
         , goals: {
             sessionExistsThenServicePresentsHome: "セッションがある場合_サービスはホーム画面を表示する"
             , sessionNotExistsThenServicePresentsSignin: "セッションがない場合_サービスはサインイン画面を表示する"
-            , onUpdateUsersTasksThenServiceUpdateUsersTaskList: "ユーザのタスクが更新された時_サービスはユーザのタスク一覧を更新する"
         }
     }
     , signIn : {

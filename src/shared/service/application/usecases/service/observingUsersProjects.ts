@@ -1,4 +1,4 @@
-import TaskModel from "@domain/entities/task";
+import ProjectModel from "@domain/entities/project";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
 import { Service } from ".";
@@ -8,20 +8,20 @@ import type { Context, Empty, MutableContext } from "robustive-ts";
 import { concat, map, Observable } from "rxjs";
 
 
-const _u = Service.observingUsersTasks;
+const _u = Service.observingUsersProjects;
 
 /**
- * usecase: ユーザのタスクを観測する
+ * usecase: ユーザのプロジェクトを観測する
  */
-export type ObservingUsersTasksScenes = {
+export type ObservingUsersProjectsScenes = {
     basics : {
         [_u.basics.serviceDetectsSigningIn]: { user: UserProperties; };
-        [_u.basics.startObservingUsersTasks]: { user: UserProperties; };
+        [_u.basics.startObservingUsersProjects]: { user: UserProperties; };
     };
     alternatives: Empty;
     goals : {
         [_u.goals.serviceDoNothing]: Empty;
-        [_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedTask[] };
+        [_u.goals.onUpdateUsersProjectsThenServiceUpdateUsersProjectList]: { changedTasks: ChangedTask[] };
     };
 };
 
@@ -31,15 +31,15 @@ export type ObservingUsersTasksScenes = {
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTasksScenes> {
+export class ObservingUsersProjectsScenario extends MyBaseScenario<ObservingUsersProjectsScenes> {
 
-    next(to: MutableContext<ObservingUsersTasksScenes>): Observable<Context<ObservingUsersTasksScenes>> {
+    next(to: MutableContext<ObservingUsersProjectsScenes>): Observable<Context<ObservingUsersProjectsScenes>> {
         switch (to.scene) {
         case _u.basics.serviceDetectsSigningIn: {
-            return this.just(this.basics[_u.basics.startObservingUsersTasks]({ user: to.user }));
+            return this.just(this.basics[_u.basics.startObservingUsersProjects]({ user: to.user }));
         }
-        case _u.basics.startObservingUsersTasks: {
-            return this.startObservingUsersTasks(to.user);
+        case _u.basics.startObservingUsersProjects: {
+            return this.startObservingUsersProjects(to.user);
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);
@@ -47,13 +47,13 @@ export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTa
         }
     }
 
-    private startObservingUsersTasks(user: UserProperties): Observable<Context<ObservingUsersTasksScenes>> {
-        // ユースケースの終わり（バウンダリー）に、オブザーバ（タスクの観測）を結合している
+    private startObservingUsersProjects(user: UserProperties): Observable<Context<ObservingUsersProjectsScenes>> {
+        // ユースケースの終わり（バウンダリー）に、オブザーバ（プロジェクトの観測）を結合している
         return concat(
             this.just(this.goals[_u.goals.serviceDoNothing]())
-            , TaskModel.observeUsersTasks(user.uid)
+            , ProjectModel.observeUsersProjects(user.uid)
                 .pipe(
-                    map(changedTasks => this.goals[_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]({ changedTasks }))
+                    map(changedTasks => this.goals[_u.goals.onUpdateUsersProjectsThenServiceUpdateUsersProjectList]({ changedTasks }))
                 )
         );
     }

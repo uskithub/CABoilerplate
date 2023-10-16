@@ -27,21 +27,11 @@ const vFocus = {
     mounted: (el: HTMLElement) => el.focus()
 };
 
-// const state = reactive<{
-//     signInStatus: SignInStatus|null;
-// }>({
-//     signInStatus: null
-// });
-
 const state = reactive<{
-    donedleTree: TaskTreenode;
-    swtTree: TaskTreenode;
+    tree: TaskTreenode;
     isEditing: boolean;
 }>({
-    donedleTree: new TaskTreenode(donedleTree as Task)
-    // TODO: TaskTreenodeでの表示。JSON.stringifyを使ったdeepCopyではgetterはコピーされないのでsubtreesが見つからないで落ちる
-    // , swtTree: new TaskTreenode(taskTree as Task)
-    , swtTree: new TaskTreenode(swtTree as Task)
+    tree: new TaskTreenode(donedleTree as Task)
     , isEditing: false
 });
 
@@ -78,36 +68,6 @@ const handlers: TreeEventHandlers<TaskTreenode> = {
         node.update(newValue.content);
     }
 };
-
-const handlers2: TreeEventHandlers<TaskTreenode> = {
-    "arrange" : (node: TaskTreenode, from: { id: string; node: TaskTreenode; }, to: { id: string; node: TaskTreenode; }, index: number) => {
-        const _from = findNodeById(from.id, state.swtTree);
-        const _to = findNodeById(to.id, state.swtTree);
-        if (_from === null || _to === null) return;
-        // 元親から削除
-        _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
-        // 新親に追加
-        _to.subtrees.splice(index, 0, node);
-        _to.isFolding = false;
-    }
-    , "toggle-folding" : (id: string) => {
-        const node = findNodeById(id, state.swtTree);
-        if (node === null) return;
-        node.isFolding = !node.isFolding;
-    }
-    , "toggle-editing" : (id: string, isEditing: boolean) => {
-        const node = findNodeById(id, state.swtTree);
-        if (node === null) return;
-        state.isEditing = isEditing;
-    }
-    , "update-node" : (newValue: TaskTreenode) => {
-        const node = findNodeById(newValue.id, state.swtTree) as TaskTreenode;
-        if (node === null) return;
-        node.update(newValue.content);
-        // TODO reaciveを起こさないといけない
-    }
-};
-
 
 const onClickExport = (event: MouseEvent, node: TaskTreenode) => {
     console.log("export", node);
@@ -167,38 +127,8 @@ const detectProjectName = (ancestorIds: string|null, id: string): string|null =>
 
 <template lang="pug">
 v-container
-  //- div [{{ user.store.signInStatus }}]
-  //- div [{{ shared.user?.mailAddress }}]
-  //- template(v-if="user.store.signInStatus.case === SignInStatus.unknown")
-  //-   v-progress-circular(:size="70", :width="7", color="purple", indeterminate)
-  //- template(v-else-if="user.store.signInStatus.case === SignInStatus.signOut")
-  //-   h1 Home {{ shared.user?.mailAddress }}
-  //-   ul
-  //-     li
-  //-       router-link(to="/signin") -> SignIn
-  //-     li
-  //-       router-link(to="/signup") -> SignUp
-  //- template(v-else)
-  //-   ul
-  //-     li(v-for="task in user.store.userTasks", :key="task.id")
-  //-       | {{ task.title }}
-  //- br
-  //- v-data-table.elevation-1(
-  //-   :headers="headers"
-  //-   :items="stores.authentication.userTasks"
-  //-   :items-per-page="25"
-  //-   multi-sort
-  //- )
-    //- template(v-slot:item.project="{ item }") {{ detectProjectName(item.ancestorIds, item.id) }}
-    //- template(v-slot:item.type="{ item }")
-    //-   v-chip(:color="colorOfTaskType(item.type)") {{ item.type }}
-    //- template(v-slot:item.title="{ item }")
-    //-   v-list-item(two-line)
-    //-     v-list-item-content
-    //-       v-list-item-subtitle {{ item.ancestors.map(t => t.title).reverse().join(" > ") }}
-    //-       v-list-item-title {{ item.title }}
   tree(
-    :node="state.donedleTree"
+    :node="state.tree"
     @arrange="handlers['arrange']"
     @toggle-folding="handlers['toggle-folding']"
     @toggle-editing="handlers['toggle-editing']"
@@ -212,55 +142,6 @@ v-container
         @blur="() => { if (slotProps.endEditing) slotProps.endEditing(slotProps.node.name); }"
       )
       template(v-else-if="slotProps.depth===0")
-        span.header {{ slotProps.node.name }}
-        v-icon(
-          v-show="slotProps.isHovering" 
-          icon="mdi:mdi-export-variant"
-          @click.prevent="onClickExport($event, slotProps.node)"
-        )
-      span.title(v-else) {{ slotProps.node.name }}
-  br
-  tree(
-    :node="state.swtTree"
-    @arrange="handlers2['arrange']"
-    @toggle-folding="handlers2['toggle-folding']"
-    @toggle-editing="handlers2['toggle-editing']"
-    @update-node="handlers2['update-node']"
-  )
-    template(v-slot="slotProps")
-      v-dialog(v-model="slotProps.isEditing" persistent)
-        v-card
-          v-card-text
-            v-container
-              v-row
-                v-col(cols="12" sm="8")
-                  v-text-field(v-model="slotProps.node.name" label="Task Name" required autofocus)
-                v-col(cols="12" sm="4")
-                  v-select(
-                    v-model="slotProps.node.type"
-                    :items="TaskModel.getAvailableTaskTypes(slotProps.node, slotProps.parent)"
-                    label="TaskType"
-                    required
-                  )
-            small *indicates required field
-          v-card-actions
-            v-container
-              v-row
-                v-col(cols="12" sm="6")
-                  v-btn(
-                    color="blue-darken-1"
-                    variant="text"
-                    block
-                    @click="() => slotProps.endEditing(false)"
-                  ) Cancel
-                v-col(cols="12" sm="6")
-                  v-btn(
-                    color="blue-darken-1"
-                    variant="text"
-                    block
-                    @click="() => slotProps.endEditing(true, slotProps.node)"
-                  ) Save
-      template(v-if="slotProps.depth === 0")
         span.header {{ slotProps.node.name }}
         v-icon(
           v-show="slotProps.isHovering" 

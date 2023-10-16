@@ -9,6 +9,7 @@ import { GetWarrantyListScenario, GetWarrantyListScenes } from "./signedInUser/g
 import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "./ServiceInProcess/signedInUser/listInsuranceItems";
 import { Usecase as _Usecase, Usecases as _Usecases, UsecaseSelector } from "robustive-ts";
 import { ConsultScenario, ConsultScenes } from "./signedInUser/consult";
+import { ObservingUsersProjectsScenario, ObservingUsersProjectsScenes } from "./service/observingUsersProjects";
 
 export type UsecaseDefinitions = {
     /* nobody */
@@ -22,6 +23,7 @@ export type UsecaseDefinitions = {
     consult : { scenes: ConsultScenes; scenario: ConsultScenario; }
     /* service actor */
     observingUsersTasks : { scenes: ObservingUsersTasksScenes; scenario: ObservingUsersTasksScenario; };
+    observingUsersProjects : { scenes: ObservingUsersProjectsScenes; scenario: ObservingUsersProjectsScenario; };
 };
 
 const usecases = new UsecaseSelector<UsecaseDefinitions>();
@@ -38,6 +40,7 @@ export const U = {
     , consult : usecases.consult(ConsultScenario)
     /* service actor */
     , observingUsersTasks : usecases.observingUsersTasks(ObservingUsersTasksScenario)
+    , observingUsersProjects : usecases.observingUsersProjects(ObservingUsersProjectsScenario)
 };
 
 export type UsecaseKeys = keyof UsecaseDefinitions;

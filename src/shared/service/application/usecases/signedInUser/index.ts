@@ -48,4 +48,13 @@ export const SignInUser = {
             , resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView: "結果が0件の場合_サービスは保証一覧画面に結果なしを表示する"
         }
     }
+    , getProject : {
+        basics : {
+            userSelectsAProject: "ユーザはプロジェクトを選択する"
+            , serviceGetsProjectThatMeetConditions: "サービスは条件に該当するプロジェクトを取得する"
+        }
+        , goals : {
+            servicePresentsProjectView: "サービスはプロジェクト画面を表示する"
+        }
+    }
 } as const;

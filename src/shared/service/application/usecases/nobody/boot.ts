@@ -1,7 +1,6 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import { Application } from "@/shared/service/domain/application/application";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
-import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
 import { Nobody } from ".";
 import { MyBaseScenario } from "../common";
 
@@ -22,7 +21,6 @@ export type BootScenes = {
     goals: {
         [_u.goals.sessionExistsThenServicePresentsHome]: { user: UserProperties; };
         [_u.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
-        [_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedTask[] };
     };
 };
 
