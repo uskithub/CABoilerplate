@@ -30,6 +30,9 @@ export interface Backend {
      * @param userId 
      * @param projectId 
      */
-    observeProjects(userId: string): Observable<ChangedTask[]>;
+    observeUsersProjects(userId: string): Observable<ChangedTask[]>;
+
+    observeProject(userId: string, projectId: string): Observable<ChangedTask[]>;
+
     // getWarranties: () => Observable<Warranty[]|null>;
 }

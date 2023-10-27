@@ -7,7 +7,9 @@ export class TaskTreenode implements Treenode<Task> {
     isFolding: boolean;
 
     constructor(task: Task);
-    constructor(task?: Task, children?: Task[]) {
+    constructor(title: string, children: Task[]);
+
+    constructor(task: Task|string, children?: Task[]) {
         if (task) {
             this._task = task;
         } else if (children) {

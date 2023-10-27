@@ -55,6 +55,7 @@ export const SignInUser = {
         }
         , goals : {
             servicePresentsProjectView: "サービスはプロジェクト画面を表示する"
+            , onUpdatProjectThenServiceUpdatesProjectView: "プロジェクトに更新があった場合_サービスはプロジェクト画面を更新する"
         }
     }
 } as const;

@@ -14,13 +14,13 @@ import { DISPATCHER_KEY } from "../../../application/performers";
 import type { TreeEventHandlers } from "vue3-tree";
 import "vue3-tree/style.css";
 
-import { useRoute } from "vue-router";
+// stubs
+import donedleTree from "../../../../../../test/stubs/donedle";
+import swtTree from "../../../../../../test/stubs/swt";
+import taskTree from "../../../../../../test/stubs/task";
+
 
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
-
-const { projectId } = useRoute().params
-
-console.log("★★★★projectId", projectId);
 
 // custom directive for autofocus
 const vFocus = {
@@ -43,7 +43,10 @@ watch(stores.application.userProjects, (newVal: Task[]) => {
 });
 
 const handlers: TreeEventHandlers<TaskTreenode> = {
-    "arrange" : (node: TaskTreenode, from: { id: string; node: TaskTreenode; }, to: { id: string; node: TaskTreenode; }, index: number) => {
+    "click" : (event: PointerEvent, node: TaskTreenode) => {
+        console.log("@@@@@ 呼ばれたよ", node);
+    }
+    , "arrange" : (node: TaskTreenode, from: { id: string; node: TaskTreenode; }, to: { id: string; node: TaskTreenode; }, index: number) => {
         const _from = findNodeById(from.id, state.donedleTree);
         const _to = findNodeById(to.id, state.donedleTree);
         if (_from === null || _to === null) return;
@@ -128,9 +131,9 @@ const detectProjectName = (ancestorIds: string|null, id: string): string|null =>
 
 <template lang="pug">
 v-container
-  span ほげほげ
   tree(
     :node="state.tree"
+    @click="handlers['click']"
     @arrange="handlers['arrange']"
     @toggle-folding="handlers['toggle-folding']"
     @toggle-editing="handlers['toggle-editing']"

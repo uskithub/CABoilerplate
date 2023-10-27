@@ -5,6 +5,7 @@ import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { concat, map, Observable } from "rxjs";
+import { Task } from "@/shared/service/domain/entities/task";
 
 
 const _u = SignInUser.getProject;
@@ -19,7 +20,8 @@ export type GetProjectScenes = {
     };
     alternatives: Empty;
     goals : {
-        [_u.goals.servicePresentsProjectView]: { project: TaskModel;};
+        [_u.goals.servicePresentsProjectView]: { project: Task;};
+        [_u.goals.onUpdatProjectThenServiceUpdatesProjectView]: { project: Task;};
     };
 };
 
@@ -29,7 +31,7 @@ export type GetProjectScenes = {
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class GetProjectScenario extends MyBaseScenario<OGetProjectScenes> {
+export class GetProjectScenario extends MyBaseScenario<GetProjectScenes> {
 
     next(to: MutableContext<GetProjectScenes>): Observable<Context<GetProjectScenes>> {
         switch (to.scene) {
@@ -37,7 +39,7 @@ export class GetProjectScenario extends MyBaseScenario<OGetProjectScenes> {
             return this.just(this.basics[_u.basics.serviceGetsProjectThatMeetConditions]({ user: to.user, projectId: to.projectId }));
         }
         case _u.basics.serviceGetsProjectThatMeetConditions: {
-            return this.getsProjectThatMeetConditions(to.user, to.projectId);
+            return this.getProjectThatMeetConditions(to.user, to.projectId);
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);
@@ -45,14 +47,18 @@ export class GetProjectScenario extends MyBaseScenario<OGetProjectScenes> {
         }
     }
 
-    private getsProjectThatMeetConditions(user: UserProperties, projectId: string): Observable<Context<GetProjectScenes>> {
-        // ユースケースの終わり（バウンダリー）に、オブザーバ（タスクの観測）を結合している
-        return concat(
-            this.just(this.goals[_u.goals.servicePresentsProjectView]())
-            , ProjectModel.observeProjects(user.uid)
-                .pipe(
-                    map(changedTasks => this.goals[_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]({ changedTasks }))
-                )
-        );
+    private getProjectThatMeetConditions(user: UserProperties, projectId: string): Observable<Context<GetProjectScenes>> {
+        let isFirst = true;
+        return ProjectModel.observeProject(user.uid, projectId)
+            .pipe(
+                map(task => {
+                    if (isFirst) {
+                        isFirst = false;
+                        return this.goals[_u.goals.servicePresentsProjectView]({ project: task });
+                    } else {
+                        return this.goals[_u.goals.onUpdatProjectThenServiceUpdatesProjectView]({ project: task });
+                    }
+                })
+            );
     }
 }
