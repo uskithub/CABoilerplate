@@ -3,8 +3,6 @@
 
 // view
 import drawer from "../components/drawer/drawer.vue";
-import { DrawerContentType } from "../components/drawer";
-import type { DrawerItem } from "../components/drawer";
 
 // system
 import { inject, reactive, ref } from "vue";
@@ -20,18 +18,6 @@ const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
 //     signInStatus: null
 // });
 
-const items: Array<DrawerItem> = [
-    { type: DrawerContentType.header, title: "Menu1" } as DrawerItem
-    , { type: DrawerContentType.link, title: "保証一覧", href: "/warranties" } as DrawerItem
-    , { type: DrawerContentType.link, title: "保険加入アイテム", href: "/insuranceItems" } as DrawerItem
-    , { type: DrawerContentType.divider } as DrawerItem
-    , { type: DrawerContentType.header, title: "Menu2" } as DrawerItem
-    , { type: DrawerContentType.link, title: "Chat", href: "/" } as DrawerItem
-    , { type: DrawerContentType.link, title: "タスク一覧", href: "/tasks" } as DrawerItem
-    , { type: DrawerContentType.link, title: "プロジェクト", href: "/projects" } as DrawerItem
-    , { type: DrawerContentType.link, title: "link3", href: "/link3" } as DrawerItem
-];
-
 const state = reactive<{
     isDrawerOpen: boolean;
 }>({
@@ -41,7 +27,7 @@ const state = reactive<{
 </script>
 
 <template lang="pug">
-drawer(v-model="state.isDrawerOpen", :items="items")
+drawer(v-model="state.isDrawerOpen", :items="stores.application.drawerItems")
 v-app-bar
   v-app-bar-nav-icon(@click="state.isDrawerOpen = !state.isDrawerOpen")
   v-toolbar-title Application

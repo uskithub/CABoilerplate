@@ -58,6 +58,10 @@ export class FirestoreBackend implements Backend {
         });
     }
 
+    /**
+     * ユーザのプロジェクトの一覧を返します。childrenは取得しません。
+     * @param userId 
+     */
     observeUsersProjects(userId: string): Observable<ChangedTask[]> {
         return new Observable(subscriber => {
             const unsubscribe = onSnapshot(
@@ -72,39 +76,41 @@ export class FirestoreBackend implements Backend {
                         .map(change => {
                             const taskId = change.doc.id;
                             const taskData = change.doc.data() as FSTask;
-                            return getDocs(
-                                query(
-                                    collection(this.#db, CollectionType.tasks)
-                                    // indexの前方一致
-                                    , where("ancestorIds", ">=", `${ taskData.ancestorIds || "" }${ taskId }`)
-                                    , where("involved", "array-contains", userId)
-                                )
-                            )
-                                .then((querySnapshot) => {
-                                    const descendants = new Array<Task>();
-                                    querySnapshot.forEach(doc => {
-                                        const taskData = doc.data() as FSTask;
-                                        descendants.push(convert(taskData.id, taskData));
-                                    });
-                                    // logsを取得する
-                                    return getDocs(
-                                        query(
-                                            collectionGroup(this.#db, CollectionType.logs)
-                                            // タスクの arrange時、log の ancestorIds も操作する必要がある
-                                            , where("ancestorIds", ">=", `${ taskData.ancestorIds || "" }${ taskId }`)
-                                            , orderBy("ancestorIds")
-                                            , orderBy("startedAt", "desc")
-                                        )
-                                    )
-                                        .then(querySnapshot => {
-                                            const logs = new Array<Log>();
-                                            querySnapshot.forEach(doc => {
-                                                const logData = doc.data() as FSLog;
-                                                logs.push(convertLog(logData));
-                                            });
-                                            return ChangedTasks[change.type]({ id: taskId, item: convert(taskId, taskData, logs, descendants)} );
-                                        });
-                                });
+                            return ChangedTasks[change.type]({ id: taskId, item: convert(taskId, taskData) } );
+                            // childrenを取得する場合をメモのために残しておく
+                            // return getDocs(
+                            //     query(
+                            //         collection(this.#db, CollectionType.tasks)
+                            //         // indexの前方一致
+                            //         , where("ancestorIds", ">=", `${ taskData.ancestorIds || "" }${ taskId }`)
+                            //         , where("involved", "array-contains", userId)
+                            //     )
+                            // )
+                            //     .then((querySnapshot) => {
+                            //         const descendants = new Array<Task>();
+                            //         querySnapshot.forEach(doc => {
+                            //             const taskData = doc.data() as FSTask;
+                            //             descendants.push(convert(taskData.id, taskData));
+                            //         });
+                            //         // logsを取得する
+                            //         return getDocs(
+                            //             query(
+                            //                 collectionGroup(this.#db, CollectionType.logs)
+                            //                 // タスクの arrange時、log の ancestorIds も操作する必要がある
+                            //                 , where("ancestorIds", ">=", `${ taskData.ancestorIds || "" }${ taskId }`)
+                            //                 , orderBy("ancestorIds")
+                            //                 , orderBy("startedAt", "desc")
+                            //             )
+                            //         )
+                            //             .then(querySnapshot => {
+                            //                 const logs = new Array<Log>();
+                            //                 querySnapshot.forEach(doc => {
+                            //                     const logData = doc.data() as FSLog;
+                            //                     logs.push(convertLog(logData));
+                            //                 });
+                            //                 return ChangedTasks[change.type]({ id: taskId, item: convert(taskId, taskData, logs, descendants)} );
+                            //             });
+                            //     });
                         });
 
                     Promise

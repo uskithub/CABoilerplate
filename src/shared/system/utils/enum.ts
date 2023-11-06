@@ -1,5 +1,5 @@
 type CaseWithAssociatedValues = Record<string, object>;
-type Empty = Record<string, never>;
+export type Empty = Record<string, never>;
 
 type DeepReadonly<T> = T extends object
   ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
