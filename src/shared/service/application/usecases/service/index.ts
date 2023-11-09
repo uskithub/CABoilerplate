@@ -2,7 +2,7 @@ export const Service = {
     observingUsersTasks : {
         basics : {
             serviceDetectsSigningIn: "サービスはユーザのサインインを検知する"
-            , startObservingUsersTasks: "サービスはユーザのタスクの観測を開始する"
+            , serviceStartsObservingUsersTasks: "サービスはユーザのタスクの観測を開始する"
         }
         , goals: {
             serviceDoNothing: "サービスは何もしない"

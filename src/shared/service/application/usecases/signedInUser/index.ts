@@ -1,4 +1,4 @@
-export const SignInUser = {
+export const SignedInUser = {
     signOut : {
         basics : {
             userStartsSignOutProcess: "ユーザはサインアウトを開始する"
@@ -11,6 +11,16 @@ export const SignInUser = {
             onSuccessThenServicePresentsSignInView: "成功した場合_サービスはサインイン画面を表示する"
             , onFailureThenServicePresentsError: "失敗した場合_サービスはエラーを表示する"
             , servicePresentsHomeView: "サービスはホーム画面を表示する"
+        }
+    }
+    , observingProject : {
+        basics : {
+            userSelectsAProject: "ユーザはプロジェクトを選択する"
+            , serviceStartsObservingProjectThatMeetConditions: "サービスは条件に該当するプロジェクトの観測を開始する"
+        }
+        , goals : {
+            servicePresentsProjectView: "サービスはプロジェクト画面を表示する"
+            , onUpdatProjectThenServiceUpdatesProjectView: "プロジェクトに更新があった場合_サービスはプロジェクト画面を更新する"
         }
     }
     , consult : {
@@ -46,16 +56,6 @@ export const SignInUser = {
         , goals: {
             resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView: "結果が1件以上の場合_サービスは保証一覧画面に結果を表示する"
             , resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView: "結果が0件の場合_サービスは保証一覧画面に結果なしを表示する"
-        }
-    }
-    , getProject : {
-        basics : {
-            userSelectsAProject: "ユーザはプロジェクトを選択する"
-            , serviceGetsProjectThatMeetConditions: "サービスは条件に該当するプロジェクトを取得する"
-        }
-        , goals : {
-            servicePresentsProjectView: "サービスはプロジェクト画面を表示する"
-            , onUpdatProjectThenServiceUpdatesProjectView: "プロジェクトに更新があった場合_サービスはプロジェクト画面を更新する"
         }
     }
 } as const;

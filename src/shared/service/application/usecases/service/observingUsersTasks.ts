@@ -16,7 +16,7 @@ const _u = Service.observingUsersTasks;
 export type ObservingUsersTasksScenes = {
     basics : {
         [_u.basics.serviceDetectsSigningIn]: { user: UserProperties; };
-        [_u.basics.startObservingUsersTasks]: { user: UserProperties; };
+        [_u.basics.serviceStartsObservingUsersTasks]: { user: UserProperties; };
     };
     alternatives: Empty;
     goals : {
@@ -36,9 +36,9 @@ export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTa
     next(to: MutableContext<ObservingUsersTasksScenes>): Observable<Context<ObservingUsersTasksScenes>> {
         switch (to.scene) {
         case _u.basics.serviceDetectsSigningIn: {
-            return this.just(this.basics[_u.basics.startObservingUsersTasks]({ user: to.user }));
+            return this.just(this.basics[_u.basics.serviceStartsObservingUsersTasks]({ user: to.user }));
         }
-        case _u.basics.startObservingUsersTasks: {
+        case _u.basics.serviceStartsObservingUsersTasks: {
             return this.startObservingUsersTasks(to.user);
         }
         default: {

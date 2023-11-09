@@ -6,9 +6,11 @@
 import { inject, reactive, watch } from "vue";
 import type { Dispatcher } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
+import { U } from "@/shared/service/application/usecases";
 
 import { useRoute } from "vue-router";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
+import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
 
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
 
@@ -18,11 +20,10 @@ const { projectId } = route.params;
 console.log("★★★★projectId", projectId);
 
 const state = reactive<{
-    projectId: string | string[];
+    projectId: string;
 }>({
-    projectId
+    projectId: (Array.isArray(projectId)) ? projectId[0] : projectId
 });
-
 
 // Projectページ間で遷移した場合は params は watach で取得する
 watch(route, (newVal: RouteLocationNormalizedLoaded) => {
@@ -31,10 +32,16 @@ watch(route, (newVal: RouteLocationNormalizedLoaded) => {
         return;
     }
     // Projectページ間での遷移
-    console.log("★☆☆★projectId", newVal.params.projectId);
-    state.projectId = newVal.params.projectId;
+    const { projectId } = newVal.params;
+    console.log("★☆☆★projectId", projectId);
+    state.projectId = (Array.isArray(projectId)) ? projectId[0] : projectId;
 });
 
+// TODO: 引数の型を合わせるところから
+const user = stores.shared.actor.user;
+if (user !== null) {
+    dispatch(U.observingProject.basics[SignedInUser.observingProject.basics.userSelectsAProject]({ user, projectId: state.projectId }));
+}
 
 
 </script>

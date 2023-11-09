@@ -12,7 +12,7 @@ import { DISPATCHER_KEY } from "../../../application/performers";
 import { Role } from "@/shared/service/domain/chat/message";
 import type { MessageProperties } from "@/shared/service/domain/chat/message";
 import { U } from "@/shared/service/application/usecases";
-import { SignInUser } from "@/shared/service/application/usecases/signedInUser";
+import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
 
 
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
@@ -30,7 +30,7 @@ const onClickSendButton = () => {
         , content: state.inputText
     } as MessageProperties;
 
-    dispatch(U.consult.basics[SignInUser.consult.basics.userInputsQuery]({ messages: [ message ]})); 
+    dispatch(U.consult.basics[SignedInUser.consult.basics.userInputsQuery]({ messages: [ message ]})); 
 };
 
 const items = [

@@ -14,10 +14,10 @@ import { Service } from "@/shared/service/application/usecases/service";
 import { Usecase } from "@/shared/service/application/usecases";
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
-import { DrawerContentType, DrawerItem, DrawerItems } from "../../presentation/components/drawer";
+import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
 
 type ImmutableTask = Readonly<Task>;
-type ImmutableDrawerItems = Readonly<DrawerItems>;
+type ImmutableDrawerItems = Readonly<DrawerItem>;
 
 export interface ApplicationStore extends Store {
     readonly drawerItems: ImmutableDrawerItems[];
@@ -45,7 +45,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
             , DrawerItem.header({ title: "Menu2" })
             , DrawerItem.link({ title: "Chat", href: "/" })
             , DrawerItem.link({ title: "タスク一覧", href: "/tasks" })
-            , DrawerItem.group({ title: "プロジェクト", children: Array<DrawerItems>() })
+            , DrawerItem.group({ title: "プロジェクト", children: Array<DrawerItem>() })
             // , DrawerItem.link({ title: "link3", href: "/link3" })
         ]
         , userTasks: []
@@ -54,7 +54,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
 
     const _store = store as Mutable<ApplicationStore>;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const _projectMenu = _store.drawerItems.find((item) => item.case === DrawerContentType.group && item.title === "プロジェクト")!.children as DrawerItems[];
+    const _projectMenu = _store.drawerItems.find((item) => item.case === DrawerContentType.group && item.title === "プロジェクト")!.children as DrawerItem[];
 
     return {
         store

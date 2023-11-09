@@ -17,9 +17,9 @@ let subscriptions: Subscription[] = [];
 watch(() => stores.shared.signInStatus, (newValue) => {
     if (newValue.case === SignInStatus.signIn) {
         const user = stores.shared.signInStatus.user;
-        const ts = dispatcher.dispatch(U.observingUsersTasks.basics[Service.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }));
+        const ts = dispatch(U.observingUsersTasks.basics[Service.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }));
         if (ts !== null) subscriptions.push(ts);
-        const ps = dispatcher.dispatch(U.observingUsersProjects.basics[Service.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }));
+        const ps = dispatch(U.observingUsersProjects.basics[Service.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }));
         if (ps !== null) subscriptions.push(ps);
     } else if (newValue.case === SignInStatus.signingOut) {
         subscriptions.forEach((s) => s.unsubscribe());

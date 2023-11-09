@@ -9,7 +9,7 @@ import { DISPATCHER_KEY } from "../../application/performers";
 import type { Dispatcher } from "../../application/performers";
 import { isSignedInUser } from "@shared/service/application/actors/signedInUser";
 import { U } from "@/shared/service/application/usecases";
-import { SignInUser } from "@/shared/service/application/usecases/signedInUser";
+import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
 import { Nobody } from "@/shared/service/application/usecases/nobody";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
@@ -64,11 +64,11 @@ v-container
           v-btn(
             color="warning",
             text,
-            @click="dispatch(U.signOut.basics[SignInUser.signOut.basics.userStartsSignOutProcess]())"
+            @click="dispatch(U.signOut.basics[SignedInUser.signOut.basics.userStartsSignOutProcess]())"
           ) Sign Out
           v-btn(
             color="success",
             text,
-            @click="dispatch(U.signOut.alternatives[SignInUser.signOut.alternatives.userResignSignOut]())"
+            @click="dispatch(U.signOut.alternatives[SignedInUser.signOut.alternatives.userResignSignOut]())"
           ) Go Home
 </template>

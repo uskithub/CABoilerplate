@@ -13,7 +13,7 @@ import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces
 
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/usecases/nobody";
-import { SignInUser } from "@/shared/service/application/usecases/signedInUser";
+import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
 import { Service } from "@/shared/service/application/usecases/service";
 import { U, Usecase } from "@/shared/service/application/usecases";
 
@@ -162,7 +162,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                 });
         }
         , signOut: (usecase: Usecase<"signOut">, actor: Actor) => {
-            const goals = SignInUser.signOut.goals;
+            const goals = SignedInUser.signOut.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase

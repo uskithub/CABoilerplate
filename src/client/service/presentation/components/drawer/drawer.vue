@@ -2,11 +2,11 @@
 // system
 import { reactive, watch } from "vue";
 import { DrawerContentType } from ".";
-import type { DrawerItems } from ".";
+import type { DrawerItem } from ".";
 
 const props = defineProps<{
     modelValue: boolean
-    , items: Array<DrawerItems>
+    , items: Array<DrawerItem>
 }>();
 
 const emits = defineEmits<{

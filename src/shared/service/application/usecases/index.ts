@@ -10,6 +10,7 @@ import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "./ServiceI
 import { Usecase as _Usecase, Usecases as _Usecases, UsecaseSelector } from "robustive-ts";
 import { ConsultScenario, ConsultScenes } from "./signedInUser/consult";
 import { ObservingUsersProjectsScenario, ObservingUsersProjectsScenes } from "./service/observingUsersProjects";
+import { ObservingProjectScenario, ObservingProjectScenes } from "./signedInUser/observingProject";
 
 export type UsecaseDefinitions = {
     /* nobody */
@@ -18,6 +19,7 @@ export type UsecaseDefinitions = {
     signUp : { scenes: SignUpScenes; scenario: SignUpScenario; };
     signOut : { scenes: SignOutScenes; scenario: SignOutScenario; };
     /* signInUser */
+    observingProject : { scenes: ObservingProjectScenes; scenario: ObservingProjectScenario; };
     listInsuranceItems : { scenes: ListInsuranceItemsScenes; scenario: ListInsuranceItemsScenario; }
     getWarrantyList : { scenes: GetWarrantyListScenes; scenario: GetWarrantyListScenario; }
     consult : { scenes: ConsultScenes; scenario: ConsultScenario; }
@@ -35,6 +37,7 @@ export const U = {
     , signUp : usecases.signUp(SignUpScenario)
     , signOut : usecases.signOut(SignOutScenario)
     /* signInUser */
+    , observingProject : usecases.observingProject(ObservingProjectScenario)
     , listInsuranceItems : usecases.listInsuranceItems(ListInsuranceItemsScenario)
     , getWarrantyList : usecases.getWarrantyList(GetWarrantyListScenario)
     , consult : usecases.consult(ConsultScenario)

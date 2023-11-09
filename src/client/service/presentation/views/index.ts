@@ -8,6 +8,7 @@ import Task from "@views/home/Task.vue";
 import Project from "@views/home/Project.vue";
 import Warranty from "@views/home/Warranty.vue";
 import Insuranace from "./home/Insuranace.vue";
+import { RouteLocationNormalized, RouteLocationNormalizedLoaded } from "vue-router";
 
 export const routes = [
     {
@@ -15,6 +16,8 @@ export const routes = [
             { path: "", component: Chat }
             , { path: "/tasks", component: Task }
             // , { path: "/projects", component: ProjectList }
+            // 以下で string | string[] を string に変換できると思ったけど、使う方では型が変わらなかった
+            // , { path: "/projects/:projectId", component: Project, props: (route: RouteLocationNormalizedLoaded) => ({ projectId: (Array.isArray(route.params.projectId)) ? route.params.projectId[0] : route.params.projectId }) }
             , { path: "/projects/:projectId", component: Project }
             , { path: "/warranties", component: Warranty }
             , { path: "/insuranceItems", component: Insuranace }

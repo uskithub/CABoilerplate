@@ -1,7 +1,6 @@
 import { Observable } from "rxjs";
 import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
 import { Task } from "../entities/task";
-import { Warranty } from "../entities/warranty";
 
 export const ItemChangeType = {
     added : "added"
@@ -9,14 +8,23 @@ export const ItemChangeType = {
     , removed : "removed"
 } as const;
 
-type ItemChangeContext<T> = {
-    [ItemChangeType.added] : { id: string; item: T; };
-    [ItemChangeType.modified] : { id: string; item: T; };
-    [ItemChangeType.removed] : { id: string; };
+export type ItemChangeType = typeof ItemChangeType[keyof typeof ItemChangeType];
+
+// これだと入力補完が利かないので
+// export type ChangedItems<T> = {
+//     [ItemChangeType.added] : { id: string; item: T; };
+//     [ItemChangeType.modified] : { id: string; item: T; };
+//     [ItemChangeType.removed] : { id: string; };
+// };
+// こうする
+export type ChangedItems<T> = {
+    added : { id: string; item: T; };
+    modified : { id: string; item: T; };
+    removed : { id: string; };
 };
 
-export const ChangedTasks = new SwiftEnum<ItemChangeContext<Task>>();
-export type ChangedTask = SwiftEnumCases<ItemChangeContext<Task>>;
+export const ChangedTask = new SwiftEnum<ChangedItems<Task>>();
+export type ChangedTask = SwiftEnumCases<ChangedItems<Task>>;
 
 export interface Backend {
 
@@ -32,7 +40,7 @@ export interface Backend {
      */
     observeUsersProjects(userId: string): Observable<ChangedTask[]>;
 
-    observeProject(userId: string, projectId: string): Observable<ChangedTask[]>;
+    observeProject(userId: string, projectId: string): Observable<Task>;
 
     // getWarranties: () => Observable<Warranty[]|null>;
 }

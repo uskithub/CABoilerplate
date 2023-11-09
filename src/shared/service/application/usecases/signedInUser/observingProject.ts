@@ -1,22 +1,21 @@
 import ProjectModel from "@domain/entities/project";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
-import { SignInUser } from ".";
+import { SignedInUser } from ".";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { concat, map, Observable } from "rxjs";
+import { map, Observable } from "rxjs";
 import { Task } from "@/shared/service/domain/entities/task";
 
-
-const _u = SignInUser.getProject;
+const _u = SignedInUser.observingProject;
 
 /**
- * usecase: アプリを起動する
+ * usecase: ユーザのプロジェクトを観測する
  */
-export type GetProjectScenes = {
+export type ObservingProjectScenes = {
     basics : {
         [_u.basics.userSelectsAProject]: { user: UserProperties; projectId: string; };
-        [_u.basics.serviceGetsProjectThatMeetConditions]: { user: UserProperties; projectId: string; };
+        [_u.basics.serviceStartsObservingProjectThatMeetConditions]: { user: UserProperties; projectId: string; };
     };
     alternatives: Empty;
     goals : {
@@ -31,15 +30,15 @@ export type GetProjectScenes = {
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class GetProjectScenario extends MyBaseScenario<GetProjectScenes> {
+export class ObservingProjectScenario extends MyBaseScenario<ObservingProjectScenes> {
 
-    next(to: MutableContext<GetProjectScenes>): Observable<Context<GetProjectScenes>> {
+    next(to: MutableContext<ObservingProjectScenes>): Observable<Context<ObservingProjectScenes>> {
         switch (to.scene) {
         case _u.basics.userSelectsAProject: {
-            return this.just(this.basics[_u.basics.serviceGetsProjectThatMeetConditions]({ user: to.user, projectId: to.projectId }));
+            return this.just(this.basics[_u.basics.serviceStartsObservingProjectThatMeetConditions]({ user: to.user, projectId: to.projectId }));
         }
-        case _u.basics.serviceGetsProjectThatMeetConditions: {
-            return this.getProjectThatMeetConditions(to.user, to.projectId);
+        case _u.basics.serviceStartsObservingProjectThatMeetConditions: {
+            return this.startObservingProjectThatMeetConditions(to.user, to.projectId);
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);
@@ -47,7 +46,7 @@ export class GetProjectScenario extends MyBaseScenario<GetProjectScenes> {
         }
     }
 
-    private getProjectThatMeetConditions(user: UserProperties, projectId: string): Observable<Context<GetProjectScenes>> {
+    private startObservingProjectThatMeetConditions(user: UserProperties, projectId: string): Observable<Context<ObservingProjectScenes>> {
         let isFirst = true;
         return ProjectModel.observeProject(user.uid, projectId)
             .pipe(
