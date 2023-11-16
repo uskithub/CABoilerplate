@@ -3,7 +3,6 @@ import { SignedInUser } from ".";
 import { MyBaseScenario } from "../common";
 
 import type { Context, MutableContext } from "robustive-ts";
-import { from, Observable } from "rxjs";
 
 const _u = SignedInUser.consult;
 
@@ -28,7 +27,7 @@ export type ConsultScenes = {
 
 export class ConsultScenario extends MyBaseScenario<ConsultScenes> {
 
-    next(to: MutableContext<ConsultScenes>): Observable<Context<ConsultScenes>> {
+    next(to: MutableContext<ConsultScenes>): Promise<Context<ConsultScenes>> {
         switch (to.scene) {
         case _u.basics.userInputsQuery: {
             return this.just(this.basics[_u.basics.serviceChecksIfThereAreExistingMessages]({ messages: to.messages }));
@@ -51,24 +50,21 @@ export class ConsultScenario extends MyBaseScenario<ConsultScenes> {
         }
     }
 
-    private check(messages: MessageProperties[]): Observable<Context<ConsultScenes>> {
+    private check(messages: MessageProperties[]): Promise<Context<ConsultScenes>> {
         if (messages.length === 1) {
             return this.just(this.alternatives[_u.alternatives.ifNotThenServiceGetRelatedVectors]({ messages }));
         }
         return this.just(this.basics[_u.basics.ifThereAreThenServiceGetRelatedVectors]({ messages }));
     }
 
-    private getRelatedEmbeddings(messages: MessageProperties[]): Observable<Context<ConsultScenes>> {
-        return from(
-            new Message(messages).getRelatedEmbeddings()
-                .then(embeddings => this.basics[_u.basics.onSuccessThenServiceAskAI]({messages, embeddings}))
-        );
+    private getRelatedEmbeddings(messages: MessageProperties[]): Promise<Context<ConsultScenes>> {
+        return new Message(messages).getRelatedEmbeddings()
+            .then(embeddings => this.basics[_u.basics.onSuccessThenServiceAskAI]({messages, embeddings}))
+        ;
     }
 
-    private ask(messages: MessageProperties[], embeddings: string): Observable<Context<ConsultScenes>> {
-        return from(
-            new Message(messages).createAnswer(embeddings)
-                .then(messages => this.goals[_u.goals.onSuccessThenServiceDisplaysMessages]({ messages }))
-        );
+    private ask(messages: MessageProperties[], embeddings: string): Promise<Context<ConsultScenes>> {
+        return new Message(messages).createAnswer(embeddings)
+            .then(messages => this.goals[_u.goals.onSuccessThenServiceDisplaysMessages]({ messages }));
     }
 }

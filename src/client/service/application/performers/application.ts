@@ -15,6 +15,7 @@ import { Usecase } from "@/shared/service/application/usecases";
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
+import { InteractResultType } from "robustive-ts/types/usecase";
 
 type ImmutableTask = Readonly<Task>;
 type ImmutableDrawerItems = Readonly<DrawerItem>;
@@ -61,13 +62,13 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
         , boot: (usecase: Usecase<"boot">, actor: Actor) => {
             const goals = Nobody.boot.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription | null = null;
-            subscription = usecase
-                .interactedBy(actor, {
-                    next: ([lastSceneContext]) => {
-                        switch (lastSceneContext.scene) {
+            return usecase
+                .interactedBy(actor)
+                .then((result) => {
+                    if (result.type === InteractResultType.success) {
+                        switch (result.lastSceneContext.scene) {
                         case goals.sessionExistsThenServicePresentsHome: {
-                            const user = { ...lastSceneContext.user };
+                            const user = { ...result.lastSceneContext.user };
                             const actor = new SignedInUser(user);
                             dispatcher.change(actor);
                             _shared.signInStatus = SignInStatuses.signIn({ user });
@@ -76,30 +77,28 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                         case goals.sessionNotExistsThenServicePresentsSignin: {
                             _shared.signInStatus = SignInStatuses.signOut();
                             router.replace("/signin")
-                                .catch((error: Error) => {
-                                });
+                                .catch((error: Error) => {});
                             break;
                         }
                         }
                     }
-                    , complete: () => dispatcher.commonCompletionProcess(subscription)
                 });
         }
         , observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor): Subscription =>  {
             const goals = Service.observingUsersTasks.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription | null = null;
-            subscription = usecase
-                .interactedBy(actor, {
-                    next: ([lastSceneContext]) => {
-                        switch (lastSceneContext.scene) {
+            usecase
+                .interactedBy(actor)
+                .then((result) => {
+                    if (result.type === InteractResultType.success) {
+                        switch (result.lastSceneContext.scene) {
                         case goals.serviceDoNothing: {
                             console.log("Started observing user's tasks...");
                             break;
                         }
                         case goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList: {
                             const mutableUserTasks = _store.userTasks ;
-                            lastSceneContext.changedTasks.forEach((changedTask) => {
+                            result.lastSceneContext.changedTasks.forEach((changedTask) => {
                                 switch (changedTask.case) {
                                 case ItemChangeType.added: {
                                     // hot reloadで増えてしまうので、同じものを予め削除しておく
@@ -140,7 +139,6 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                         }
                     }
                 });
-            return subscription;
         }
         , observingUsersProjects: (usecase: Usecase<"observingUsersProjects">, actor: Actor): Subscription =>  {
             const goals = Service.observingUsersProjects.goals;

@@ -3,7 +3,7 @@ import { SignedInUser } from ".";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { catchError, map, Observable } from "rxjs";
+import { catchError, firstValueFrom, map } from "rxjs";
 
 const _u = SignedInUser.signOut;
 
@@ -27,7 +27,7 @@ export type SignOutScenes = {
 
 export class SignOutScenario extends MyBaseScenario<SignOutScenes> {
 
-    next(to: MutableContext<SignOutScenes>): Observable<Context<SignOutScenes>> {
+    next(to: MutableContext<SignOutScenes>): Promise<Context<SignOutScenes>> {
         switch (to.scene) {
         case _u.basics.userStartsSignOutProcess: {
             return this.just(this.basics[_u.basics.serviceClosesSession]());
@@ -44,11 +44,13 @@ export class SignOutScenario extends MyBaseScenario<SignOutScenes> {
         }
     }
 
-    private signOut(): Observable<Context<SignOutScenes>> {
-        return User.signOut()
-            .pipe(
-                map(() => this.goals[_u.goals.onSuccessThenServicePresentsSignInView]())
-                , catchError((error: Error) => this.just(this.goals[_u.goals.onFailureThenServicePresentsError]({ error })))
-            );
+    private signOut(): Promise<Context<SignOutScenes>> {
+        return firstValueFrom(
+            User.signOut()
+                .pipe(
+                    map(() => this.goals[_u.goals.onSuccessThenServicePresentsSignInView]())
+                    , catchError((error: Error) => this.just(this.goals[_u.goals.onFailureThenServicePresentsError]({ error })))
+                )
+        );
     }
 }

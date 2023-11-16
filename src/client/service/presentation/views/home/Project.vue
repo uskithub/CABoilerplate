@@ -4,13 +4,16 @@
 // view
 // system
 import { inject, reactive, watch } from "vue";
-import type { Dispatcher } from "../../../application/performers";
+import type { Dispatcher, SharedStore } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
 import { U } from "@/shared/service/application/usecases";
 
 import { useRoute } from "vue-router";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
 import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
+import { type UserProperties } from "@/shared/service/domain/authentication/user";
+import type { Actor } from "@/shared/service/application/actors";
+import { whenNoLongerNull } from "@/client/system/common";
 
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
 
@@ -37,12 +40,9 @@ watch(route, (newVal: RouteLocationNormalizedLoaded) => {
     state.projectId = (Array.isArray(projectId)) ? projectId[0] : projectId;
 });
 
-// TODO: 引数の型を合わせるところから
-const user = stores.shared.actor.user;
-if (user !== null) {
+whenNoLongerNull(() => stores.shared.actor.user, (user: UserProperties) => {
     dispatch(U.observingProject.basics[SignedInUser.observingProject.basics.userSelectsAProject]({ user, projectId: state.projectId }));
-}
-
+});
 
 </script>
 

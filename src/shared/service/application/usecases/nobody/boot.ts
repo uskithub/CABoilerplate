@@ -5,7 +5,7 @@ import { Nobody } from ".";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { first, map, Observable } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 
 const _u = Nobody.boot;
 
@@ -32,7 +32,7 @@ export type BootScenes = {
  */
 export class BootScenario extends MyBaseScenario<BootScenes> {
 
-    next(to: MutableContext<BootScenes>): Observable<Context<BootScenes>> {
+    next(to: MutableContext<BootScenes>): Promise<Context<BootScenes>> {
         switch (to.scene) {
         case _u.basics.userOpensSite: {
             return this.just(this.basics[_u.basics.serviceChecksSession]());
@@ -46,21 +46,22 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
         }
     }
 
-    private check(): Observable<Context<BootScenes>> {
-        return Application
-            .signInStatus()
-            .pipe(
-                map((signInStatus) => {
-                    switch (signInStatus.case) {
-                    case SignInStatus.signIn: {
-                        return this.goals[_u.goals.sessionExistsThenServicePresentsHome]({ user: signInStatus.user });
-                    }
-                    default: {     
-                        return this.goals[_u.goals.sessionNotExistsThenServicePresentsSignin]();
-                    }
-                    }
-                })
-                , first() // 一度観測したらsubscriptionを終わらせる
-            );
+    private check(): Promise<Context<BootScenes>> {
+        return firstValueFrom(
+            Application
+                .signInStatus()
+                .pipe(
+                    map((signInStatus) => {
+                        switch (signInStatus.case) {
+                        case SignInStatus.signIn: {
+                            return this.goals[_u.goals.sessionExistsThenServicePresentsHome]({ user: signInStatus.user });
+                        }
+                        default: {     
+                            return this.goals[_u.goals.sessionNotExistsThenServicePresentsSignin]();
+                        }
+                        }
+                    })
+                )
+        );
     }
 }

@@ -16,6 +16,7 @@ import { createChatPerformer } from "./chat";
 import { Usecases, UsecaseLog } from "@/shared/service/application/usecases";
 import { Subscription } from "rxjs";
 import { Application } from "@/shared/service/domain/application/application";
+import { createProjectManagementPerformer, ProjectManagementStore } from "./projectManagement";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -38,6 +39,7 @@ type Stores = {
     shared: SharedStore;
     application: ApplicationStore;
     authentication: AuthenticationStore;
+    projectManagement: ProjectManagementStore
 };
 
 export type Dispatcher = {
@@ -66,10 +68,12 @@ export function createDispatcher(): Dispatcher {
             shared
             , application: {} as ApplicationStore
             , authentication: {} as AuthenticationStore
+            , projectManagement: {} as ProjectManagementStore
         }
         , change(actor: Actor) {
             const _shared = shared as Mutable<SharedStore>;
             _shared.actor = actor;
+            console.log("actor changed: ", actor);
         }
         , commonCompletionProcess: (subscription: Subscription | null) => {
             subscription?.unsubscribe();
@@ -86,10 +90,12 @@ export function createDispatcher(): Dispatcher {
         , warranty: createWarrantyPerformer(dispatcher)
         , serviceInProcess: createServiceInProcessPerformer(dispatcher)
         , chat: createChatPerformer(dispatcher)
+        , projectManagement: createProjectManagementPerformer(dispatcher)
     };
 
     dispatcher.stores.application = performers.application.store;
     dispatcher.stores.authentication = performers.authentication.store;
+    dispatcher.stores.projectManagement = performers.projectManagement.store;
 
     dispatcher.dispatch = (usecase: Usecases): Subscription | null => {
         const _shared = shared as Mutable<SharedStore>;
@@ -170,6 +176,11 @@ export function createDispatcher(): Dispatcher {
         }
         case "consult": {
             console.info("[DISPATCH] Consult", usecase);
+            performers.chat.consult(usecase, actor);
+            break;
+        }
+        case "observingProject": {
+            console.info("[DISPATCH] ObservingProject", usecase);
             performers.chat.consult(usecase, actor);
             break;
         }

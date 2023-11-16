@@ -3,7 +3,7 @@ import { Nobody } from ".";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { first, map, Observable } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 
 const _u = Nobody.signUp;
 
@@ -26,7 +26,7 @@ export type SignUpScenes = {
 
 export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
 
-    next(to: MutableContext<SignUpScenes>): Observable<Context<SignUpScenes>> {
+    next(to: MutableContext<SignUpScenes>): Promise<Context<SignUpScenes>> {
         switch (to.scene) {
         case _u.basics.userStartsSignUpProcess: {
             return this.just(this.basics[_u.basics.serviceValidateInputs]({ id: to.id, password: to.password }));
@@ -43,7 +43,7 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         }
     }
 
-    private validate(id: string | null, password: string | null): Observable<Context<SignUpScenes>> {
+    private validate(id: string | null, password: string | null): Promise<Context<SignUpScenes>> {
         const result = User.validate(id, password);
         if (result === true && id !== null && password != null) {
             return this.just(this.basics[_u.basics.onSuccessInValidatingThenServicePublishNewAccount]({ id, password }));
@@ -52,14 +52,15 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         }
     }
 
-    private publishNewAccount(id: string, password: string): Observable<Context<SignUpScenes>> {
-        return User
-            .create(id, password)
-            .pipe(
-                map((userProperties: UserProperties) => {
-                    return this.goals[_u.goals.onSuccessInPublishingThenServicePresentsHomeView]({ user: userProperties });
-                })
-                , first() // 一度観測したらsubscriptionを終わらせる
-            );
+    private publishNewAccount(id: string, password: string): Promise<Context<SignUpScenes>> {
+        return firstValueFrom(
+            User
+                .create(id, password)
+                .pipe(
+                    map((userProperties: UserProperties) => {
+                        return this.goals[_u.goals.onSuccessInPublishingThenServicePresentsHomeView]({ user: userProperties });
+                    })
+                )
+        );
     }
 }

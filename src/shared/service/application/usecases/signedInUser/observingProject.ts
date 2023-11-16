@@ -32,7 +32,7 @@ export type ObservingProjectScenes = {
  */
 export class ObservingProjectScenario extends MyBaseScenario<ObservingProjectScenes> {
 
-    next(to: MutableContext<ObservingProjectScenes>): Observable<Context<ObservingProjectScenes>> {
+    next(to: MutableContext<ObservingProjectScenes>): Promise<Context<ObservingProjectScenes>> {
         switch (to.scene) {
         case _u.basics.userSelectsAProject: {
             return this.just(this.basics[_u.basics.serviceStartsObservingProjectThatMeetConditions]({ user: to.user, projectId: to.projectId }));
@@ -46,7 +46,7 @@ export class ObservingProjectScenario extends MyBaseScenario<ObservingProjectSce
         }
     }
 
-    private startObservingProjectThatMeetConditions(user: UserProperties, projectId: string): Observable<Context<ObservingProjectScenes>> {
+    private startObservingProjectThatMeetConditions(user: UserProperties, projectId: string): Promise<Context<ObservingProjectScenes>> {
         let isFirst = true;
         return ProjectModel.observeProject(user.uid, projectId)
             .pipe(

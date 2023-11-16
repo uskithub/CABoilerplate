@@ -1,12 +1,12 @@
 import InsuranceItemModel from "@shared/service/domain/ServiceInProcess/models/insuranceItem";
 import { InsuranceItem } from "@/shared/service/infrastructure/API";
-import { SignInUser } from "../../signedInUser";
+import { SignedInUser } from "../../signedInUser";
 import { MyBaseScenario } from "../../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { map, Observable } from "rxjs";
+import { firstValueFrom, map, Observable } from "rxjs";
 
-const _u = SignInUser.listInsuranceItems;
+const _u = SignedInUser.listInsuranceItems;
 
 /**
  * usecase: 保険加入アイテム一覧を取得する
@@ -25,7 +25,7 @@ export type ListInsuranceItemsScenes = {
 
 export class ListInsuranceItemsScenario extends MyBaseScenario<ListInsuranceItemsScenes> {
 
-    next(to: MutableContext<ListInsuranceItemsScenes>): Observable<Context<ListInsuranceItemsScenes>> {
+    next(to: MutableContext<ListInsuranceItemsScenes>): Promise<Context<ListInsuranceItemsScenes>> {
         switch (to.scene) {
         case _u.basics.userInitiatesListing: {
             return this.just(this.basics[_u.basics.serviceSelectsInsuranceItemsThatMeetConditions]());
@@ -39,14 +39,16 @@ export class ListInsuranceItemsScenario extends MyBaseScenario<ListInsuranceItem
         }
     }
 
-    private select(): Observable<Context<ListInsuranceItemsScenes>> {
-        return InsuranceItemModel
-            .list()
-            .pipe(
-                map((insuranceItems) => {
-                    return this.goals[_u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView]({ insuranceItems });
-                })
+    private select(): Promise<Context<ListInsuranceItemsScenes>> {
+        return firstValueFrom(
+            InsuranceItemModel
+                .list()
+                .pipe(
+                    map((insuranceItems) => {
+                        return this.goals[_u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView]({ insuranceItems });
+                    })
                 // , catchError(error => this.just({ scene: SignOut.goals.onFailureThenServicePresentsError, error }))
-            );
+                )
+        );
     }
 }

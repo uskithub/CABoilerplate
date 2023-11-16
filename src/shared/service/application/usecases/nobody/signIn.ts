@@ -4,7 +4,7 @@ import { Nobody } from ".";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { catchError, map, Observable } from "rxjs";
+import { catchError, firstValueFrom, map } from "rxjs";
 
 
 const _u = Nobody.signIn;
@@ -29,7 +29,7 @@ export type SignInScenes = {
 
 export class SignInScenario extends MyBaseScenario<SignInScenes> {
 
-    next(to: MutableContext<SignInScenes>): Observable<Context<SignInScenes>> {
+    next(to: MutableContext<SignInScenes>): Promise<Context<SignInScenes>> {
         switch (to.scene) {
         case _u.basics.userStartsSignInProcess: {
             return this.just(this.basics[_u.basics.serviceValidateInputs]({ id: to.id, password: to.password }));
@@ -46,7 +46,7 @@ export class SignInScenario extends MyBaseScenario<SignInScenes> {
         }
     }
 
-    private validate(id: string | null, password: string | null): Observable<Context<SignInScenes>> {
+    private validate(id: string | null, password: string | null): Promise<Context<SignInScenes>> {
         const result = User.validate(id, password);
         if (result === true && id !== null && password != null) {
             return this.just(this.basics[_u.basics.onSuccessInValidatingThenServiceTrySigningIn]({ id, password }));
@@ -55,11 +55,13 @@ export class SignInScenario extends MyBaseScenario<SignInScenes> {
         }
     }
 
-    private signIn(id: string, password: string): Observable<Context<SignInScenes>> {
-        return User.signIn(id, password)
-            .pipe(
-                map(userProperties => this.goals[_u.goals.onSuccessInSigningInThenServicePresentsHomeView]({ user: userProperties }))
-                , catchError((error: Error) => this.just(this.goals[_u.goals.onFailureInSigningInThenServicePresentsError]({ error })))
-            );
+    private signIn(id: string, password: string): Promise<Context<SignInScenes>> {
+        return firstValueFrom(
+            User.signIn(id, password)
+                .pipe(
+                    map(userProperties => this.goals[_u.goals.onSuccessInSigningInThenServicePresentsHomeView]({ user: userProperties }))
+                    , catchError((error: Error) => this.just(this.goals[_u.goals.onFailureInSigningInThenServicePresentsError]({ error })))
+                )
+        );
     }
 }

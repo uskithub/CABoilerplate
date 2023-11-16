@@ -1,11 +1,10 @@
 import { BaseScenario, Context, IActor, InteractResult, MutableContext, Scenes } from "robustive-ts";
-import { Observable } from "rxjs";
 import { Application } from "../../domain/application/application";
 import { Actor } from "../actors";
 import { UsecaseDefinitions, UsecaseKeys } from ".";
 
 export abstract class MyBaseScenario<Z extends Scenes> extends BaseScenario<Z> {
-    abstract next(to: MutableContext<Z>): Observable<Context<Z>>;
+    abstract next(to: MutableContext<Z>): Promise<Context<Z>>;
 
     authorize(actor: Actor, usecase: UsecaseKeys): boolean {
         return Application.authorize(actor, usecase);

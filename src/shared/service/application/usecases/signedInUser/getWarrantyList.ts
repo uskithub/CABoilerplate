@@ -3,7 +3,7 @@ import { SignedInUser } from ".";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { map, Observable } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 
 const _u = SignedInUser.getWarrantyList;
 
@@ -24,7 +24,7 @@ export type GetWarrantyListScenes = {
 
 export class GetWarrantyListScenario extends MyBaseScenario<GetWarrantyListScenes> {
 
-    next(to: MutableContext<GetWarrantyListScenes>): Observable<Context<GetWarrantyListScenes>> {
+    next(to: MutableContext<GetWarrantyListScenes>): Promise<Context<GetWarrantyListScenes>> {
         switch (to.scene) {
         case _u.basics.userInitiatesWarrantyListing: {
             return this.just(this.basics[_u.basics.serviceSelectsWarrantiesThatMeetConditions]());
@@ -38,14 +38,16 @@ export class GetWarrantyListScenario extends MyBaseScenario<GetWarrantyListScene
         }
     }
 
-    private select(): Observable<Context<GetWarrantyListScenes>> {
-        return WarrantyModel
-            .get()
-            .pipe(
-                map((warranties) => {
-                    return this.goals[_u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView]({ warranties });
-                })
+    private select(): Promise<Context<GetWarrantyListScenes>> {
+        return firstValueFrom(
+            WarrantyModel
+                .get()
+                .pipe(
+                    map((warranties) => {
+                        return this.goals[_u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView]({ warranties });
+                    })
                 // , catchError(error => this.just({ scene: SignOut.goals.onFailureThenServicePresentsError, error }))
-            );
+                )
+        );
     }
 }

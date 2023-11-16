@@ -33,7 +33,7 @@ export type ObservingUsersTasksScenes = {
  */
 export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTasksScenes> {
 
-    next(to: MutableContext<ObservingUsersTasksScenes>): Observable<Context<ObservingUsersTasksScenes>> {
+    next(to: MutableContext<ObservingUsersTasksScenes>): Promise<Context<ObservingUsersTasksScenes>> {
         switch (to.scene) {
         case _u.basics.serviceDetectsSigningIn: {
             return this.just(this.basics[_u.basics.serviceStartsObservingUsersTasks]({ user: to.user }));
@@ -47,7 +47,7 @@ export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTa
         }
     }
 
-    private startObservingUsersTasks(user: UserProperties): Observable<Context<ObservingUsersTasksScenes>> {
+    private startObservingUsersTasks(user: UserProperties): Promise<Context<ObservingUsersTasksScenes>> {
         // ユースケースの終わり（バウンダリー）に、オブザーバ（タスクの観測）を結合している
         return concat(
             this.just(this.goals[_u.goals.serviceDoNothing]())
