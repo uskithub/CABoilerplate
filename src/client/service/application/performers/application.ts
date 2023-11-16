@@ -97,7 +97,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                     }
                 })
                 .then((observable) => {
-                    return observable.subscribe({
+                    const subscription = observable.subscribe({
                         next: changedTasks => {
                             const mutableUserTasks = _store.userTasks;
                             changedTasks.forEach((changedTask) => {
