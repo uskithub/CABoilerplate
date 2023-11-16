@@ -3,9 +3,9 @@ import { provide } from "vue";
 import { DISPATCHER_KEY, createDispatcher } from "@/client/service/application/performers";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { U } from "@/shared/service/application/usecases";
-import { Nobody } from "@/shared/service/application/usecases/nobody";
+import { Nobody } from "@/shared/service/application/actors/nobody";
 import { watch } from "vue";
-import { Service } from "@/shared/service/application/usecases/service";
+import { Service } from "@/shared/service/application/actors/service";
 import { Subscription } from "rxjs";
 
 const dispatcher = createDispatcher();
@@ -17,9 +17,9 @@ let subscriptions: Subscription[] = [];
 watch(() => stores.shared.signInStatus, (newValue) => {
     if (newValue.case === SignInStatus.signIn) {
         const user = stores.shared.signInStatus.user;
-        const ts = dispatch(U.observingUsersTasks.basics[Service.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }));
+        const ts = dispatch(U.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }));
         if (ts !== null) subscriptions.push(ts);
-        const ps = dispatch(U.observingUsersProjects.basics[Service.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }));
+        const ps = dispatch(U.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }));
         if (ps !== null) subscriptions.push(ps);
     } else if (newValue.case === SignInStatus.signingOut) {
         subscriptions.forEach((s) => s.unsubscribe());
@@ -28,7 +28,7 @@ watch(() => stores.shared.signInStatus, (newValue) => {
 });
 
 if (stores.shared.signInStatus.case === SignInStatus.unknown) {
-    dispatch(U.boot.basics[Nobody.boot.basics.userOpensSite]());
+    dispatch(U.boot.basics[Nobody.usecases.boot.basics.userOpensSite]());
 }
 </script>
 

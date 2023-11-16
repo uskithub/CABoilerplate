@@ -5,7 +5,7 @@ import { Service } from "../../actors/service";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { concat, map } from "rxjs";
+import { Observable, concat, map } from "rxjs";
 
 
 const _u = Service.usecases.observingUsersTasks;
@@ -16,12 +16,10 @@ const _u = Service.usecases.observingUsersTasks;
 export type ObservingUsersTasksScenes = {
     basics : {
         [_u.basics.serviceDetectsSigningIn]: { user: UserProperties; };
-        [_u.basics.serviceStartsObservingUsersTasks]: { user: UserProperties; };
     };
     alternatives: Empty;
     goals : {
-        [_u.goals.serviceDoNothing]: Empty;
-        [_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]: { changedTasks: ChangedTask[] };
+        [_u.goals.serviceStartsObservingUsersTasks]: { observable: Observable<ChangedTask[]> };
     };
 };
 
@@ -36,25 +34,12 @@ export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTa
     next(to: MutableContext<ObservingUsersTasksScenes>): Promise<Context<ObservingUsersTasksScenes>> {
         switch (to.scene) {
         case _u.basics.serviceDetectsSigningIn: {
-            return this.just(this.basics[_u.basics.serviceStartsObservingUsersTasks]({ user: to.user }));
-        }
-        case _u.basics.serviceStartsObservingUsersTasks: {
-            return this.startObservingUsersTasks(to.user);
+            const observable = TaskModel.observeUsersTasks(to.user.uid);
+            return this.just(this.goals[_u.goals.serviceStartsObservingUsersTasks]({ observable }));
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);
         }
         }
-    }
-
-    private startObservingUsersTasks(user: UserProperties): Promise<Context<ObservingUsersTasksScenes>> {
-        // ユースケースの終わり（バウンダリー）に、オブザーバ（タスクの観測）を結合している
-        return concat(
-            this.just(this.goals[_u.goals.serviceDoNothing]())
-            , TaskModel.observeUsersTasks(user.uid)
-                .pipe(
-                    map(changedTasks => this.goals[_u.goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList]({ changedTasks }))
-                )
-        );
     }
 }

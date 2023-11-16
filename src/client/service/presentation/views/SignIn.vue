@@ -9,8 +9,8 @@ import type { Dispatcher } from "../../application/performers";
 import { DISPATCHER_KEY } from "../../application/performers";
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import { U } from "@/shared/service/application/usecases";
-import { Nobody } from "@/shared/service/application/usecases/nobody";
-import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
+import { Nobody } from "@/shared/service/application/actors/nobody";
+import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
@@ -53,7 +53,7 @@ v-container
     v-btn.mr-4(
       :disabled="!state.isValid",
       color="success",
-      @click="dispatch(U.signIn.basics[Nobody.signIn.basics.userStartsSignInProcess]({ id: state.email, password: state.password }))"
+      @click="dispatch(U.signIn.basics[Nobody.usecases.signIn.basics.userStartsSignInProcess]({ id: state.email, password: state.password }))"
     ) Sign In
 
   router-link(to="/signup") -> SignUp
@@ -68,11 +68,11 @@ v-container
           v-btn(
             color="warning",
             text,
-            @click="dispatch(U.signOut.basics[SignedInUser.signOut.basics.userStartsSignOutProcess]())"
+            @click="dispatch(U.signOut.basics[SignedInUser.usecases.signOut.basics.userStartsSignOutProcess]())"
           ) Sign Out
           v-btn(
             color="success",
             text,
-            @click="dispatch(U.signOut.alternatives[SignedInUser.signOut.alternatives.userResignSignOut]())"
+            @click="dispatch(U.signOut.alternatives[SignedInUser.usecases.signOut.alternatives.userResignSignOut]())"
           ) Go Home
 </template>

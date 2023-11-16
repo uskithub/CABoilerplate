@@ -9,8 +9,8 @@ import { DISPATCHER_KEY } from "../../application/performers";
 import type { Dispatcher } from "../../application/performers";
 import { isSignedInUser } from "@shared/service/application/actors/signedInUser";
 import { U } from "@/shared/service/application/usecases";
-import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
-import { Nobody } from "@/shared/service/application/usecases/nobody";
+import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { Nobody } from "@/shared/service/application/actors/nobody";
 
 const t = inject(DICTIONARY_KEY) as Dictionary;
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
@@ -51,7 +51,7 @@ v-container
     v-btn.mr-4(
       :disabled="!isFormValid",
       color="success",
-      @click="dispatch(U.signUp.basics[Nobody.signUp.basics.userStartsSignUpProcess]({ id: state.email, password: state.password }))"
+      @click="dispatch(U.signUp.basics[Nobody.usecases.signUp.basics.userStartsSignUpProcess]({ id: state.email, password: state.password }))"
     ) {{ t.signUp.buttons.signUp }}
 
   v-row(justify="center")
@@ -64,11 +64,11 @@ v-container
           v-btn(
             color="warning",
             text,
-            @click="dispatch(U.signOut.basics[SignedInUser.signOut.basics.userStartsSignOutProcess]())"
+            @click="dispatch(U.signOut.basics[SignedInUser.usecases.signOut.basics.userStartsSignOutProcess]())"
           ) Sign Out
           v-btn(
             color="success",
             text,
-            @click="dispatch(U.signOut.alternatives[SignedInUser.signOut.alternatives.userResignSignOut]())"
+            @click="dispatch(U.signOut.alternatives[SignedInUser.usecases.signOut.alternatives.userResignSignOut]())"
           ) Go Home
 </template>

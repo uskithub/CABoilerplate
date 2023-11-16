@@ -62,7 +62,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
         , boot: (usecase: Usecase<"boot">, actor: Actor) => {
             const goals = Nobody.usecases.boot.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
-            return usecase
+            usecase
                 .interactedBy(actor)
                 .then((result) => {
                     if (result.type === InteractResultType.success) {
@@ -82,7 +82,8 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                         }
                         }
                     }
-                });
+                })
+                .catch(err => console.error(err));
         }
         , observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor): Subscription =>  {
             const goals = Service.usecases.observingUsersTasks.goals;
@@ -90,15 +91,16 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
             usecase
                 .interactedBy(actor)
                 .then((result) => {
-                    if (result.type === InteractResultType.success) {
-                        switch (result.lastSceneContext.scene) {
-                        case goals.serviceDoNothing: {
-                            console.log("Started observing user's tasks...");
-                            break;
-                        }
-                        case goals.onUpdateUsersTasksThenServiceUpdateUsersTaskList: {
-                            const mutableUserTasks = _store.userTasks ;
-                            result.lastSceneContext.changedTasks.forEach((changedTask) => {
+                    if (result.type === InteractResultType.success && result.lastSceneContext.scene === goals.serviceStartsObservingUsersTasks) {
+                        console.log("Started observing user's tasks...");
+                        return result.lastSceneContext.observable;
+                    }
+                })
+                .then((observable) => {
+                    return observable.subscribe({
+                        next: changedTasks => {
+                            const mutableUserTasks = _store.userTasks;
+                            changedTasks.forEach((changedTask) => {
                                 switch (changedTask.case) {
                                 case ItemChangeType.added: {
                                     // hot reloadで増えてしまうので、同じものを予め削除しておく
@@ -136,9 +138,11 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                                 }
                             });
                         }
-                        }
-                    }
-                });
+                        , error: err => console.error("Observer got an error: " + err)
+                        
+                    });
+                })
+                .catch(err => console.error(err));
         }
         , observingUsersProjects: (usecase: Usecase<"observingUsersProjects">, actor: Actor): Subscription =>  {
             const goals = Service.usecases.observingUsersProjects.goals;

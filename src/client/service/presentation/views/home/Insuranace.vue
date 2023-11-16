@@ -11,7 +11,7 @@ import { inject, reactive, ref } from "vue";
 import type { Dispatcher } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
 import { U } from "@/shared/service/application/usecases";
-import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
+import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 
 
 const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
@@ -26,7 +26,7 @@ const state = reactive<{
     , isAddingNewPolicy: false
 });
 
-dispatch(U.listInsuranceItems.basics[SignedInUser.listInsuranceItems.basics.userInitiatesListing]()); 
+dispatch(U.listInsuranceItems.basics[SignedInUser.usecases.listInsuranceItems.basics.userInitiatesListing]()); 
 
 const onClickAddButton = () => {
     state.isPresentDialog = true;
