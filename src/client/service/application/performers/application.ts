@@ -9,8 +9,8 @@ import { Subscription } from "rxjs";
 import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Actor } from "@/shared/service/application/actors";
-import { Nobody } from "@/shared/service/application/usecases/nobody";
-import { Service } from "@/shared/service/application/usecases/service";
+import { Nobody } from "@/shared/service/application/actors/nobody";
+import { Service } from "@/shared/service/application/actors/service";
 import { Usecase } from "@/shared/service/application/usecases";
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
@@ -60,7 +60,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
     return {
         store
         , boot: (usecase: Usecase<"boot">, actor: Actor) => {
-            const goals = Nobody.boot.goals;
+            const goals = Nobody.usecases.boot.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             return usecase
                 .interactedBy(actor)
@@ -85,7 +85,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                 });
         }
         , observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor): Subscription =>  {
-            const goals = Service.observingUsersTasks.goals;
+            const goals = Service.usecases.observingUsersTasks.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             usecase
                 .interactedBy(actor)
@@ -141,7 +141,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                 });
         }
         , observingUsersProjects: (usecase: Usecase<"observingUsersProjects">, actor: Actor): Subscription =>  {
-            const goals = Service.observingUsersProjects.goals;
+            const goals = Service.usecases.observingUsersProjects.goals;
             let subscription: Subscription | null = null;
             subscription = usecase
                 .interactedBy(actor, {

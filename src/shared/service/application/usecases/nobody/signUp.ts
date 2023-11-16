@@ -1,11 +1,11 @@
 import { User, type SignUpValidationResult, type UserProperties } from "@/shared/service/domain/authentication/user";
-import { Nobody } from ".";
+import { Nobody } from "../../actors/nobody";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { firstValueFrom, map } from "rxjs";
 
-const _u = Nobody.signUp;
+const _u = Nobody.usecases.signUp;
 
 /**
  * usecase: サインアップする

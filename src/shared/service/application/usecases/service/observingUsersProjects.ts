@@ -1,14 +1,14 @@
 import ProjectModel from "@domain/entities/project";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
-import { Service } from ".";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { concat, map, Observable } from "rxjs";
+import { concat, map } from "rxjs";
+import { Service } from "../../actors/service";
 
 
-const _u = Service.observingUsersProjects;
+const _u = Service.usecases.observingUsersProjects;
 
 /**
  * usecase: ユーザのプロジェクトを観測する

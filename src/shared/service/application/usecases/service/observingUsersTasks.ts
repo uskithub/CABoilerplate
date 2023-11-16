@@ -1,14 +1,14 @@
 import TaskModel from "@domain/entities/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
-import { Service } from ".";
+import { Service } from "../../actors/service";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { concat, map, Observable } from "rxjs";
+import { concat, map } from "rxjs";
 
 
-const _u = Service.observingUsersTasks;
+const _u = Service.usecases.observingUsersTasks;
 
 /**
  * usecase: ユーザのタスクを観測する

@@ -8,7 +8,7 @@ import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { MessageProperties } from "@/shared/service/domain/chat/message";
-import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
+import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Usecase } from "@/shared/service/application/usecases";
 
 export interface ProjectManagementStore extends Store {
@@ -29,7 +29,7 @@ export function createProjectManagementPerformer(dispatcher: Dispatcher): Projec
         store
         // TODO ここの実装から
         , observingProject: (usecase: Usecase<"observingProject">, actor: Actor) => {
-            const goals = SignedInUser.consult.goals;
+            const goals = SignedInUser.usecases.observingProject.goals;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase

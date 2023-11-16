@@ -1,5 +1,4 @@
 // service
-import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
@@ -12,9 +11,9 @@ import { Nobody as NobodyActor } from "robustive-ts";
 import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 
 import { Actor } from "@/shared/service/application/actors";
-import { Nobody } from "@/shared/service/application/usecases/nobody";
-import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
-import { Service } from "@/shared/service/application/usecases/service";
+import { Nobody } from "@/shared/service/application/actors/nobody";
+import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { Service } from "@/shared/service/application/actors/service";
 import { U, Usecase } from "@/shared/service/application/usecases";
 
 export interface AuthenticationStore extends Store {
@@ -47,7 +46,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
     return {
         store
         , signUp: (usecase: Usecase<"signUp">, actor: Actor) => {
-            const goals = Nobody.signUp.goals;
+            const goals = Nobody.usecases.signUp.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
@@ -103,7 +102,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                 });
         }
         , signIn: (usecase: Usecase<"signIn">, actor: Actor) => {
-            const goals = Nobody.signIn.goals;
+            const goals = Nobody.usecases.signIn.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
@@ -162,7 +161,7 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
                 });
         }
         , signOut: (usecase: Usecase<"signOut">, actor: Actor) => {
-            const goals = SignedInUser.signOut.goals;
+            const goals = SignedInUser.usecases.signOut.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase

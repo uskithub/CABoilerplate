@@ -8,7 +8,7 @@ import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { MessageProperties } from "@/shared/service/domain/chat/message";
-import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
+import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Usecase } from "@/shared/service/application/usecases";
 
 export interface ChatStore extends Store {
@@ -28,7 +28,7 @@ export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
     return {
         store
         , consult: (usecase: Usecase<"consult">, actor: Actor) => {
-            const goals = SignedInUser.consult.goals;
+            const goals = SignedInUser.usecases.consult.goals;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase

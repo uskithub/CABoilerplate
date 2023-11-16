@@ -7,7 +7,7 @@ import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 import { inject, reactive } from "vue";
 import { Subscription } from "rxjs";
 import { useRouter } from "vue-router";
-import { SignedInUser } from "@/shared/service/application/usecases/signedInUser";
+import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Usecase } from "@/shared/service/application/usecases";
 
 export interface ServiceInProcessStore extends Store {
@@ -31,7 +31,7 @@ export function createServiceInProcessPerformer(dispatcher: Dispatcher): Service
     return {
         store
         , list: (usecase: Usecase<"listInsuranceItems">, actor: Actor) => {
-            const goals = SignedInUser.listInsuranceItems.goals;
+            const goals = SignedInUser.usecases.listInsuranceItems.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             let subscription: Subscription | null = null;
             subscription = usecase
