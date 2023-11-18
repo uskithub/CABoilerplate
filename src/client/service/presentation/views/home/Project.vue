@@ -15,7 +15,7 @@ import { type UserProperties } from "@/shared/service/domain/authentication/user
 import type { Actor } from "@/shared/service/application/actors";
 import { whenNoLongerNull } from "@/client/system/common";
 
-const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
+const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
 
 const route = useRoute();
 const { projectId } = route.params;

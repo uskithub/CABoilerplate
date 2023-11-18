@@ -1,5 +1,5 @@
 // system
-import { createApp } from "vue";
+import { createApp, watch } from "vue";
 import { loadRouter } from "@client/system/plugins/router";
 import { loadVuetify } from "@client/system/plugins/vuetify";
 import { loadFonts } from "@client/system/plugins/webfontloader";
@@ -23,6 +23,12 @@ import { DICTIONARY_KEY, i18n } from "@/shared/system/localizations";
 import { ServiceInProcessApi } from "./service/infrastructure/amplify/serviceInProcessApi";
 import { FirebaseAnalytics } from "./service/infrastructure/firebaseAnalytics/firebaseAnalytics";
 import { OpenaiAssistance } from "@/shared/service/infrastructure/openai/openaiAssistance";
+import { DISPATCHER_KEY, createDispatcher } from "./service/application/performers";
+import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
+import { U } from "@/shared/service/application/usecases";
+import { Service } from "@/shared/service/application/actors/service";
+import { Subscription } from "rxjs";
+import { Nobody } from "robustive-ts";
 // import { GraphqlAuthenticator } from "./service/infrastructure/graphqlAuthenticator";
 
 // initialize firebase
@@ -50,6 +56,33 @@ const app = createApp(App);
 loadRouter(app);
 loadVuetify(app);
 
+const dispatcher = createDispatcher();
+const { stores, dispatch } = dispatcher;
+app.provide(DISPATCHER_KEY, dispatcher);
 app.provide(DICTIONARY_KEY, dictionary);
+
+let subscriptions: Subscription[] = [];
+watch(() => stores.shared.signInStatus, (newValue) => {
+    if (newValue.case === SignInStatus.signIn) {
+        const user = stores.shared.signInStatus.user;
+        dispatch(U.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }))
+            .then(subscription => {
+                if (subscription !== null) subscriptions.push(subscription);
+            });
+        
+        dispatch(U.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }))
+            .then(subscription => {
+                if (subscription !== null) subscriptions.push(subscription);
+            });
+    } else if (newValue.case === SignInStatus.signingOut) {
+        subscriptions.forEach((s) => s.unsubscribe());
+        subscriptions = [];
+    }
+});
+
+if (stores.shared.signInStatus.case === SignInStatus.unknown) {
+    dispatch(U.boot.basics[Nobody.usecases.boot.basics.userOpensSite]());
+}
+
 app.mount("#app");
 

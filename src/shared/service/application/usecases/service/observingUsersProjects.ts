@@ -1,11 +1,11 @@
 import ProjectModel from "@domain/entities/project";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
+import { Service } from "../../actors/service";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { concat, map } from "rxjs";
-import { Service } from "../../actors/service";
+import { Observable } from "rxjs";
 
 
 const _u = Service.usecases.observingUsersProjects;
@@ -16,12 +16,10 @@ const _u = Service.usecases.observingUsersProjects;
 export type ObservingUsersProjectsScenes = {
     basics : {
         [_u.basics.serviceDetectsSigningIn]: { user: UserProperties; };
-        [_u.basics.startObservingUsersProjects]: { user: UserProperties; };
     };
     alternatives: Empty;
     goals : {
-        [_u.goals.serviceDoNothing]: Empty;
-        [_u.goals.onUpdateUsersProjectsThenServiceUpdateUsersProjectList]: { changedTasks: ChangedTask[] };
+        [_u.goals.startObservingUsersProjects]: { observable: Observable<ChangedTask[]> };
     };
 };
 
@@ -36,25 +34,12 @@ export class ObservingUsersProjectsScenario extends MyBaseScenario<ObservingUser
     next(to: MutableContext<ObservingUsersProjectsScenes>): Promise<Context<ObservingUsersProjectsScenes>> {
         switch (to.scene) {
         case _u.basics.serviceDetectsSigningIn: {
-            return this.just(this.basics[_u.basics.startObservingUsersProjects]({ user: to.user }));
-        }
-        case _u.basics.startObservingUsersProjects: {
-            return this.startObservingUsersProjects(to.user);
+            const observable = ProjectModel.observeUsersProjects(to.user.uid);
+            return this.just(this.goals[_u.goals.startObservingUsersProjects]({ observable }));
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);
         }
         }
-    }
-
-    private startObservingUsersProjects(user: UserProperties): Promise<Context<ObservingUsersProjectsScenes>> {
-        // ユースケースの終わり（バウンダリー）に、オブザーバ（プロジェクトの観測）を結合している
-        return concat(
-            this.just(this.goals[_u.goals.serviceDoNothing]())
-            , ProjectModel.observeUsersProjects(user.uid)
-                .pipe(
-                    map(changedTasks => this.goals[_u.goals.onUpdateUsersProjectsThenServiceUpdateUsersProjectList]({ changedTasks }))
-                )
-        );
     }
 }

@@ -10,7 +10,7 @@ import type { Dispatcher } from "../../application/performers";
 import { DISPATCHER_KEY } from "../../application/performers";
 import "vue3-tree/style.css";
 
-const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
+const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
 
 // const state = reactive<{
 //     signInStatus: SignInStatus|null;

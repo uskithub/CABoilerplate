@@ -1,12 +1,12 @@
 import InsuranceItemModel from "@shared/service/domain/ServiceInProcess/models/insuranceItem";
 import { InsuranceItem } from "@/shared/service/infrastructure/API";
-import { SignedInUser } from "../../signedInUser";
+import { SignedInUser } from "../../../actors/signedInUser";
 import { MyBaseScenario } from "../../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { firstValueFrom, map, Observable } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 
-const _u = SignedInUser.listInsuranceItems;
+const _u = SignedInUser.usecases.listInsuranceItems;
 
 /**
  * usecase: 保険加入アイテム一覧を取得する

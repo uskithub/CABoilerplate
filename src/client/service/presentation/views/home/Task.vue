@@ -20,7 +20,7 @@ import swtTree from "../../../../../../test/stubs/swt";
 import taskTree from "../../../../../../test/stubs/task";
 
 
-const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
+const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
 
 // custom directive for autofocus
 const vFocus = {

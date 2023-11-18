@@ -46,7 +46,7 @@ export type Dispatcher = {
     stores: Stores;
     change: (actor: Actor) => void;
     commonCompletionProcess: (subscription: Subscription | null) => void;
-    dispatch: (usecase: Usecases) => Subscription | null;
+    dispatch: (usecase: Usecases) => Promise<Subscription | void>;
     // accountViewModel: (shared: SharedStore) => HomeViewModel;
     // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
     // createSignUpViewModel: (shared: SharedStore) => SignUpViewModel;
@@ -81,7 +81,7 @@ export function createDispatcher(): Dispatcher {
             _shared.executingUsecase = null;
         }
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        , dispatch() { return null; }
+        , dispatch() { return Promise.resolve(); }
     } as Dispatcher;
 
     const performers = {
@@ -97,7 +97,7 @@ export function createDispatcher(): Dispatcher {
     dispatcher.stores.authentication = performers.authentication.store;
     dispatcher.stores.projectManagement = performers.projectManagement.store;
 
-    dispatcher.dispatch = (usecase: Usecases): Subscription | null => {
+    dispatcher.dispatch = (usecase: Usecases): Promise<Subscription | void> => {
         const _shared = shared as Mutable<SharedStore>;
         const actor = shared.actor;
         // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
@@ -107,8 +107,7 @@ export function createDispatcher(): Dispatcher {
         case "boot": {
             console.info("[DISPATCH] Boot:", usecase);
             _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
-            performers.application.boot(usecase, actor);
-            return null;
+            return performers.application.boot(usecase, actor);
         }
         }
 

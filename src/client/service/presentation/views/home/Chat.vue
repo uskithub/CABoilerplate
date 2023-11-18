@@ -14,8 +14,7 @@ import type { MessageProperties } from "@/shared/service/domain/chat/message";
 import { U } from "@/shared/service/application/usecases";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 
-
-const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
+const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
 
 
 const state = reactive<{

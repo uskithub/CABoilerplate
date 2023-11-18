@@ -12,8 +12,8 @@ import { U } from "@/shared/service/application/usecases";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 
-const t = inject(DICTIONARY_KEY) as Dictionary;
-const { stores, dispatch } = inject(DISPATCHER_KEY) as Dispatcher;
+const t = inject<Dictionary>(DICTIONARY_KEY)!;
+const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
 
 const state = reactive<{
     email: string | null;

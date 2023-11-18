@@ -5,7 +5,7 @@ import { Service } from "../../actors/service";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { Observable, concat, map } from "rxjs";
+import { Observable } from "rxjs";
 
 
 const _u = Service.usecases.observingUsersTasks;
