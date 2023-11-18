@@ -5,18 +5,18 @@ import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { inject, reactive } from "vue";
 import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 import { useRouter } from "vue-router";
-import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { Warranty } from "@/shared/service/domain/entities/warranty";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Usecase } from "@/shared/service/application/usecases";
+import { InteractResultType } from "robustive-ts";
 
 export interface WarrantyStore extends Store {
     warranties: Warranty[]
 }
 export interface WarrantyPerformer extends Performer<WarrantyStore> {
     readonly store: WarrantyStore;
-    get: (usecase: Usecase<"getWarrantyList">, actor: Actor) => void;
+    get: (usecase: Usecase<"getWarrantyList">, actor: Actor) => Promise<void>;
 }
 
 export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerformer {
@@ -31,24 +31,26 @@ export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerform
 
     return {
         store
-        , get: (usecase: Usecase<"getWarrantyList">, actor: Actor) => {
+        , get: (usecase: Usecase<"getWarrantyList">, actor: Actor) :  Promise<void> => {
             const goals = SignedInUser.usecases.getWarrantyList.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription | null = null;
-            subscription = usecase
-                .interactedBy(actor, {
-                    next: ([lastSceneContext]) => {
-                        switch (lastSceneContext.scene) {
-                        case goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView:
-                            console.log("OKKKKKK", lastSceneContext.warranties);
-                            _store.warranties = lastSceneContext.warranties;
-                            break;
-                        case goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView:
-                            _store.warranties = [];
-                            break;
-                        }
+            return usecase
+                .interactedBy(actor)
+                .then(result => {
+                    if (result.type !== InteractResultType.success) { return; }
+                    const context = result.lastSceneContext;
+                    
+                    switch (context.scene) {
+                    case goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView: {
+                        console.log("OKKKKKK", context.warranties);
+                        _store.warranties = context.warranties;
+                        break;
                     }
-                    , complete: () => dispatcher.commonCompletionProcess(subscription)
+                    case goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView: {
+                        _store.warranties = [];
+                        break;
+                    }
+                    }
                 });
         }
     };

@@ -29,8 +29,8 @@ export interface ApplicationStore extends Store {
 export interface ApplicationPerformer extends Performer<ApplicationStore> {
     readonly store: ApplicationStore;
     boot: (usecase: Usecase<"boot">, actor: Actor) => Promise<void>;
-    observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor) => Promise<Subscription | null>;
-    observingUsersProjects: (usecase: Usecase<"observingUsersProjects">, actor: Actor) => Promise<Subscription | null>;
+    observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor) => Promise<Subscription | void>;
+    observingUsersProjects: (usecase: Usecase<"observingUsersProjects">, actor: Actor) => Promise<Subscription | void>;
 }
 
 export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationPerformer {
@@ -84,13 +84,13 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                     }
                 });
         }
-        , observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor): Promise<Subscription | null> => {
+        , observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor): Promise<Subscription | void> => {
             const goals = Service.usecases.observingUsersTasks.goals;
             return usecase
                 .interactedBy(actor)
                 .then(result => {
                     if (result.type !== InteractResultType.success || result.lastSceneContext.scene !== goals.serviceStartsObservingUsersTasks) {
-                        return null;
+                        return;
                     }
                     console.log("Started observing user's tasks...");
                     return result.lastSceneContext.observable
@@ -145,7 +145,7 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
                 .interactedBy(actor)
                 .then(result => {
                     if (result.type !== InteractResultType.success || result.lastSceneContext.scene !== goals.serviceDoNothing) {
-                        return null;
+                        return;
                     }
                     return result.lastSceneContext.observable
                         .subscribe({

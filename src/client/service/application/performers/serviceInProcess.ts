@@ -9,13 +9,14 @@ import { Subscription } from "rxjs";
 import { useRouter } from "vue-router";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Usecase } from "@/shared/service/application/usecases";
+import { InteractResultType } from "robustive-ts";
 
 export interface ServiceInProcessStore extends Store {
     insuranceItems: InsuranceItem[]|null
 }
 export interface ServiceInProcessPerformer extends Performer<ServiceInProcessStore> {
     readonly store: ServiceInProcessStore;
-    list: (usecase: Usecase<"listInsuranceItems">, actor: Actor) => void;
+    list: (usecase: Usecase<"listInsuranceItems">, actor: Actor) => Promise<void>;
 }
 
 export function createServiceInProcessPerformer(dispatcher: Dispatcher): ServiceInProcessPerformer {
@@ -30,24 +31,25 @@ export function createServiceInProcessPerformer(dispatcher: Dispatcher): Service
 
     return {
         store
-        , list: (usecase: Usecase<"listInsuranceItems">, actor: Actor) => {
+        , list: (usecase: Usecase<"listInsuranceItems">, actor: Actor) : Promise<void> => {
             const goals = SignedInUser.usecases.listInsuranceItems.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription | null = null;
-            subscription = usecase
-                .interactedBy(actor, {
-                    next: ([lastSceneContext]) => {
-                        switch (lastSceneContext.scene) {
-                        case goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView:
-                            console.log("OKKKKKK", lastSceneContext.insuranceItems);
-                            _store.insuranceItems = lastSceneContext.insuranceItems;
-                            break;
-                        case goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView:
-                            _store.insuranceItems = null;
-                            break;
-                        }
+            return usecase
+                .interactedBy(actor)
+                .then(result => {
+                    if (result.type !== InteractResultType.success) { return; }
+                    const context = result.lastSceneContext;
+                    switch (context.scene) {
+                    case goals.resultIsOneOrMoreThenServiceDisplaysResultOnInsuranceItemListView: {
+                        console.log("OKKKKKK", context.insuranceItems);
+                        _store.insuranceItems = context.insuranceItems;
+                        break;
                     }
-                    , complete: () => dispatcher.commonCompletionProcess(subscription)
+                    case goals.resultIsZeroThenServiceDisplaysNoResultOnInsuranceItemListView: {
+                        _store.insuranceItems = null;
+                        break;
+                    }
+                    }
                 });
         }
     };

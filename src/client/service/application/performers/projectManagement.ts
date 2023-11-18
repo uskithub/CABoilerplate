@@ -10,6 +10,7 @@ import { Actor } from "@/shared/service/application/actors";
 import { MessageProperties } from "@/shared/service/domain/chat/message";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Usecase } from "@/shared/service/application/usecases";
+import { InteractResultType } from "robustive-ts";
 
 export interface ProjectManagementStore extends Store {
     dummy: string
@@ -17,7 +18,7 @@ export interface ProjectManagementStore extends Store {
 
 export interface ProjectManagementPerformer extends Performer<ProjectManagementStore> {
     readonly store: ProjectManagementStore;
-    consult: (usecase: Usecase<"consult">, actor: Actor) => void;
+    observingProject: (usecase: Usecase<"consult">, actor: Actor) => Promise<void>;
 }
 
 export function createProjectManagementPerformer(dispatcher: Dispatcher): ProjectManagementPerformer {
@@ -28,25 +29,24 @@ export function createProjectManagementPerformer(dispatcher: Dispatcher): Projec
     return {
         store
         // TODO ここの実装から
-        , observingProject: (usecase: Usecase<"observingProject">, actor: Actor) => {
+        , observingProject: (usecase: Usecase<"observingProject">, actor: Actor) : Promise<void> => {
             const goals = SignedInUser.usecases.observingProject.goals;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription | null = null;
-            subscription = usecase
-                .interactedBy(actor, {
-                    next: ([lastSceneContext]) => {
-                        switch (lastSceneContext.scene) {
-                        case goals.onSuccessThenServiceDisplaysMessages: {
-                            console.log("OKKKKKK", lastSceneContext.messages);
-                            break;
-                        }
-                        case goals.onFailureThenServicePresentsError: {
-                            console.error(lastSceneContext.error);
-                            break;
-                        }
-                        }
+            return usecase
+                .interactedBy(actor)
+                .then(result => {
+                    if (result.type !== InteractResultType.success) { return; }
+                    const context = result.lastSceneContext;
+                    switch (context.scene) {
+                    case goals.onSuccessThenServiceDisplaysMessages: {
+                        console.log("OKKKKKK", context.messages);
+                        break;
                     }
-                    , complete: () => dispatcher.commonCompletionProcess(subscription)
+                    case goals.onFailureThenServicePresentsError: {
+                        console.error(context.error);
+                        break;
+                    }
+                    }
                 });
         }
     };

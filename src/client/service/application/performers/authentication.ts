@@ -6,7 +6,7 @@ import { inject, reactive } from "vue";
 import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
-import { Nobody as NobodyActor } from "robustive-ts";
+import { InteractResultType, Nobody as NobodyActor } from "robustive-ts";
 
 import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 
@@ -25,9 +25,9 @@ export interface AuthenticationStore extends Store {
 
 export interface AuthenticationPerformer extends Performer<AuthenticationStore> {
     readonly store: AuthenticationStore;
-    signUp: (usecase: Usecase<"signUp">, actor: Actor) => void;
-    signIn: (usecase: Usecase<"signIn">, actor: Actor) => void;
-    signOut: (usecase: Usecase<"signOut">, actor: Actor) => void;
+    signUp: (usecase: Usecase<"signUp">, actor: Actor) => Promise<void>;
+    signIn: (usecase: Usecase<"signIn">, actor: Actor) => Promise<void>;
+    signOut: (usecase: Usecase<"signOut">, actor: Actor) => Promise<void>;
 }
 
 export function createAuthenticationPerformer(dispatcher: Dispatcher): AuthenticationPerformer {
@@ -45,141 +45,139 @@ export function createAuthenticationPerformer(dispatcher: Dispatcher): Authentic
     
     return {
         store
-        , signUp: (usecase: Usecase<"signUp">, actor: Actor) => {
+        , signUp: (usecase: Usecase<"signUp">, actor: Actor): Promise<void> => {
             const goals = Nobody.usecases.signUp.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription | null = null;
-            subscription = usecase
-                .interactedBy(actor, {
-                    next: ([lastSceneContext]) => {
-                        switch (lastSceneContext.scene) {
-                        case goals.onSuccessInPublishingThenServicePresentsHomeView: {
-                            const user = lastSceneContext.user;
-                            const actor = new SignedInUser(user);
-                            _shared.actor = actor;
-                            router.replace("/");
-                            break;
-                        }
-                        case goals.onFailureInValidatingThenServicePresentsError: {
-                            if (lastSceneContext.result === true) { return; }
-                            const labelMailAddress = t.common.labels.mailAddress;
-                            const labelPassword = t.common.labels.password;
+            return usecase
+                .interactedBy(actor)
+                .then(result => {
+                    if (result.type !== InteractResultType.success) { return; }
+                    const context = result.lastSceneContext;
 
-                            switch (lastSceneContext.result.id) {
-                            case "isRequired":
-                                _store.idInvalidMessage = t.common.validations.isRequired(labelMailAddress);
-                                break;
-                            case "isMalformed":
-                                _store.idInvalidMessage = t.common.validations.isMalformed(labelMailAddress);
-                                break;
-                            case null:
-                                _store.idInvalidMessage = undefined;
-                                break;
-                            }
-
-                            switch (lastSceneContext.result.password) {
-                            case "isRequired":
-                                _store.passwordInvalidMessage = t.common.validations.isRequired(labelPassword);
-                                break;
-                            case "isTooShort":
-                                _store.passwordInvalidMessage = t.common.validations.isTooShort(labelPassword, 8);
-                                break;
-                            case "isTooLong":
-                                _store.passwordInvalidMessage = t.common.validations.isTooLong(labelPassword, 20);
-                                break;
-                            case null:
-                                _store.passwordInvalidMessage = undefined;
-                                break;
-                            }
-                            break;
-                        }
-                        case goals.onFailureInPublishingThenServicePresentsError:
-                            console.error("SERVICE ERROR:", lastSceneContext.error);
-                            break;
-                        }
+                    switch (context.scene) {
+                    case goals.onSuccessInPublishingThenServicePresentsHomeView: {
+                        const user = context.user;
+                        const actor = new SignedInUser(user);
+                        _shared.actor = actor;
+                        router.replace("/");
+                        break;
                     }
-                    , complete: () => dispatcher.commonCompletionProcess(subscription)
+                    case goals.onFailureInValidatingThenServicePresentsError: {
+                        if (context.result === true) { break; }
+                        const labelMailAddress = t.common.labels.mailAddress;
+                        const labelPassword = t.common.labels.password;
+
+                        switch (context.result.id) {
+                        case "isRequired":
+                            _store.idInvalidMessage = t.common.validations.isRequired(labelMailAddress);
+                            break;
+                        case "isMalformed":
+                            _store.idInvalidMessage = t.common.validations.isMalformed(labelMailAddress);
+                            break;
+                        case null:
+                            _store.idInvalidMessage = undefined;
+                            break;
+                        }
+
+                        switch (context.result.password) {
+                        case "isRequired":
+                            _store.passwordInvalidMessage = t.common.validations.isRequired(labelPassword);
+                            break;
+                        case "isTooShort":
+                            _store.passwordInvalidMessage = t.common.validations.isTooShort(labelPassword, 8);
+                            break;
+                        case "isTooLong":
+                            _store.passwordInvalidMessage = t.common.validations.isTooLong(labelPassword, 20);
+                            break;
+                        case null:
+                            _store.passwordInvalidMessage = undefined;
+                            break;
+                        }
+                        break;
+                    }
+                    case goals.onFailureInPublishingThenServicePresentsError:
+                        console.error("SERVICE ERROR:", context.error);
+                        break;
+                    }
                 });
         }
-        , signIn: (usecase: Usecase<"signIn">, actor: Actor) => {
+        , signIn: (usecase: Usecase<"signIn">, actor: Actor): Promise<void> => {
             const goals = Nobody.usecases.signIn.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription | null = null;
-            subscription = usecase
-                .interactedBy(actor, {
-                    next: ([lastSceneContext]) => {
-                        switch (lastSceneContext.scene) {
-                        case goals.onSuccessInSigningInThenServicePresentsHomeView:
-                            router.replace("/");
-                            dispatcher.dispatch(U.observingUsersTasks.basics[Service.observingUsersTasks.basics.serviceDetectsSigningIn]({ user : lastSceneContext.user }));
+            return usecase
+                .interactedBy(actor)
+                .then(result => {
+                    if (result.type !== InteractResultType.success) { return; }
+                    const context = result.lastSceneContext;
+                    switch (context.scene) {
+                    case goals.onSuccessInSigningInThenServicePresentsHomeView:
+                        router.replace("/");
+                        break;
+
+                    case goals.onFailureInValidatingThenServicePresentsError: {
+                        if (context.result === true) { return; }
+                        const labelMailAddress = t.common.labels.mailAddress;
+                        const labelPassword = t.common.labels.password;
+
+                        switch (context.result.id) {
+                        case "isRequired":
+                            _store.idInvalidMessage = t.common.validations.isRequired(labelMailAddress);
                             break;
-
-                        case goals.onFailureInValidatingThenServicePresentsError: {
-                            if (lastSceneContext.result === true) { return; }
-                            const labelMailAddress = t.common.labels.mailAddress;
-                            const labelPassword = t.common.labels.password;
-
-                            switch (lastSceneContext.result.id) {
-                            case "isRequired":
-                                _store.idInvalidMessage = t.common.validations.isRequired(labelMailAddress);
-                                break;
-                            case "isMalformed":
-                                _store.idInvalidMessage = t.common.validations.isMalformed(labelMailAddress);
-                                break;
-                            case null:
-                                _store.idInvalidMessage = undefined;
-                                break;
-                            }
-
-                            switch (lastSceneContext.result.password) {
-                            case "isRequired":
-                                _store.passwordInvalidMessage = t.common.validations.isRequired(labelPassword);
-                                break;
-                            case "isTooShort":
-                                _store.passwordInvalidMessage = t.common.validations.isTooShort(labelPassword, 8);
-                                break;
-                            case "isTooLong":
-                                _store.passwordInvalidMessage = t.common.validations.isTooLong(labelPassword, 20);
-                                break;
-                            case null:
-                                _store.passwordInvalidMessage = undefined;
-                                break;
-                            }
+                        case "isMalformed":
+                            _store.idInvalidMessage = t.common.validations.isMalformed(labelMailAddress);
+                            break;
+                        case null:
+                            _store.idInvalidMessage = undefined;
                             break;
                         }
-                        case goals.onFailureInSigningInThenServicePresentsError: {
-                            console.error("SERVICE ERROR:", lastSceneContext.error);
-                            _store.signInFailureMessage = lastSceneContext.error.message;
+
+                        switch (context.result.password) {
+                        case "isRequired":
+                            _store.passwordInvalidMessage = t.common.validations.isRequired(labelPassword);
+                            break;
+                        case "isTooShort":
+                            _store.passwordInvalidMessage = t.common.validations.isTooShort(labelPassword, 8);
+                            break;
+                        case "isTooLong":
+                            _store.passwordInvalidMessage = t.common.validations.isTooLong(labelPassword, 20);
+                            break;
+                        case null:
+                            _store.passwordInvalidMessage = undefined;
                             break;
                         }
-                        }
+                        break;
                     }
-                    , error: (e) => {
-                        _store.signInFailureMessage = e.message;
+                    case goals.onFailureInSigningInThenServicePresentsError: {
+                        console.error("SERVICE ERROR:", context.error);
+                        _store.signInFailureMessage = context.error.message;
+                        break;
                     }
-                    , complete: () => dispatcher.commonCompletionProcess(subscription)
+                    }
+                })
+                .catch(e => {
+                    _store.signInFailureMessage = e.message;
                 });
         }
-        , signOut: (usecase: Usecase<"signOut">, actor: Actor) => {
+        , signOut: (usecase: Usecase<"signOut">, actor: Actor): Promise<void> => {
             const goals = SignedInUser.usecases.signOut.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
-            let subscription: Subscription | null = null;
-            subscription = usecase
-                .interactedBy(actor, {
-                    next: ([lastSceneContext]) => {
-                        switch (lastSceneContext.scene) {
-                        case goals.onSuccessThenServicePresentsSignInView:
-                            dispatcher.change(new NobodyActor());
-                            _shared.signInStatus = SignInStatuses.signOut();
-                            break;
-                        case goals.onFailureThenServicePresentsError:
-                            console.error("SERVICE ERROR:", lastSceneContext.error);
-                            break;
-                        case goals.servicePresentsHomeView:
-                            router.replace("/");
-                        }
+            return usecase
+                .interactedBy(actor)
+                .then(result => {
+                    if (result.type !== InteractResultType.success) { return; }
+                    const context = result.lastSceneContext;
+                    switch (context.scene) {
+                    case goals.onSuccessThenServicePresentsSignInView:
+                        dispatcher.change(new NobodyActor());
+                        _shared.signInStatus = SignInStatuses.signOut();
+                        break;
+                    case goals.onFailureThenServicePresentsError:
+                        console.error("SERVICE ERROR:", context.error);
+                        break;
+                    case goals.servicePresentsHomeView:
+                        router.replace("/");
+                        break;
                     }
-                    , complete: () => dispatcher.commonCompletionProcess(subscription)
                 });
         }
     };

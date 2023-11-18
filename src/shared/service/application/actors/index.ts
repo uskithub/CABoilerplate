@@ -1,4 +1,4 @@
-import { Nobody } from "robustive-ts";
+import { Nobody } from "./nobody";
 import { SignedInUser } from "./signedInUser";
 import { Service } from "./service";
 

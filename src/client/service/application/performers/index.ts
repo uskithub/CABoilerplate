@@ -117,14 +117,18 @@ export function createDispatcher(): Dispatcher {
         if (shared.signInStatus.case === SignInStatus.unknown) {
             console.info("[DISPATCH] signInStatus が 不明のため、ユースケースの実行を保留します...");
             let stopHandle: WatchStopHandle | null = null;
-            stopHandle = watch(() => shared.signInStatus, (newValue) => {
-                if (newValue.case !== SignInStatus.unknown) {
-                    console.log(`[DISPATCH] signInStatus が "${ newValue.case as string }" に変わったため、保留したユースケースを再開します...`);
-                    dispatcher.dispatch(usecase);
+            return new Promise<void>((resolve) => {
+                stopHandle = watch(() => shared.signInStatus, (newValue) => {
+                    if (newValue.case !== SignInStatus.unknown) {
+                        console.log(`[DISPATCH] signInStatus が "${ newValue.case as string }" に変わったため、保留したユースケースを再開します...`);
+                        resolve();
+                    }
+                });
+            })
+                .then(() => {
                     stopHandle?.();
-                }
-            });
-            return null;
+                    return dispatcher.dispatch(usecase);
+                });
         }
 
         _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
@@ -134,14 +138,12 @@ export function createDispatcher(): Dispatcher {
         case "signUp": {
             console.info("[DISPATCH] SignUp", usecase);
             _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
-            performers.authentication.signUp(usecase, actor);
-            return null;
+            return performers.authentication.signUp(usecase, actor);
         }
         case "signIn": {
             console.info("[DISPATCH] SignIn", usecase);
             _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
-            performers.authentication.signIn(usecase, actor);
-            return null;
+            return performers.authentication.signIn(usecase, actor);
         }
     
         /* Service */
@@ -160,34 +162,28 @@ export function createDispatcher(): Dispatcher {
         /* SignedInUser */
         case "listInsuranceItems": {
             console.info("[DISPATCH] ListInsuranceItem:", usecase);
-            performers.serviceInProcess.list(usecase, actor);
-            break;
+            return performers.serviceInProcess.list(usecase, actor);
         }
         case "signOut": {
             console.info("[DISPATCH] SignOut", usecase);
-            performers.authentication.signOut(usecase, actor);
-            break;
+            return performers.authentication.signOut(usecase, actor);
         }
         case "getWarrantyList": {
             console.info("[DISPATCH] GetWarrantyList", usecase);
-            performers.warranty.get(usecase, actor);
-            break;
+            return performers.warranty.get(usecase, actor);
         }
         case "consult": {
             console.info("[DISPATCH] Consult", usecase);
-            performers.chat.consult(usecase, actor);
-            break;
+            return performers.chat.consult(usecase, actor);
         }
         case "observingProject": {
             console.info("[DISPATCH] ObservingProject", usecase);
-            performers.chat.consult(usecase, actor);
-            break;
+            return performers.chat.consult(usecase, actor);
         }
         default: {
             throw new Error(`dispatch先が定義されていません: ${ usecase.name }`);
         }
         }
-        return null;
     };
     
     return dispatcher;

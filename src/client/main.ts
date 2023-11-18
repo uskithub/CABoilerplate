@@ -28,7 +28,7 @@ import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { U } from "@/shared/service/application/usecases";
 import { Service } from "@/shared/service/application/actors/service";
 import { Subscription } from "rxjs";
-import { Nobody } from "robustive-ts";
+import { Nobody } from "@/shared/service/application/actors/nobody";
 // import { GraphqlAuthenticator } from "./service/infrastructure/graphqlAuthenticator";
 
 // initialize firebase
@@ -67,13 +67,15 @@ watch(() => stores.shared.signInStatus, (newValue) => {
         const user = stores.shared.signInStatus.user;
         dispatch(U.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }))
             .then(subscription => {
-                if (subscription !== null) subscriptions.push(subscription);
-            });
+                if (subscription) subscriptions.push(subscription);
+            })
+            .catch(e => console.error(e));
         
         dispatch(U.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }))
             .then(subscription => {
-                if (subscription !== null) subscriptions.push(subscription);
-            });
+                if (subscription) subscriptions.push(subscription);
+            })
+            .catch(e => console.error(e));
     } else if (newValue.case === SignInStatus.signingOut) {
         subscriptions.forEach((s) => s.unsubscribe());
         subscriptions = [];
@@ -81,7 +83,8 @@ watch(() => stores.shared.signInStatus, (newValue) => {
 });
 
 if (stores.shared.signInStatus.case === SignInStatus.unknown) {
-    dispatch(U.boot.basics[Nobody.usecases.boot.basics.userOpensSite]());
+    dispatch(U.boot.basics[Nobody.usecases.boot.basics.userOpensSite]())
+        .catch(e => console.error(e));
 }
 
 app.mount("#app");
