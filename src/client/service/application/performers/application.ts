@@ -15,7 +15,7 @@ import { Usecase } from "@/shared/service/application/usecases";
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
-import { InteractResultType } from "robustive-ts/types/usecase";
+import { InteractResultType } from "robustive-ts";
 
 type ImmutableTask = Readonly<Task>;
 type ImmutableDrawerItems = Readonly<DrawerItem>;
