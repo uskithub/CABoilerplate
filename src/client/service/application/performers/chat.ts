@@ -18,7 +18,7 @@ export interface ChatStore extends Store {
 
 export interface ChatPerformer extends Performer<ChatStore> {
     readonly store: ChatStore;
-    consult: (usecase: Usecase<"consult">, actor: Actor) => Promise<void>;
+    consult: (usecase: Usecase<"projectManagement", "consult">, actor: Actor) => Promise<void>;
 }
 
 export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
@@ -28,7 +28,7 @@ export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
 
     return {
         store
-        , consult: (usecase: Usecase<"consult">, actor: Actor) : Promise<void> => {
+        , consult: (usecase: Usecase<"projectManagement", "consult">, actor: Actor) : Promise<void> => {
             const goals = SignedInUser.usecases.consult.goals;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             return usecase

@@ -7,7 +7,7 @@ import { SignOutScenario, SignOutScenes } from "./signedInUser/signOut";
 import { ObservingUsersTasksScenario, ObservingUsersTasksScenes } from "./service/observingUsersTasks";
 import { GetWarrantyListScenario, GetWarrantyListScenes } from "./signedInUser/getWarrantyList";
 import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "./ServiceInProcess/signedInUser/listInsuranceItems";
-import { Usecase as _Usecase, AllUsecasesOverDomain, DomainRequirements, UsecaseSelectorOverDomain } from "robustive-ts";
+import { Usecase as _Usecase, AllUsecases, AllUsecasesOverDomain, DomainRequirements, UsecaseSelectorOverDomain } from "robustive-ts";
 import { ConsultScenario, ConsultScenes } from "./signedInUser/consult";
 import { ObservingUsersProjectsScenario, ObservingUsersProjectsScenes } from "./service/observingUsersProjects";
 import { ObservingProjectScenario, ObservingProjectScenes } from "./signedInUser/observingProject";
@@ -71,13 +71,16 @@ export const U = {
     }
 };
 
-// export type UsecaseKeys = keyof UsecaseDefinitions;
-// export type Usecases = _Usecases<UsecaseDefinitions>;
-export type Usecases = AllUsecasesOverDomain<Requirements>;
-export type Usecase<Domain extends keyof Requirements, Usecase extends keyof Requirements[Domain]> = _Usecase<Requirements, Domain, Usecase>;
 
-export type UsecaseLog = {
-    [D in keyof Requirements] : {
-        [U in keyof Requirements[D]] : { executing: { domain: D, usecase: U }, startAt: Date }
-    }[ keyof Requirements[D]]    
-}[keyof Requirements];
+export type Usecases = AllUsecasesOverDomain<Requirements>;
+export type UsecasesOf<D extends keyof Requirements> = AllUsecases<Requirements, D>; 
+export type Usecase<D extends keyof Requirements, U extends keyof Requirements[D]> = _Usecase<Requirements, D, U>;
+
+export type UsecaseLog = { 
+    executing: { 
+        domain: keyof Requirements;
+        usecase: { [D in keyof Requirements] : { [U in keyof Requirements[D]] : U }[ keyof Requirements[D]] }[keyof Requirements]; 
+    }
+    startAt: Date;
+};
+

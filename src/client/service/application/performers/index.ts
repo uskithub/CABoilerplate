@@ -4,7 +4,6 @@ import { createAuthenticationPerformer } from "./authentication";
 import type { AuthenticationStore } from "./authentication";
 import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { Actor } from "@/shared/service/application/actors";
-import { Service } from "@/shared/service/application/actors/service";
 import { createWarrantyPerformer } from "./warranty";
 import { createServiceInProcessPerformer } from "./serviceInProcess";
 
@@ -13,9 +12,8 @@ import { Nobody } from "robustive-ts";
 import { watch, WatchStopHandle } from "vue";
 import { Log } from "@/shared/service/domain/analytics/log";
 import { createChatPerformer } from "./chat";
-import { Usecases, UsecaseLog } from "@/shared/service/application/usecases";
+import { Usecases, UsecaseLog, Requirements, UsecasesOf } from "@/shared/service/application/usecases";
 import { Subscription } from "rxjs";
-import { Application } from "@/shared/service/domain/application/application";
 import { createProjectManagementPerformer, ProjectManagementStore } from "./projectManagement";
 
 export type Mutable<Type> = {
@@ -24,7 +22,10 @@ export type Mutable<Type> = {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Store { }
-export interface Performer<T extends Store> { readonly store: T; }
+export interface Performer<D extends keyof Requirements, T extends Store> {
+    readonly store: T;
+    dispatch: (usecase: UsecasesOf<D>, actor: Actor) => Promise<Subscription | void>;
+}
 
 type ImmutableActor = Readonly<Actor>;
 type ImmutableUsecaseLog = Readonly<UsecaseLog>;
@@ -35,26 +36,18 @@ export interface SharedStore extends Store {
     readonly signInStatus: SignInStatus;
 }
 
-type Stores = {
-    shared: SharedStore;
-    application: ApplicationStore;
-    authentication: AuthenticationStore;
-    projectManagement: ProjectManagementStore
-};
-
 export type Dispatcher = {
-    stores: Stores;
+    stores: {
+        shared: SharedStore;
+        application: ApplicationStore;
+        authentication: AuthenticationStore;
+        projectManagement: ProjectManagementStore
+    };
     change: (actor: Actor) => void;
     commonCompletionProcess: (subscription: Subscription | null) => void;
+    // add<D extends keyof Requirements, S extends Store>(performer: Performer<D, S>): void;
     dispatch: (usecase: Usecases) => Promise<Subscription | void>;
-    // accountViewModel: (shared: SharedStore) => HomeViewModel;
-    // createSignInViewModel: (shared: SharedStore) => SignInViewModel;
-    // createSignUpViewModel: (shared: SharedStore) => SignUpViewModel;
-}
-
-// Performerをどういう単位で作るかを再考する
-// ✕ 画面単位
-// ◯ DoaminModelのような単位
+};
 
 export function createDispatcher(): Dispatcher {
     const shared = reactive<SharedStore>({
@@ -63,12 +56,19 @@ export function createDispatcher(): Dispatcher {
         , signInStatus: SignInStatuses.unknown()
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const performers = {
+        application: createApplicationPerformer()
+        , authentication: createAuthenticationPerformer()
+        , projectManagement: createProjectManagementPerformer()
+    };
+    
     const dispatcher = {
         stores: {
             shared
-            , application: {} as ApplicationStore
-            , authentication: {} as AuthenticationStore
-            , projectManagement: {} as ProjectManagementStore
+            , application: performers.application.store
+            , authentication: performers.authentication.store
+            , projectManagement: performers.projectManagement.store
         }
         , change(actor: Actor) {
             const _shared = shared as Mutable<SharedStore>;
@@ -81,111 +81,50 @@ export function createDispatcher(): Dispatcher {
             _shared.executingUsecase = null;
         }
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        , dispatch() { return Promise.resolve(); }
+        , dispatch(usecase: Usecases): Promise<Subscription | void> {
+            const _shared = shared as Mutable<SharedStore>;
+            const actor = shared.actor;
+    
+            console.info(`[DISPATCH] ${ usecase.domain }.${ usecase.name }` );
+            _shared.executingUsecase = { executing: { domain: usecase.domain, usecase: usecase.name }, startAt: new Date() };
+    
+            // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
+            if (usecase.domain === "application" && usecase.name === "boot") {
+                return performers.application.dispatch(usecase, actor);
+            }
+    
+            // 初回表示時対応
+            // signInStatus が不明の場合、signInUserでないと実行できないUsecaseがエラーになるので、
+            // ステータスが変わるのを監視し、その後実行し直す
+            if (shared.signInStatus.case === SignInStatus.unknown) {
+                console.info("[DISPATCH] signInStatus が 不明のため、ユースケースの実行を保留します...");
+                let stopHandle: WatchStopHandle | null = null;
+                return new Promise<void>((resolve) => {
+                    stopHandle = watch(() => shared.signInStatus, (newValue) => {
+                        if (newValue.case !== SignInStatus.unknown) {
+                            console.log(`[DISPATCH] signInStatus が "${ newValue.case as string }" に変わったため、保留したユースケースを再開します...`);
+                            resolve();
+                        }
+                    });
+                })
+                    .then(() => {
+                        stopHandle?.();
+                        return dispatcher.dispatch(usecase);
+                    });
+            }
+            
+            switch (usecase.domain) {
+            case "authentication": {
+                return performers.authentication.dispatch(usecase, actor);
+            }
+            case "projectManagement": {
+                return performers.projectManagement.dispatch(usecase, actor);
+            }
+            }
+            // return performers[usecase.domain].dispatch(usecase, actor);
+        }
     } as Dispatcher;
 
-    const performers = {
-        application: createApplicationPerformer(dispatcher)
-        , authentication: createAuthenticationPerformer(dispatcher)
-        , warranty: createWarrantyPerformer(dispatcher)
-        , serviceInProcess: createServiceInProcessPerformer(dispatcher)
-        , chat: createChatPerformer(dispatcher)
-        , projectManagement: createProjectManagementPerformer(dispatcher)
-    };
-
-    dispatcher.stores.application = performers.application.store;
-    dispatcher.stores.authentication = performers.authentication.store;
-    dispatcher.stores.projectManagement = performers.projectManagement.store;
-
-    dispatcher.dispatch = (usecase: Usecases): Promise<Subscription | void> => {
-        const _shared = shared as Mutable<SharedStore>;
-        const actor = shared.actor;
-
-        // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
-        switch (usecase.name) {
-        /* Nobody */
-        case "boot": {
-            console.info("[DISPATCH] Boot:", usecase);
-            _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
-            return performers.application.boot(usecase, actor);
-        }
-        }
-
-        // 初回表示時対応
-        // signInStatus が不明の場合、signInUserでないと実行できないUsecaseがエラーになるので、
-        // ステータスが変わるのを監視し、その後実行し直す
-        if (shared.signInStatus.case === SignInStatus.unknown) {
-            console.info("[DISPATCH] signInStatus が 不明のため、ユースケースの実行を保留します...");
-            let stopHandle: WatchStopHandle | null = null;
-            return new Promise<void>((resolve) => {
-                stopHandle = watch(() => shared.signInStatus, (newValue) => {
-                    if (newValue.case !== SignInStatus.unknown) {
-                        console.log(`[DISPATCH] signInStatus が "${ newValue.case as string }" に変わったため、保留したユースケースを再開します...`);
-                        resolve();
-                    }
-                });
-            })
-                .then(() => {
-                    stopHandle?.();
-                    return dispatcher.dispatch(usecase);
-                });
-        }
-
-        _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
-
-        switch (usecase.name) {
-        /* Nobody */
-        case "signUp": {
-            console.info("[DISPATCH] SignUp", usecase);
-            _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
-            return performers.authentication.signUp(usecase, actor);
-        }
-        case "signIn": {
-            console.info("[DISPATCH] SignIn", usecase);
-            _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
-            return performers.authentication.signIn(usecase, actor);
-        }
-    
-        /* Service */
-        case "observingUsersTasks": {
-            console.info("[DISPATCH] ObservingUsersTasks:", usecase);
-            // 観測し続けるのでステータス管理しない
-            // _shared.executingUsecase = { executing: usecase.name, startAt: new Date() };
-            return performers.application.observingUsersTasks(usecase, new Service());
-        }
-
-        case "observingUsersProjects": {
-            console.info("[DISPATCH] observingUsersProjects:", usecase);
-            return performers.application.observingUsersProjects(usecase, new Service());
-        }
-        
-        /* SignedInUser */
-        case "listInsuranceItems": {
-            console.info("[DISPATCH] ListInsuranceItem:", usecase);
-            return performers.serviceInProcess.list(usecase, actor);
-        }
-        case "signOut": {
-            console.info("[DISPATCH] SignOut", usecase);
-            return performers.authentication.signOut(usecase, actor);
-        }
-        case "getWarrantyList": {
-            console.info("[DISPATCH] GetWarrantyList", usecase);
-            return performers.warranty.get(usecase, actor);
-        }
-        case "consult": {
-            console.info("[DISPATCH] Consult", usecase);
-            return performers.chat.consult(usecase, actor);
-        }
-        case "observingProject": {
-            console.info("[DISPATCH] ObservingProject", usecase);
-            return performers.chat.consult(usecase, actor);
-        }
-        default: {
-            throw new Error(`dispatch先が定義されていません: ${ usecase.name }`);
-        }
-        }
-    };
-    
     return dispatcher;
 }
 

@@ -16,7 +16,7 @@ export interface WarrantyStore extends Store {
 }
 export interface WarrantyPerformer extends Performer<WarrantyStore> {
     readonly store: WarrantyStore;
-    get: (usecase: Usecase<"getWarrantyList">, actor: Actor) => Promise<void>;
+    get: (usecase: Usecase<"projectManagement", "getWarrantyList">, actor: Actor) => Promise<void>;
 }
 
 export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerformer {
@@ -31,7 +31,7 @@ export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerform
 
     return {
         store
-        , get: (usecase: Usecase<"getWarrantyList">, actor: Actor) :  Promise<void> => {
+        , get: (usecase: Usecase<"projectManagement", "getWarrantyList">, actor: Actor) :  Promise<void> => {
             const goals = SignedInUser.usecases.getWarrantyList.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             return usecase

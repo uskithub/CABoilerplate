@@ -16,7 +16,7 @@ export interface ServiceInProcessStore extends Store {
 }
 export interface ServiceInProcessPerformer extends Performer<ServiceInProcessStore> {
     readonly store: ServiceInProcessStore;
-    list: (usecase: Usecase<"listInsuranceItems">, actor: Actor) => Promise<void>;
+    list: (usecase: Usecase<"projectManagement", "listInsuranceItems">, actor: Actor) => Promise<void>;
 }
 
 export function createServiceInProcessPerformer(dispatcher: Dispatcher): ServiceInProcessPerformer {
@@ -31,7 +31,7 @@ export function createServiceInProcessPerformer(dispatcher: Dispatcher): Service
 
     return {
         store
-        , list: (usecase: Usecase<"listInsuranceItems">, actor: Actor) : Promise<void> => {
+        , list: (usecase: Usecase<"projectManagement", "listInsuranceItems">, actor: Actor) : Promise<void> => {
             const goals = SignedInUser.usecases.listInsuranceItems.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             return usecase

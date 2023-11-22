@@ -11,7 +11,7 @@ import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 import { Service } from "@/shared/service/application/actors/service";
-import { Usecase } from "@/shared/service/application/usecases";
+import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { Task } from "@/shared/service/domain/entities/task";
 import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
@@ -26,14 +26,12 @@ export interface ApplicationStore extends Store {
     readonly userProjects: ImmutableTask[];
 }
 
-export interface ApplicationPerformer extends Performer<ApplicationStore> {
+export interface ApplicationPerformer extends Performer<"application", ApplicationStore> {
     readonly store: ApplicationStore;
-    boot: (usecase: Usecase<"boot">, actor: Actor) => Promise<void>;
-    observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor) => Promise<Subscription | void>;
-    observingUsersProjects: (usecase: Usecase<"observingUsersProjects">, actor: Actor) => Promise<Subscription | void>;
+    dispatch: (usecase: UsecasesOf<"application">, actor: Actor) => Promise<Subscription | void>;
 }
 
-export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationPerformer {
+export function createApplicationPerformer(): ApplicationPerformer {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
 
@@ -57,155 +55,40 @@ export function createApplicationPerformer(dispatcher: Dispatcher): ApplicationP
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const _projectMenu = _store.drawerItems.find((item) => item.case === DrawerContentType.group && item.title === "プロジェクト")!.children as DrawerItem[];
 
+    const boot = (usecase: Usecase<"application", "boot">, actor: Actor): Promise<void> => {
+        const goals = Nobody.usecases.boot.goals;
+        const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
+        return usecase
+            .interactedBy(actor)
+            .then((result) => {
+                if (result.type === InteractResultType.success) {
+                    switch (result.lastSceneContext.scene) {
+                    case goals.sessionExistsThenServicePresentsHome: {
+                        const user = { ...result.lastSceneContext.user };
+                        const actor = new SignedInUser(user);
+                        dispatcher.change(actor);
+                        _shared.signInStatus = SignInStatuses.signIn({ user });
+                        break;
+                    }
+                    case goals.sessionNotExistsThenServicePresentsSignin: {
+                        _shared.signInStatus = SignInStatuses.signOut();
+                        router.replace("/signin")
+                            .catch((error: Error) => {});
+                        break;
+                    }
+                    }
+                }
+            });
+    };
+    
     return {
         store
-        , boot: (usecase: Usecase<"boot">, actor: Actor): Promise<void> => {
-            const goals = Nobody.usecases.boot.goals;
-            const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
-            return usecase
-                .interactedBy(actor)
-                .then((result) => {
-                    if (result.type === InteractResultType.success) {
-                        switch (result.lastSceneContext.scene) {
-                        case goals.sessionExistsThenServicePresentsHome: {
-                            const user = { ...result.lastSceneContext.user };
-                            const actor = new SignedInUser(user);
-                            dispatcher.change(actor);
-                            _shared.signInStatus = SignInStatuses.signIn({ user });
-                            break;
-                        }
-                        case goals.sessionNotExistsThenServicePresentsSignin: {
-                            _shared.signInStatus = SignInStatuses.signOut();
-                            router.replace("/signin")
-                                .catch((error: Error) => {});
-                            break;
-                        }
-                        }
-                    }
-                });
-        }
-        , observingUsersTasks: (usecase: Usecase<"observingUsersTasks">, actor: Actor): Promise<Subscription | void> => {
-            const goals = Service.usecases.observingUsersTasks.goals;
-            return usecase
-                .interactedBy(actor)
-                .then(result => {
-                    if (result.type !== InteractResultType.success || result.lastSceneContext.scene !== goals.serviceStartsObservingUsersTasks) {
-                        return;
-                    }
-                    console.log("Started observing user's tasks...");
-                    return result.lastSceneContext.observable
-                        .subscribe({
-                            next: changedTasks => {
-                                const mutableUserTasks = _store.userTasks;
-                                changedTasks.forEach((changedTask) => {
-                                    switch (changedTask.case) {
-                                    case ItemChangeType.added: {
-                                        // hot reloadで増えてしまうので、同じものを予め削除しておく
-                                        for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                            if (mutableUserTasks[i].id === changedTask.id) {
-                                                mutableUserTasks.splice(i, 0);
-                                                break;
-                                            }
-                                        }
-                                        mutableUserTasks.unshift(changedTask.item);
-                                        break;
-                                    }
-                                    case ItemChangeType.modified: {
-                                    // doingかどうかを調べ、そうなら更新する
-                                    // if (self.#stores.currentUser._doingTask && self.#stores.currentUser._doingTask.id === changedTask.id) {
-                                    //     self.#stores.currentUser._doingTask = changedTask.item;
-                                    // }
-                                        for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                            if (mutableUserTasks[i].id === changedTask.id) {
-                                                mutableUserTasks.splice(i, 1, changedTask.item);
-                                                break;
-                                            }
-                                        }
-                                        break;
-                                    }
-                                    case ItemChangeType.removed: {
-                                        for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                            if (mutableUserTasks[i].id === changedTask.id) {
-                                                mutableUserTasks.splice(i, 0);
-                                                break;
-                                            }
-                                        }
-                                        break;
-                                    }
-                                    }
-                                });
-                            }
-                            , error: err => console.error("Observer got an error: " + err)
-                        });
-                });
-        }
-        , observingUsersProjects: (usecase: Usecase<"observingUsersProjects">, actor: Actor): Promise<Subscription | null> =>  {
-            const goals = Service.usecases.observingUsersProjects.goals;
-            return usecase
-                .interactedBy(actor)
-                .then(result => {
-                    if (result.type !== InteractResultType.success || result.lastSceneContext.scene !== goals.serviceDoNothing) {
-                        return;
-                    }
-                    return result.lastSceneContext.observable
-                        .subscribe({
-                            next: ([lastSceneContext]) => {
-                                switch (lastSceneContext.scene) {
-                                case goals.serviceDoNothing: {
-                                    console.log("Started observing user's tasks...");
-                                    break;
-                                }
-                                case goals.onUpdateUsersProjectsThenServiceUpdateUsersProjectList: {
-                                    const mutableUserProjects = _store.userProjects;
-                                
-                                
-                                    lastSceneContext.changedTasks.forEach((changedTask) => {
-                                        switch (changedTask.case) {
-                                        case ItemChangeType.added: {
-                                        // hot reloadで増えてしまうので、同じものを予め削除しておく
-                                            for (let i = 0, imax = mutableUserProjects.length; i < imax; i++) {
-                                                if (mutableUserProjects[i].id === changedTask.id) {
-                                                    mutableUserProjects.splice(i, 0);
-                                                    break;
-                                                }
-                                            }
-                                            const project = changedTask.item as Task;
-                                            mutableUserProjects.unshift(project);
-                                            _projectMenu.unshift(DrawerItem.link({ title: project.title, href: `/projects/${ project.id }` }));
-                                            break;
-                                        }
-                                        case ItemChangeType.modified: {
-                                        // doingかどうかを調べ、そうなら更新する
-                                        // if (self.#stores.currentUser._doingTask && self.#stores.currentUser._doingTask.id === changedTask.id) {
-                                        //     self.#stores.currentUser._doingTask = changedTask.item;
-                                        // }
-                                            for (let i = 0, imax = mutableUserProjects.length; i < imax; i++) {
-                                                if (mutableUserProjects[i].id === changedTask.id) {
-                                                    const project = changedTask.item as Task;
-                                                    mutableUserProjects.splice(i, 1, project);
-                                                    _projectMenu.splice(i, 1, DrawerItem.link({ title: project.title, href: `/projects/${ project.id }` }));
-                                                    break;
-                                                }
-                                            }
-                                            break;
-                                        }
-                                        case ItemChangeType.removed: {
-                                            for (let i = 0, imax = mutableUserProjects.length; i < imax; i++) {
-                                                if (mutableUserProjects[i].id === changedTask.id) {
-                                                    mutableUserProjects.splice(i, 0);
-                                                    _projectMenu.splice(i, 0);
-                                                    break;
-                                                }
-                                            }
-                                            break;
-                                        }
-                                        }
-                                    });
-                                }
-                                }
-                            }
-                        });
-                });
+        , dispatch: (usecase: UsecasesOf<"application">, actor: Actor): Promise<Subscription | void> => {
+            switch (usecase.name) {
+            case "boot": {
+                return boot(usecase, actor);
+            }
+            }
         }
     };
 }
