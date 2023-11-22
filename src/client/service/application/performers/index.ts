@@ -100,8 +100,8 @@ export function createDispatcher(): Dispatcher {
     dispatcher.dispatch = (usecase: Usecases): Promise<Subscription | void> => {
         const _shared = shared as Mutable<SharedStore>;
         const actor = shared.actor;
-        // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
 
+        // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
         switch (usecase.name) {
         /* Nobody */
         case "boot": {

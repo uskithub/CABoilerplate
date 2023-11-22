@@ -53,7 +53,7 @@ v-container
     v-btn.mr-4(
       :disabled="!state.isValid",
       color="success",
-      @click="dispatch(U.signIn.basics[Nobody.usecases.signIn.basics.userStartsSignInProcess]({ id: state.email, password: state.password }))"
+      @click="dispatch(U.authentication.signIn.basics[Nobody.usecases.signIn.basics.userStartsSignInProcess]({ id: state.email, password: state.password }))"
     ) Sign In
 
   router-link(to="/signup") -> SignUp
@@ -68,11 +68,11 @@ v-container
           v-btn(
             color="warning",
             text,
-            @click="dispatch(U.signOut.basics[SignedInUser.usecases.signOut.basics.userStartsSignOutProcess]())"
+            @click="dispatch(U.authentication.signOut.basics[SignedInUser.usecases.signOut.basics.userStartsSignOutProcess]())"
           ) Sign Out
           v-btn(
             color="success",
             text,
-            @click="dispatch(U.signOut.alternatives[SignedInUser.usecases.signOut.alternatives.userResignSignOut]())"
+            @click="dispatch(U.authentication.signOut.alternatives[SignedInUser.usecases.signOut.alternatives.userResignSignOut]())"
           ) Go Home
 </template>

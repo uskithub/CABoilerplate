@@ -41,7 +41,7 @@ watch(route, (newVal: RouteLocationNormalizedLoaded) => {
 });
 
 whenNoLongerNull(() => stores.shared.actor.user, (user: UserProperties) => {
-    dispatch(U.observingProject.basics[SignedInUser.usecases.observingProject.basics.userSelectsAProject]({ user, projectId: state.projectId }));
+    dispatch(U.projectManagement.observingProject.basics[SignedInUser.usecases.observingProject.basics.userSelectsAProject]({ user, projectId: state.projectId }));
 });
 
 </script>

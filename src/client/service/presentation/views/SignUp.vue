@@ -51,7 +51,7 @@ v-container
     v-btn.mr-4(
       :disabled="!isFormValid",
       color="success",
-      @click="dispatch(U.signUp.basics[Nobody.usecases.signUp.basics.userStartsSignUpProcess]({ id: state.email, password: state.password }))"
+      @click="dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.userStartsSignUpProcess]({ id: state.email, password: state.password }))"
     ) {{ t.signUp.buttons.signUp }}
 
   v-row(justify="center")
@@ -64,11 +64,11 @@ v-container
           v-btn(
             color="warning",
             text,
-            @click="dispatch(U.signOut.basics[SignedInUser.usecases.signOut.basics.userStartsSignOutProcess]())"
+            @click="dispatch(U.authentication.signOut.basics[SignedInUser.usecases.signOut.basics.userStartsSignOutProcess]())"
           ) Sign Out
           v-btn(
             color="success",
             text,
-            @click="dispatch(U.signOut.alternatives[SignedInUser.usecases.signOut.alternatives.userResignSignOut]())"
+            @click="dispatch(U.authentication.signOut.alternatives[SignedInUser.usecases.signOut.alternatives.userResignSignOut]())"
           ) Go Home
 </template>

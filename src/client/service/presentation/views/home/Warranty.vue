@@ -16,7 +16,7 @@ import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 
 const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
 
-dispatch(U.getWarrantyList.basics[SignedInUser.usecases.getWarrantyList.basics.userInitiatesWarrantyListing]()); 
+dispatch(U.projectManagement.getWarrantyList.basics[SignedInUser.usecases.getWarrantyList.basics.userInitiatesWarrantyListing]()); 
 
 // const state = reactive<{
 //   isDrawerOpen: boolean;

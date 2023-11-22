@@ -65,13 +65,13 @@ let subscriptions: Subscription[] = [];
 watch(() => stores.shared.signInStatus, (newValue) => {
     if (newValue.case === SignInStatus.signIn) {
         const user = stores.shared.signInStatus.user;
-        dispatch(U.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }))
+        dispatch(U.projectManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }))
             .then(subscription => {
                 if (subscription) subscriptions.push(subscription);
             })
             .catch(e => console.error(e));
         
-        dispatch(U.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }))
+        dispatch(U.projectManagement.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }))
             .then(subscription => {
                 if (subscription) subscriptions.push(subscription);
             })
@@ -83,7 +83,7 @@ watch(() => stores.shared.signInStatus, (newValue) => {
 });
 
 if (stores.shared.signInStatus.case === SignInStatus.unknown) {
-    dispatch(U.boot.basics[Nobody.usecases.boot.basics.userOpensSite]())
+    dispatch(U.application.boot.basics[Nobody.usecases.boot.basics.userOpensSite]())
         .catch(e => console.error(e));
 }
 
