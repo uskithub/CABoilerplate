@@ -6,12 +6,12 @@ import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces
 import { Actor } from "@/shared/service/application/actors";
 import { createWarrantyPerformer } from "./warranty";
 import { createServiceInProcessPerformer } from "./serviceInProcess";
+import { createChatPerformer } from "./chat";
 
 // System
 import { Nobody } from "robustive-ts";
 import { watch, WatchStopHandle } from "vue";
 import { Log } from "@/shared/service/domain/analytics/log";
-import { createChatPerformer } from "./chat";
 import { Usecases, UsecaseLog, Requirements, UsecasesOf } from "@/shared/service/application/usecases";
 import { Subscription } from "rxjs";
 import { createProjectManagementPerformer, ProjectManagementStore } from "./projectManagement";
@@ -21,10 +21,10 @@ export type Mutable<Type> = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Store { }
+export interface Store {}
 export interface Performer<D extends keyof Requirements, T extends Store> {
     readonly store: T;
-    dispatch: (usecase: UsecasesOf<D>, actor: Actor) => Promise<Subscription | void>;
+    dispatch: (usecase: UsecasesOf<D>, actor: Actor, dispatcher: Dispatcher) => Promise<Subscription | void>;
 }
 
 type ImmutableActor = Readonly<Actor>;
@@ -45,7 +45,6 @@ export type Dispatcher = {
     };
     change: (actor: Actor) => void;
     commonCompletionProcess: (subscription: Subscription | null) => void;
-    // add<D extends keyof Requirements, S extends Store>(performer: Performer<D, S>): void;
     dispatch: (usecase: Usecases) => Promise<Subscription | void>;
 };
 
@@ -56,7 +55,6 @@ export function createDispatcher(): Dispatcher {
         , signInStatus: SignInStatuses.unknown()
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const performers = {
         application: createApplicationPerformer()
         , authentication: createAuthenticationPerformer()
@@ -90,7 +88,7 @@ export function createDispatcher(): Dispatcher {
     
             // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
             if (usecase.domain === "application" && usecase.name === "boot") {
-                return performers.application.dispatch(usecase, actor);
+                return performers.application.dispatch(usecase, actor, dispatcher);
             }
     
             // 初回表示時対応
@@ -115,13 +113,12 @@ export function createDispatcher(): Dispatcher {
             
             switch (usecase.domain) {
             case "authentication": {
-                return performers.authentication.dispatch(usecase, actor);
+                return performers.authentication.dispatch(usecase, actor, dispatcher);
             }
             case "projectManagement": {
-                return performers.projectManagement.dispatch(usecase, actor);
+                return performers.projectManagement.dispatch(usecase, actor, dispatcher);
             }
             }
-            // return performers[usecase.domain].dispatch(usecase, actor);
         }
     } as Dispatcher;
 

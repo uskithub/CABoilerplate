@@ -3,32 +3,27 @@
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { inject, reactive } from "vue";
-import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
+import { Performer, Mutable, SharedStore, Store, Dispatcher } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/actors/nobody";
-import { Service } from "@/shared/service/application/actors/service";
 import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { Task } from "@/shared/service/domain/entities/task";
-import { ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
 import { InteractResultType } from "robustive-ts";
 
-type ImmutableTask = Readonly<Task>;
 type ImmutableDrawerItems = Readonly<DrawerItem>;
 
 export interface ApplicationStore extends Store {
     readonly drawerItems: ImmutableDrawerItems[];
-    readonly userTasks: ImmutableTask[];
-    readonly userProjects: ImmutableTask[];
 }
 
 export interface ApplicationPerformer extends Performer<"application", ApplicationStore> {
     readonly store: ApplicationStore;
-    dispatch: (usecase: UsecasesOf<"application">, actor: Actor) => Promise<Subscription | void>;
+    dispatch: (usecase: UsecasesOf<"application">, actor: Actor, dispatcher: Dispatcher) => Promise<Subscription | void>;
 }
 
 export function createApplicationPerformer(): ApplicationPerformer {
@@ -47,15 +42,11 @@ export function createApplicationPerformer(): ApplicationPerformer {
             , DrawerItem.group({ title: "プロジェクト", children: Array<DrawerItem>() })
             // , DrawerItem.link({ title: "link3", href: "/link3" })
         ]
-        , userTasks: []
-        , userProjects: []
     });
 
     const _store = store as Mutable<ApplicationStore>;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const _projectMenu = _store.drawerItems.find((item) => item.case === DrawerContentType.group && item.title === "プロジェクト")!.children as DrawerItem[];
-
-    const boot = (usecase: Usecase<"application", "boot">, actor: Actor): Promise<void> => {
+    
+    const boot = (usecase: Usecase<"application", "boot">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
         const goals = Nobody.usecases.boot.goals;
         const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
         return usecase
@@ -83,10 +74,10 @@ export function createApplicationPerformer(): ApplicationPerformer {
     
     return {
         store
-        , dispatch: (usecase: UsecasesOf<"application">, actor: Actor): Promise<Subscription | void> => {
+        , dispatch: (usecase: UsecasesOf<"application">, actor: Actor, dispatcher: Dispatcher): Promise<Subscription | void> => {
             switch (usecase.name) {
             case "boot": {
-                return boot(usecase, actor);
+                return boot(usecase, actor, dispatcher);
             }
             }
         }

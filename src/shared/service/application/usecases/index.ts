@@ -12,21 +12,8 @@ import { ConsultScenario, ConsultScenes } from "./signedInUser/consult";
 import { ObservingUsersProjectsScenario, ObservingUsersProjectsScenes } from "./service/observingUsersProjects";
 import { ObservingProjectScenario, ObservingProjectScenes } from "./signedInUser/observingProject";
 
-// export type UsecaseDefinitions = {
-//     /* nobody */
-//     boot : { scenes: BootScenes; scenario: BootScenario; };
-//     signIn : { scenes: SignInScenes; scenario: SignInScenario; };
-//     signUp : { scenes: SignUpScenes; scenario: SignUpScenario; };
-//     signOut : { scenes: SignOutScenes; scenario: SignOutScenario; };
-//     /* signInUser */
-//     observingProject : { scenes: ObservingProjectScenes; scenario: ObservingProjectScenario; };
-//     listInsuranceItems : { scenes: ListInsuranceItemsScenes; scenario: ListInsuranceItemsScenario; }
-//     getWarrantyList : { scenes: GetWarrantyListScenes; scenario: GetWarrantyListScenario; }
-//     consult : { scenes: ConsultScenes; scenario: ConsultScenario; }
-//     /* service actor */
-//     observingUsersTasks : { scenes: ObservingUsersTasksScenes; scenario: ObservingUsersTasksScenario; };
-//     observingUsersProjects : { scenes: ObservingUsersProjectsScenes; scenario: ObservingUsersProjectsScenario; };
-// };
+const domains = ["application", "authentication", "projectManagement"] as const;
+export type Domains = typeof domains[number];
 
 export type Requirements = {
     application : {

@@ -13,8 +13,7 @@ import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
-import { Service } from "@/shared/service/application/actors/service";
-import { U, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
+import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 
 export interface AuthenticationStore extends Store {
     readonly signInStatus: SignInStatus | null;
@@ -25,7 +24,7 @@ export interface AuthenticationStore extends Store {
 
 export interface AuthenticationPerformer extends Performer<"authentication", AuthenticationStore> {
     readonly store: AuthenticationStore;
-    dispatch: (usecase: UsecasesOf<"authentication">, actor: Actor) => Promise<Subscription | void>;
+    dispatch: (usecase: UsecasesOf<"authentication">, actor: Actor, dispatcher: Dispatcher) => Promise<Subscription | void>;
 }
 
 export function createAuthenticationPerformer(): AuthenticationPerformer {
@@ -41,7 +40,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
 
     const _store = store as Mutable<AuthenticationStore>;
     
-    const signUp = (usecase: Usecase<"authentication", "signUp">, actor: Actor): Promise<void> => {
+    const signUp = (usecase: Usecase<"authentication", "signUp">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
         const goals = Nobody.usecases.signUp.goals;
         const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
         return usecase
@@ -95,10 +94,11 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     console.error("SERVICE ERROR:", context.error);
                     break;
                 }
+                return;
             });
     };
     
-    const signIn = (usecase: Usecase<"authentication", "signIn">, actor: Actor): Promise<void> => {
+    const signIn = (usecase: Usecase<"authentication", "signIn">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
         const goals = Nobody.usecases.signIn.goals;
         const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
         return usecase
@@ -156,7 +156,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
             });
     };
     
-    const signOut = (usecase: Usecase<"authentication", "signOut">, actor: Actor): Promise<void> => {
+    const signOut = (usecase: Usecase<"authentication", "signOut">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
         const goals = SignedInUser.usecases.signOut.goals;
         const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
         return usecase
@@ -181,16 +181,16 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
 
     return {
         store
-        , dispatch: (usecase: UsecasesOf<"authentication">, actor: Actor): Promise<Subscription | void> => {
+        , dispatch: (usecase: UsecasesOf<"authentication">, actor: Actor, dispatcher: Dispatcher): Promise<Subscription | void> => {
             switch (usecase.name) {
             case "signUp": {
-                return signUp(usecase, actor);
+                return signUp(usecase, actor, dispatcher);
             }
             case "signIn": {
-                return signIn(usecase, actor);
+                return signIn(usecase, actor, dispatcher);
             }
             case "signOut": {
-                return signOut(usecase, actor);
+                return signOut(usecase, actor, dispatcher);
             }
             }
         }

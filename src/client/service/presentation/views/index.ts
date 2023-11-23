@@ -8,7 +8,6 @@ import Task from "@views/home/Task.vue";
 import Project from "@views/home/Project.vue";
 import Warranty from "@views/home/Warranty.vue";
 import Insuranace from "./home/Insuranace.vue";
-import { RouteLocationNormalized, RouteLocationNormalizedLoaded } from "vue-router";
 
 export const routes = [
     {
