@@ -1,19 +1,18 @@
-import { BaseScenario, Context, IActor, InteractResult, MutableContext, Scenes } from "robustive-ts";
+import { BaseScenario, Context, InteractResult, MutableContext, Scenes } from "robustive-ts";
 import { Application } from "../../domain/application/application";
 import { Actor } from "../actors";
-import type { Requirements } from ".";
-import { Domain } from "domain";
+import { DomainRequirements } from "robustive-ts";
 
 export abstract class MyBaseScenario<Z extends Scenes> extends BaseScenario<Z> {
     abstract next(to: MutableContext<Z>): Promise<Context<Z>>;
 
-    authorize<Requirements, Domain extends keyof Requirements, Usecase extends keyof Requirements[Domain]>(actor: Actor, domain: Domain, usecase: Usecase): boolean {
+    authorize<R extends DomainRequirements, D extends Extract<keyof R, string>, U extends Extract<keyof R[D], string>>(actor: Actor, domain: D, usecase: U): boolean {
         return Application.authorize(actor, usecase);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    complete<Domain extends keyof Requirements, Usecase extends keyof Requirements[Domain], A extends IActor<any>>(withResult: InteractResult<Requirements, Domain, Usecase, A, Z>) {
+    complete<R extends DomainRequirements, D extends keyof R, U extends keyof R[D]>(withResult: InteractResult<R, D, U, Actor, Z>): void {
         // TODO: usecaseの実行結果をログに残す
-        console.log(`[COMPLETION] ${ String(withResult.domain) }.${ String(withResult.usecase) } (${ withResult.id })`, withResult);
+        console.info(`[COMPLETION] ${ String(withResult.domain) }.${ String(withResult.usecase) } (${ withResult.id })`, withResult);
     }
 }
