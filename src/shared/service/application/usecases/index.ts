@@ -63,7 +63,8 @@ export type Usecases = AllUsecasesOverDomain<Requirements>;
 export type UsecasesOf<D extends keyof Requirements> = AllUsecases<Requirements, D>; 
 export type Usecase<D extends keyof Requirements, U extends keyof Requirements[D]> = _Usecase<Requirements, D, U>;
 
-export type UsecaseLog = { 
+export type UsecaseLog = {
+    id: string;
     executing: { 
         domain: keyof Requirements;
         usecase: { [D in keyof Requirements] : { [U in keyof Requirements[D]] : U }[ keyof Requirements[D]] }[keyof Requirements]; 

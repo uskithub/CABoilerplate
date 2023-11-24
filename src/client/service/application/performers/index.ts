@@ -83,12 +83,13 @@ export function createDispatcher(): Dispatcher {
             const _shared = shared as Mutable<SharedStore>;
             const actor = shared.actor;
     
-            console.info(`[DISPATCH] ${ usecase.domain }.${ usecase.name }` );
-            _shared.executingUsecase = { executing: { domain: usecase.domain, usecase: usecase.name }, startAt: new Date() };
+            console.info(`[DISPATCH] ${ usecase.domain }.${ usecase.name } (${ usecase.id })` );
+            _shared.executingUsecase = { id: usecase.id, executing: { domain: usecase.domain, usecase: usecase.name }, startAt: new Date() };
     
             // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
             if (usecase.domain === "application" && usecase.name === "boot") {
-                return performers.application.dispatch(usecase, actor, dispatcher);
+                return performers.application.dispatch(usecase, actor, dispatcher)
+                    .finally(() => dispatcher.commonCompletionProcess(null));
             }
     
             // 初回表示時対応
@@ -111,14 +112,18 @@ export function createDispatcher(): Dispatcher {
                     });
             }
             
-            switch (usecase.domain) {
-            case "authentication": {
-                return performers.authentication.dispatch(usecase, actor, dispatcher);
-            }
-            case "projectManagement": {
-                return performers.projectManagement.dispatch(usecase, actor, dispatcher);
-            }
-            }
+            return Promise.resolve()
+                .then(() => {
+                    switch (usecase.domain) {
+                    case "authentication": {
+                        return performers.authentication.dispatch(usecase, actor, dispatcher);
+                    }
+                    case "projectManagement": {
+                        return performers.projectManagement.dispatch(usecase, actor, dispatcher);
+                    }
+                    }
+                })
+                .finally(() => dispatcher.commonCompletionProcess(null));
         }
     } as Dispatcher;
 

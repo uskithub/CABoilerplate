@@ -14,6 +14,6 @@ export abstract class MyBaseScenario<Z extends Scenes> extends BaseScenario<Z> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     complete<Domain extends keyof Requirements, Usecase extends keyof Requirements[Domain], A extends IActor<any>>(withResult: InteractResult<Requirements, Domain, Usecase, A, Z>) {
         // TODO: usecaseの実行結果をログに残す
-        console.log("[COMPLETION]", withResult);
+        console.log(`[COMPLETION] ${ String(withResult.domain) }.${ String(withResult.usecase) } (${ withResult.id })`, withResult);
     }
 }

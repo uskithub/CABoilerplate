@@ -29,7 +29,7 @@ const onClickSendButton = () => {
         , content: state.inputText
     } as MessageProperties;
 
-    dispatch(U.consult.basics[SignedInUser.usecases.consult.basics.userInputsQuery]({ messages: [ message ]})); 
+    dispatch(U.projectManagement.consult.basics[SignedInUser.usecases.consult.basics.userInputsQuery]({ messages: [ message ]})); 
 };
 
 const items = [
