@@ -1,38 +1,38 @@
-import { BootScenario, BootScenes } from "./nobody/boot";
-import { SignInScenario, SignInScenes } from "./nobody/signIn";
-import { SignUpScenario, SignUpScenes } from "./nobody/signUp";
+import { BootScenario } from "./nobody/boot";
+import { SignInScenario } from "./nobody/signIn";
+import { SignUpScenario } from "./nobody/signUp";
 
-import { SignOutScenario, SignOutScenes } from "./signedInUser/signOut";
+import { SignOutScenario } from "./signedInUser/signOut";
 
-import { ObservingUsersTasksScenario, ObservingUsersTasksScenes } from "./service/observingUsersTasks";
-import { GetWarrantyListScenario, GetWarrantyListScenes } from "./signedInUser/getWarrantyList";
-import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "./ServiceInProcess/signedInUser/listInsuranceItems";
+import { GetWarrantyListScenario } from "./signedInUser/getWarrantyList";
+import { ListInsuranceItemsScenario } from "./ServiceInProcess/signedInUser/listInsuranceItems";
+import { ConsultScenario } from "./signedInUser/consult";
+import { ObservingProjectScenario } from "./signedInUser/observingProject";
+import { ObservingUsersTasksScenario } from "./service/observingUsersTasks";
+import { ObservingUsersProjectsScenario } from "./service/observingUsersProjects";
 import { Usecase as _Usecase, AllUsecases, AllUsecasesOverDomain, UsecaseSelectorOverDomain } from "robustive-ts";
-import { ConsultScenario, ConsultScenes } from "./signedInUser/consult";
-import { ObservingUsersProjectsScenario, ObservingUsersProjectsScenes } from "./service/observingUsersProjects";
-import { ObservingProjectScenario, ObservingProjectScenes } from "./signedInUser/observingProject";
 
 const domains = ["application", "authentication", "projectManagement"] as const;
 export type Domains = typeof domains[number];
 
 export type Requirements = {
     application : {
-        boot : { scenes: BootScenes; scenario: BootScenario; };
+        boot : BootScenario;
     }
     , authentication : {
-        signIn : { scenes: SignInScenes; scenario: SignInScenario; };
-        signUp : { scenes: SignUpScenes; scenario: SignUpScenario; };
-        signOut : { scenes: SignOutScenes; scenario: SignOutScenario; };
+        signIn : SignInScenario;
+        signUp : SignUpScenario;
+        signOut : SignOutScenario;
     }
     , projectManagement : {
         /* signInUser */
-        observingProject : { scenes: ObservingProjectScenes; scenario: ObservingProjectScenario; };
-        listInsuranceItems : { scenes: ListInsuranceItemsScenes; scenario: ListInsuranceItemsScenario; }
-        getWarrantyList : { scenes: GetWarrantyListScenes; scenario: GetWarrantyListScenario; }
-        consult : { scenes: ConsultScenes; scenario: ConsultScenario; }
+        observingProject : ObservingProjectScenario;
+        listInsuranceItems : ListInsuranceItemsScenario;
+        getWarrantyList : GetWarrantyListScenario;
+        consult : ConsultScenario;
         /* service actor */
-        observingUsersTasks : { scenes: ObservingUsersTasksScenes; scenario: ObservingUsersTasksScenario; };
-        observingUsersProjects : { scenes: ObservingUsersProjectsScenes; scenario: ObservingUsersProjectsScenario; };
+        observingUsersTasks : ObservingUsersTasksScenario;
+        observingUsersProjects : ObservingUsersProjectsScenario;
     }
 };
 
@@ -57,7 +57,6 @@ export const U = {
         , observingUsersProjects : usecases.projectManagement.observingUsersProjects(ObservingUsersProjectsScenario)
     }
 };
-
 
 export type Usecases = AllUsecasesOverDomain<Requirements>;
 export type UsecasesOf<D extends keyof Requirements> = AllUsecases<Requirements, D>; 
