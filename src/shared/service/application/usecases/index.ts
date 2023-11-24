@@ -7,7 +7,7 @@ import { SignOutScenario, SignOutScenes } from "./signedInUser/signOut";
 import { ObservingUsersTasksScenario, ObservingUsersTasksScenes } from "./service/observingUsersTasks";
 import { GetWarrantyListScenario, GetWarrantyListScenes } from "./signedInUser/getWarrantyList";
 import { ListInsuranceItemsScenario, ListInsuranceItemsScenes } from "./ServiceInProcess/signedInUser/listInsuranceItems";
-import { Usecase as _Usecase, AllUsecases, AllUsecasesOverDomain, DomainRequirements, UsecaseSelectorOverDomain } from "robustive-ts";
+import { Usecase as _Usecase, AllUsecases, AllUsecasesOverDomain, UsecaseSelectorOverDomain } from "robustive-ts";
 import { ConsultScenario, ConsultScenes } from "./signedInUser/consult";
 import { ObservingUsersProjectsScenario, ObservingUsersProjectsScenes } from "./service/observingUsersProjects";
 import { ObservingProjectScenario, ObservingProjectScenes } from "./signedInUser/observingProject";
