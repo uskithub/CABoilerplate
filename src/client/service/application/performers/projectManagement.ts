@@ -1,8 +1,7 @@
 // service
 
 // system
-import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
-import { inject, reactive } from "vue";
+import { reactive } from "vue";
 import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 import { useRouter } from "vue-router";
 import { Observable, Subscription } from "rxjs";

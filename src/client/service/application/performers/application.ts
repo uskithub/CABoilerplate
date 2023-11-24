@@ -1,8 +1,7 @@
 // service
 
 // system
-import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
-import { inject, reactive } from "vue";
+import { reactive } from "vue";
 import { Performer, Mutable, SharedStore, Store, Dispatcher } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
@@ -27,7 +26,6 @@ export interface ApplicationPerformer extends Performer<"application", Applicati
 }
 
 export function createApplicationPerformer(): ApplicationPerformer {
-    const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
 
     const store = reactive<ApplicationStore>({

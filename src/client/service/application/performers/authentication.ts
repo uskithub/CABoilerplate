@@ -1,8 +1,7 @@
 // service
 
 // system
-import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
-import { inject, reactive } from "vue";
+import { reactive } from "vue";
 import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
 import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
@@ -28,7 +27,6 @@ export interface AuthenticationPerformer extends Performer<"authentication", Aut
 }
 
 export function createAuthenticationPerformer(): AuthenticationPerformer {
-    const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
     const store = reactive<AuthenticationStore>({
         signInStatus: null
