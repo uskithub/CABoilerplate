@@ -35,7 +35,8 @@ export const requirements = {
 export const U = new Robustive(requirements);
 
 export type Requirements = typeof requirements;
-type Domains = keyof Requirements;
+export type DomainKeys = keyof Requirements;
+export type UsecaseKeys = { [D in DomainKeys] : keyof Requirements[D]; }[DomainKeys];
 
 export type Usecases = AllUsecasesOverDomain<Requirements>;
 export type UsecasesOf<D extends keyof Requirements> = AllUsecases<Requirements, D>; 
@@ -44,8 +45,8 @@ export type Usecase<D extends keyof Requirements, U extends keyof Requirements[D
 export type UsecaseLog = {
     id: string;
     executing: { 
-        domain: keyof Requirements;
-        usecase: { [D in Domains] : keyof Requirements[D]; }[Domains]; 
+        domain: DomainKeys;
+        usecase: UsecaseKeys;
     }
     startAt: Date;
 };
