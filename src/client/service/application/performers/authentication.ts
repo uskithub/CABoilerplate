@@ -3,7 +3,6 @@
 // system
 import { reactive } from "vue";
 import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
-import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { InteractResultType, Nobody as NobodyActor } from "robustive-ts";
 
@@ -27,7 +26,6 @@ export interface AuthenticationPerformer extends Performer<"authentication", Aut
 }
 
 export function createAuthenticationPerformer(): AuthenticationPerformer {
-    const router = useRouter();
     const store = reactive<AuthenticationStore>({
         signInStatus: null
 
@@ -52,7 +50,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     const user = context.user;
                     const actor = new SignedInUser(user);
                     _shared.actor = actor;
-                    router.replace("/");
+                    _shared.current = "/";
                     break;
                 }
                 case goals.onFailureInValidatingThenServicePresentsError: {
@@ -106,7 +104,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 const context = result.lastSceneContext;
                 switch (context.scene) {
                 case goals.onSuccessInSigningInThenServicePresentsHomeView:
-                    router.replace("/");
+                    _shared.current = "/";
                     break;
 
                 case goals.onFailureInValidatingThenServicePresentsError: {
@@ -171,7 +169,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     console.error("SERVICE ERROR:", context.error);
                     break;
                 case goals.servicePresentsHomeView:
-                    router.replace("/");
+                    _shared.current = "/";
                     break;
                 }
             });

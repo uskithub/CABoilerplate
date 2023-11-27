@@ -3,7 +3,6 @@
 // system
 import { reactive } from "vue";
 import { Performer, Mutable, SharedStore, Store, Dispatcher } from ".";
-import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
@@ -26,7 +25,6 @@ export interface ApplicationPerformer extends Performer<"application", Applicati
 }
 
 export function createApplicationPerformer(): ApplicationPerformer {
-    const router = useRouter();
 
     const store = reactive<ApplicationStore>({
         drawerItems : [
@@ -61,8 +59,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     }
                     case goals.sessionNotExistsThenServicePresentsSignin: {
                         _shared.signInStatus = SignInStatuses.signOut();
-                        router.replace("/signin")
-                            .catch((error: Error) => {});
+                        _shared.current = "/signin";
                         break;
                     }
                     }

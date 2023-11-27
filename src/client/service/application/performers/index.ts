@@ -15,6 +15,7 @@ import { Log } from "@/shared/service/domain/analytics/log";
 import { Usecases, UsecaseLog, Requirements, UsecasesOf } from "@/shared/service/application/usecases";
 import { Subscription } from "rxjs";
 import { createProjectManagementPerformer, ProjectManagementStore } from "./projectManagement";
+import { RouteLocationRaw } from "vue-router";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -34,6 +35,7 @@ export interface SharedStore extends Store {
     readonly actor: ImmutableActor;
     readonly executingUsecase: ImmutableUsecaseLog | null;
     readonly signInStatus: SignInStatus;
+    readonly current: RouteLocationRaw;
 }
 
 export type Dispatcher = {
@@ -45,7 +47,7 @@ export type Dispatcher = {
     };
     change: (actor: Actor) => void;
     commonCompletionProcess: (subscription: Subscription | null) => void;
-    dispatch: (usecase: Usecases) => Promise<Subscription | void>;
+    dispatch: (usecase: Usecases, actor?: Actor) => Promise<Subscription | void>;
 };
 
 export function createDispatcher(): Dispatcher {
@@ -53,6 +55,7 @@ export function createDispatcher(): Dispatcher {
         actor: new Nobody()
         , executingUsecase: null
         , signInStatus: SignInStatuses.unknown()
+        , current: "/"
     });
 
     const performers = {
@@ -79,16 +82,16 @@ export function createDispatcher(): Dispatcher {
             _shared.executingUsecase = null;
         }
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        , dispatch(usecase: Usecases): Promise<Subscription | void> {
+        , dispatch(usecase: Usecases, actor?: Actor): Promise<Subscription | void> {
             const _shared = shared as Mutable<SharedStore>;
-            const actor = shared.actor;
+            const _actor = actor || shared.actor;
     
             console.info(`[DISPATCH] ${ usecase.domain }.${ usecase.name } (${ usecase.id })` );
             _shared.executingUsecase = { id: usecase.id, executing: { domain: usecase.domain, usecase: usecase.name }, startAt: new Date() };
     
             // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
             if (usecase.domain === "application" && usecase.name === "boot") {
-                return performers.application.dispatch(usecase, actor, dispatcher)
+                return performers.application.dispatch(usecase, _actor, dispatcher)
                     .finally(() => dispatcher.commonCompletionProcess(null));
             }
     
@@ -116,10 +119,10 @@ export function createDispatcher(): Dispatcher {
                 .then(() => {
                     switch (usecase.domain) {
                     case "authentication": {
-                        return performers.authentication.dispatch(usecase, actor, dispatcher);
+                        return performers.authentication.dispatch(usecase, _actor, dispatcher);
                     }
                     case "projectManagement": {
-                        return performers.projectManagement.dispatch(usecase, actor, dispatcher);
+                        return performers.projectManagement.dispatch(usecase, _actor, dispatcher);
                     }
                     }
                 })
