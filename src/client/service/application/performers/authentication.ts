@@ -12,7 +12,7 @@ import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
-
+import { dictionary as t } from "@/client/main";
 export interface AuthenticationStore extends Store {
     readonly signInStatus: SignInStatus | null;
     readonly idInvalidMessage: string | string[] | undefined;
@@ -50,7 +50,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     const user = context.user;
                     const actor = new SignedInUser(user);
                     _shared.actor = actor;
-                    _shared.current = "/";
+                    _shared.currentRouteLocation = "/";
                     break;
                 }
                 case goals.onFailureInValidatingThenServicePresentsError: {

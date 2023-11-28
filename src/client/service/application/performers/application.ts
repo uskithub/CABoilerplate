@@ -59,7 +59,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     }
                     case goals.sessionNotExistsThenServicePresentsSignin: {
                         _shared.signInStatus = SignInStatuses.signOut();
-                        _shared.current = "/signin";
+                        _shared.currentRouteLocation = "/signin";
                         break;
                     }
                     }

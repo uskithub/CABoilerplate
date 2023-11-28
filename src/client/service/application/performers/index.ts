@@ -35,7 +35,7 @@ export interface SharedStore extends Store {
     readonly actor: ImmutableActor;
     readonly executingUsecase: ImmutableUsecaseLog | null;
     readonly signInStatus: SignInStatus;
-    readonly current: RouteLocationRaw;
+    readonly currentRouteLocation: RouteLocationRaw;
 }
 
 export type Dispatcher = {
@@ -55,7 +55,7 @@ export function createDispatcher(): Dispatcher {
         actor: new Nobody()
         , executingUsecase: null
         , signInStatus: SignInStatuses.unknown()
-        , current: "/"
+        , currentRouteLocation: "/"
     });
 
     const performers = {

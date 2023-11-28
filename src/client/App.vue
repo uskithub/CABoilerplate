@@ -8,7 +8,7 @@ import { watch } from "vue";
 const { stores } = inject<Dispatcher>(DISPATCHER_KEY)!;
 const router = useRouter();
 
-watch(() => stores.shared.current, (newValue, oldValue) => {
+watch(() => stores.shared.currentRouteLocation, (newValue, oldValue) => {
   console.log("★☆★☆★current", oldValue, "--->", newValue);
   router.replace(newValue);
 });

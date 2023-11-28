@@ -31,6 +31,8 @@ import { Subscription } from "rxjs";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 // import { GraphqlAuthenticator } from "./service/infrastructure/graphqlAuthenticator";
 
+export const dictionary = i18n(navigator.language);
+
 // initialize firebase
 const firebaseApp = initializeApp(firebaseConfig);
 dependencies.auth = new FirebaseAuthenticator(firebaseApp);
@@ -48,8 +50,6 @@ Amplify.configure(awsExports);
 
 
 loadFonts();
-
-const dictionary = i18n(navigator.language);
 
 const app = createApp(App);
 
