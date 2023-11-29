@@ -31,10 +31,9 @@ const isFormValid = computed(() => state.email !== null && state.password !== nu
 <template lang="pug">
 v-container
   v-app-bar(app)
-    v-toolbar-title {{ t.authentication.signUp.title }}
+    v-toolbar-title {{ t.application.title }}
   v-main
-    h1 {{ t.authentication.signUp.title }}
-
+    h1 {{  t.application.views.signUp.title }}
     v-form(ref="form", v-model="isFormValid", lazy-validation)
       v-text-field(
         v-model="state.email",
@@ -53,7 +52,7 @@ v-container
         :disabled="!isFormValid",
         color="success",
         @click="dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.userStartsSignUpProcess]({ id: state.email, password: state.password }))"
-      ) {{ t.authentication.signUp.buttons.signUp }}
+      ) {{ t.application.views.signUp.buttons.signUp }}
 
     v-row(justify="center")
       v-dialog(v-model="isPresentDialog", persistent, max-width="290")

@@ -31,32 +31,52 @@ const isPresentDialog = computed(() => stores.shared.signInStatus.case === SignI
 <template lang="pug">
 v-container
   v-app-bar(app)
-    v-toolbar-title ホーム
+    v-toolbar-title {{ t.application.title }}
   v-main
-    h1 SignIn
-    v-form(ref="form", v-model="state.isValid", lazy-validation)
-      span(v-if="stores.authentication.signInFailureMessage !== null") {{ stores.authentication.signInFailureMessage }}
-      v-text-field(
-        v-model="state.email",
-        :label="t.authentication.common.labels.mailAddress",
-        :error-messages="stores.authentication.idInvalidMessage",
-        required
-      )
-      v-text-field(
-        v-model="state.password",
-        type="password",
-        :label="t.authentication.common.labels.password",
-        :error-messages="stores.authentication.passwordInvalidMessage",
-        required
-      )
+    v-sheet(
+      elevation="12"
+      max-width="600"
+      rounded="lg"
+      width="100%"
+      class="pa-4 text-center mx-auto"
+    )
+      h1 {{  t.application.views.signIn.title }}
+      v-form(ref="form", v-model="state.isValid", lazy-validation)
+        span(v-if="stores.authentication.signInFailureMessage !== null") {{ stores.authentication.signInFailureMessage }}
+        v-text-field(
+          v-model="state.email",
+          :label="t.authentication.common.labels.mailAddress",
+          :error-messages="stores.authentication.idInvalidMessage",
+          required
+        )
+        v-text-field(
+          v-model="state.password",
+          type="password",
+          :label="t.authentication.common.labels.password",
+          :error-messages="stores.authentication.passwordInvalidMessage",
+          required
+        )
+      .text-end
+        v-btn.text-none(
+          :disabled="!state.isValid",
+          color="success"
+          rounded
+          variant="flat"
+          width="90"
+          @click="dispatch(U.authentication.signIn.basics[Nobody.usecases.signIn.basics.userStartsSignInProcess]({ id: state.email, password: state.password }))"
+        ) {{ t.application.views.signIn.buttons.signIn }}
+      br
+      v-divider.mb-4
       v-btn.mr-4(
-        :disabled="!state.isValid",
         color="success",
-        @click="dispatch(U.authentication.signIn.basics[Nobody.usecases.signIn.basics.userStartsSignInProcess]({ id: state.email, password: state.password }))"
-      ) Sign In
-
+      ) {{ t.application.views.signUp.buttons.signUp }}
+      br
+      v-divider.mb-4
+      br
+      v-btn.mr-4(
+        color="success",
+      ) {{ t.application.views.signUp.buttons.signUp }}
     router-link(to="/signup") -> SignUp
-
     v-row(justify="center")
       v-dialog(v-model="isPresentDialog", persistent, max-width="290")
         v-card

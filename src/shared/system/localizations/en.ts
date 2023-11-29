@@ -1,6 +1,20 @@
 export default {
     application : {
-
+        title : "My New App"
+        , views : {
+            signUp : {
+                title : "Sign Up"
+                , buttons: {
+                    signUp: "Sign Up"
+                }
+            }
+            , signIn : {
+                title : "Sign In"
+                , buttons: {
+                    signIn: "Sign In"
+                }
+            }
+        }
     }
     , authentication: {
         common : {
@@ -15,11 +29,6 @@ export default {
                 , isTooLong: (what: string, maxLength: number) => `${ what } is too long. It should be equal to or less than ${maxLength} characters.`
             }
         }
-        , signUp : {
-            title : "Sign Up"
-            , buttons: {
-                signUp: "Sign Up"
-            }
-        }
+        
     }
 };
