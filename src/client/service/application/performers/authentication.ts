@@ -13,6 +13,7 @@ import { Nobody } from "@/shared/service/application/actors/nobody";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { dictionary as t } from "@/client/main";
+
 export interface AuthenticationStore extends Store {
     readonly signInStatus: SignInStatus | null;
     readonly idInvalidMessage: string | string[] | undefined;
@@ -55,15 +56,15 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 }
                 case goals.onFailureInValidatingThenServicePresentsError: {
                     if (context.result === true) { break; }
-                    const labelMailAddress = t.common.labels.mailAddress;
-                    const labelPassword = t.common.labels.password;
+                    const labelMailAddress = t.authentication.common.labels.mailAddress;
+                    const labelPassword = t.authentication.common.labels.password;
 
                     switch (context.result.id) {
                     case "isRequired":
-                        _store.idInvalidMessage = t.common.validations.isRequired(labelMailAddress);
+                        _store.idInvalidMessage = t.authentication.common.validations.isRequired(labelMailAddress);
                         break;
                     case "isMalformed":
-                        _store.idInvalidMessage = t.common.validations.isMalformed(labelMailAddress);
+                        _store.idInvalidMessage = t.authentication.common.validations.isMalformed(labelMailAddress);
                         break;
                     case null:
                         _store.idInvalidMessage = undefined;
@@ -72,13 +73,13 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
 
                     switch (context.result.password) {
                     case "isRequired":
-                        _store.passwordInvalidMessage = t.common.validations.isRequired(labelPassword);
+                        _store.passwordInvalidMessage = t.authentication.common.validations.isRequired(labelPassword);
                         break;
                     case "isTooShort":
-                        _store.passwordInvalidMessage = t.common.validations.isTooShort(labelPassword, 8);
+                        _store.passwordInvalidMessage = t.authentication.common.validations.isTooShort(labelPassword, 8);
                         break;
                     case "isTooLong":
-                        _store.passwordInvalidMessage = t.common.validations.isTooLong(labelPassword, 20);
+                        _store.passwordInvalidMessage = t.authentication.common.validations.isTooLong(labelPassword, 20);
                         break;
                     case null:
                         _store.passwordInvalidMessage = undefined;
@@ -104,20 +105,20 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 const context = result.lastSceneContext;
                 switch (context.scene) {
                 case goals.onSuccessInSigningInThenServicePresentsHomeView:
-                    _shared.current = "/";
+                    _shared.currentRouteLocation = "/";
                     break;
 
                 case goals.onFailureInValidatingThenServicePresentsError: {
                     if (context.result === true) { return; }
-                    const labelMailAddress = t.common.labels.mailAddress;
-                    const labelPassword = t.common.labels.password;
+                    const labelMailAddress = t.authentication.common.labels.mailAddress;
+                    const labelPassword = t.authentication.common.labels.password;
 
                     switch (context.result.id) {
                     case "isRequired":
-                        _store.idInvalidMessage = t.common.validations.isRequired(labelMailAddress);
+                        _store.idInvalidMessage = t.authentication.common.validations.isRequired(labelMailAddress);
                         break;
                     case "isMalformed":
-                        _store.idInvalidMessage = t.common.validations.isMalformed(labelMailAddress);
+                        _store.idInvalidMessage = t.authentication.common.validations.isMalformed(labelMailAddress);
                         break;
                     case null:
                         _store.idInvalidMessage = undefined;
@@ -126,13 +127,13 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
 
                     switch (context.result.password) {
                     case "isRequired":
-                        _store.passwordInvalidMessage = t.common.validations.isRequired(labelPassword);
+                        _store.passwordInvalidMessage = t.authentication.common.validations.isRequired(labelPassword);
                         break;
                     case "isTooShort":
-                        _store.passwordInvalidMessage = t.common.validations.isTooShort(labelPassword, 8);
+                        _store.passwordInvalidMessage = t.authentication.common.validations.isTooShort(labelPassword, 8);
                         break;
                     case "isTooLong":
-                        _store.passwordInvalidMessage = t.common.validations.isTooLong(labelPassword, 20);
+                        _store.passwordInvalidMessage = t.authentication.common.validations.isTooLong(labelPassword, 20);
                         break;
                     case null:
                         _store.passwordInvalidMessage = undefined;
@@ -169,7 +170,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     console.error("SERVICE ERROR:", context.error);
                     break;
                 case goals.servicePresentsHomeView:
-                    _shared.current = "/";
+                    _shared.currentRouteLocation = "/";
                     break;
                 }
             });

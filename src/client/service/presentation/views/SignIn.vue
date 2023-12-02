@@ -33,50 +33,54 @@ v-container
   v-app-bar(app)
     v-toolbar-title {{ t.application.title }}
   v-main
-    v-sheet(
-      elevation="12"
-      max-width="600"
-      rounded="lg"
-      width="100%"
-      class="pa-4 text-center mx-auto"
-    )
-      h1 {{  t.application.views.signIn.title }}
+    h1.mb-5 {{  t.application.views.signIn.title }}
+    v-card.mx-auto(elevation="1", max-width="500")
       v-form(ref="form", v-model="state.isValid", lazy-validation)
-        span(v-if="stores.authentication.signInFailureMessage !== null") {{ stores.authentication.signInFailureMessage }}
-        v-text-field(
-          v-model="state.email",
-          :label="t.authentication.common.labels.mailAddress",
-          :error-messages="stores.authentication.idInvalidMessage",
-          required
-        )
-        v-text-field(
-          v-model="state.password",
-          type="password",
-          :label="t.authentication.common.labels.password",
-          :error-messages="stores.authentication.passwordInvalidMessage",
-          required
-        )
-      .text-end
-        v-btn.text-none(
-          :disabled="!state.isValid",
-          color="success"
-          rounded
-          variant="flat"
-          width="90"
-          @click="dispatch(U.authentication.signIn.basics[Nobody.usecases.signIn.basics.userStartsSignInProcess]({ id: state.email, password: state.password }))"
-        ) {{ t.application.views.signIn.buttons.signIn }}
-      br
-      v-divider.mb-4
-      v-btn.mr-4(
-        color="success",
-      ) {{ t.application.views.signUp.buttons.signUp }}
-      br
-      v-divider.mb-4
-      br
-      v-btn.mr-4(
-        color="success",
-      ) {{ t.application.views.signUp.buttons.signUp }}
-    router-link(to="/signup") -> SignUp
+        v-card-text
+          v-row(align="center", justify="center")
+            v-col(cols="auto")
+              v-btn(icon="mdi-google", size="x-large")
+        v-divider
+        v-card-text
+          v-alert(
+            v-show="stores.authentication.signInFailureMessage"
+            color="error"
+            variant="text"
+          ) {{ stores.authentication.signInFailureMessage }}
+          div.text-subtitle-2.font-weight-black.mb-1 {{ t.authentication.common.labels.mailAddress }}
+          v-text-field(
+            v-model="state.email",
+            single-line,
+            variant="outlined"
+            :label="t.authentication.common.labels.mailAddress",
+            :error-messages="stores.authentication.idInvalidMessage",
+            required
+          )
+          div.text-subtitle-2.font-weight-black.mb-1 {{ t.authentication.common.labels.password }}
+          v-text-field(
+            v-model="state.password",
+            single-line,
+            variant="outlined"
+            type="password",
+            :label="t.authentication.common.labels.password",
+            :error-messages="stores.authentication.passwordInvalidMessage",
+            required
+          )
+          v-btn.text-none.mb-4(
+            color="success"
+            block,
+            size="x-large",
+            variant="flat"
+            @click="dispatch(U.authentication.signIn.basics[Nobody.usecases.signIn.basics.userStartsSignInProcess]({ id: state.email, password: state.password }))"
+          ) {{ t.application.views.signIn.buttons.signIn }}
+        v-divider.mb-4
+        v-card-text
+          v-btn.text-none.mr-4(
+            color="success",
+            block,
+            size="x-large",
+            variant="text"
+          ) {{ t.application.views.signUp.buttons.signUp }}
     v-row(justify="center")
       v-dialog(v-model="isPresentDialog", persistent, max-width="290")
         v-card
