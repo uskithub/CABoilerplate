@@ -146,6 +146,10 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     _store.signInFailureMessage = context.error.message;
                     break;
                 }
+                case goals.servicePresentsSignUpView: {
+                    _shared.currentRouteLocation = "/signup";
+                    break;
+                }
                 }
             })
             .catch(e => {

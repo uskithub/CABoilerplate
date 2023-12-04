@@ -80,6 +80,7 @@ v-container
             block,
             size="x-large",
             variant="text"
+            @click="dispatch(U.authentication.signIn.alternatives[Nobody.usecases.signIn.alternatives.userTapsSignUpButton]())"
           ) {{ t.application.views.signUp.buttons.signUp }}
     v-row(justify="center")
       v-dialog(v-model="isPresentDialog", persistent, max-width="290")

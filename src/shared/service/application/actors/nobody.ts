@@ -19,10 +19,14 @@ export class Nobody extends BaseActor<null> {
                 , serviceValidateInputs: "サービスは入力項目に問題がないかを確認する"
                 , onSuccessInValidatingThenServiceTrySigningIn: "入力項目に問題がない場合_サービスはサインインを試行する"
             }
+            , alternatives: {
+                userTapsSignUpButton: "ユーザはサインアップボタンをタップする"
+            }
             , goals: {
                 onSuccessInSigningInThenServicePresentsHomeView: "サインインに成功した場合_サービスはホーム画面を表示する"
                 , onFailureInValidatingThenServicePresentsError: "入力項目に問題がある場合_サービスはエラーを表示する"
                 , onFailureInSigningInThenServicePresentsError: "サインインに失敗した場合_サービスはエラーを表示する"
+                , servicePresentsSignUpView: "サインアップ画面を表示する"
             }
         }
         , signUp : {
