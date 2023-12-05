@@ -87,9 +87,14 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     }
                     break;
                 }
-                case goals.onFailureInPublishingThenServicePresentsError:
+                case goals.onFailureInPublishingThenServicePresentsError: {
                     console.error("SERVICE ERROR:", context.error);
                     break;
+                }
+                case goals.servicePresentsSignInView: {
+                    _shared.currentRouteLocation = "/signin";
+                    break;
+                }
                 }
                 return;
             });

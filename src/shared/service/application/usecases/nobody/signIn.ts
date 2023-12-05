@@ -20,7 +20,7 @@ export type SignInScenes = {
     };
     alternatives: {
         [_u.alternatives.userTapsSignUpButton]: Empty;
-    }
+    };
     goals : {
         [_u.goals.onSuccessInSigningInThenServicePresentsHomeView]: { user: UserProperties; };
         [_u.goals.onFailureInValidatingThenServicePresentsError]: { result: SignInValidationResult; };

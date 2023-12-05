@@ -15,13 +15,16 @@ export type SignUpScenes = {
         [_u.basics.userStartsSignUpProcess]: { id: string | null; password: string | null; };
         [_u.basics.serviceValidateInputs]: { id: string | null; password: string | null; };
         [_u.basics.onSuccessInValidatingThenServicePublishNewAccount]: { id: string; password: string; };
-    }
-    alternatives: Empty;
+    };
+    alternatives: {
+        [_u.alternatives.userTapsSignInButton]: Empty;
+    };
     goals : {
         [_u.goals.onSuccessInPublishingThenServicePresentsHomeView]: { user: UserProperties; };
         [_u.goals.onFailureInValidatingThenServicePresentsError]: { result: SignUpValidationResult; };
         [_u.goals.onFailureInPublishingThenServicePresentsError]: { error: Error; };
-    }
+        [_u.goals.servicePresentsSignInView]: Empty;
+    };
 };
 
 export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
@@ -36,6 +39,9 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         }
         case _u.basics.onSuccessInValidatingThenServicePublishNewAccount: {
             return this.publishNewAccount(to.id, to.password);
+        }
+        case _u.alternatives.userTapsSignInButton: {
+            return this.just(this.goals[_u.goals.servicePresentsSignInView]());
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);

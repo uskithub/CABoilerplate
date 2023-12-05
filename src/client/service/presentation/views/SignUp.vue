@@ -33,26 +33,44 @@ v-container
   v-app-bar(app)
     v-toolbar-title {{ t.application.title }}
   v-main
-    h1 {{  t.application.views.signUp.title }}
-    v-form(ref="form", v-model="isFormValid", lazy-validation)
-      v-text-field(
-        v-model="state.email",
-        :label="t.authentication.common.labels.mailAddress",
-        :error-messages="stores.authentication.idInvalidMessage",
-        required
-      )
-      v-text-field(
-        v-model="state.password",
-        type="password",
-        :label="t.authentication.common.labels.password",
-        :error-messages="stores.authentication.passwordInvalidMessage",
-        required
-      )
-      v-btn.mr-4(
-        :disabled="!isFormValid",
-        color="success",
-        @click="dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.userStartsSignUpProcess]({ id: state.email, password: state.password }))"
-      ) {{ t.application.views.signUp.buttons.signUp }}
+    h1.mb-5 {{  t.application.views.signUp.title }}
+    v-card.mx-auto(
+      variant="flat", 
+      max-width="500"
+    )
+      v-form(ref="form", v-model="isFormValid", lazy-validation)
+        v-card-text
+          div.text-subtitle-2.font-weight-black.mb-1 {{ t.authentication.common.labels.mailAddress }}
+          v-text-field(
+            v-model="state.email",
+            single-line,
+            variant="outlined"
+            :label="t.authentication.common.labels.mailAddress",
+            :error-messages="stores.authentication.idInvalidMessage",
+            required
+          )
+          v-btn.text-none.mb-4(
+            :disabled="!isFormValid",
+            color="success",
+            block,
+            size="x-large",
+            variant="flat"
+            @click="dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.userStartsSignUpProcess]({ id: state.email, password: state.password }))"
+          ) {{ t.application.views.signUp.buttons.next }}
+        v-divider.mb-4
+        v-card-text
+          v-row(align="center", justify="center")
+            v-col(cols="auto")
+              v-btn(icon="mdi-google", size="x-large")
+        v-divider.mb-4
+        v-card-text
+          v-btn.text-none.mr-4(
+            color="success",
+            block,
+            size="x-large",
+            variant="text"
+            @click="dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userTapsSignInButton]())"
+          ) {{ t.application.views.signUp.buttons.signIn }}
 
     v-row(justify="center")
       v-dialog(v-model="isPresentDialog", persistent, max-width="290")

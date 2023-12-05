@@ -5,7 +5,9 @@ export default {
             signUp : {
                 title : "Sign Up"
                 , buttons: {
-                    signUp: "Sign Up"
+                    signIn: "Sign In"
+                    , signUp: "Sign Up"
+                    , next: "Next"
                 }
             }
             , signIn : {
