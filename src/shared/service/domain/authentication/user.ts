@@ -100,4 +100,8 @@ export class User implements Entity<UserProperties> {
     static signOut(): Observable<void> {
         return dependencies.auth.signOut();
     }
+    
+    static oauthToGoogle(): Observable<void> {
+        return dependencies.auth.oauthToGoogle();
+    }
 }

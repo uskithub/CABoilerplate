@@ -45,6 +45,21 @@ export class Nobody extends BaseActor<null> {
                 , servicePresentsSignInView: "サインイン画面を表示する"
             }
         }
+        , signUpWithGoogleOAuth : {
+            basics: {
+                userStartsSignUpProcess: "ユーザはサインアップを開始する"
+                , systemRedirectsToGoogleOAuth: "システムはGoogle OAuth認証ページにリダイレクトする"
+                , userAuthenticatesWithGoogle: "ユーザはGoogleアカウントで認証を行う"
+                , systemReceivesAuthToken: "システムは認証トークンを受け取る"
+            }
+            , alternatives: {
+                errorDuringGoogleOAuth: "Google OAuth認証中にエラーが発生する"
+                , systemDisplaysErrorAndRedirects: "システムがエラーメッセージを表示し、ログインページにリダイレクトする"
+            }
+            , goals: {
+                systemDisplaysHomepage: "システムがホームページを表示する"
+            }
+        }
     } as const;
 }
 export const isNobody = (actor: Actor): actor is Nobody => actor.constructor === Nobody;

@@ -45,4 +45,6 @@ export interface Authenticator {
      * サインアウトします。
      */
     signOut: () => Observable<void>;
+
+    oauthToGoogle: () => Observable<void>;
 }

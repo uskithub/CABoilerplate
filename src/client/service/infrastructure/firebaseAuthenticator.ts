@@ -1,6 +1,6 @@
 import { Authenticator, SignInStatus, SignInStatuses } from "@interfaces/authenticator";
 import { FirebaseApp, FirebaseError } from "firebase/app";
-import { Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, Unsubscribe, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, Unsubscribe, signInWithEmailAndPassword, signOut, signInWithRedirect, GoogleAuthProvider } from "firebase/auth";
 import { Observable, ReplaySubject } from "rxjs";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 
@@ -103,6 +103,20 @@ export class FirebaseAuthenticator implements Authenticator {
     signOut(): Observable<void> {
         return new Observable(subscriber => {
             signOut(this.#auth)
+                .then(() => {
+                    subscriber.next();
+                    subscriber.complete();
+                })
+                .catch(error => {
+                    subscriber.error(error);
+                });
+        });
+    }
+
+    oauthToGoogle(): Observable<void> {
+        return new Observable(subscriber => {
+            const provider = new GoogleAuthProvider();
+            signInWithRedirect(this.#auth, provider)
                 .then(() => {
                     subscriber.next();
                     subscriber.complete();
