@@ -1,8 +1,8 @@
 import { Authenticator, SignInStatus, SignInStatuses } from "@interfaces/authenticator";
 import { FirebaseApp, FirebaseError } from "firebase/app";
-import { Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, Unsubscribe, signInWithEmailAndPassword, signOut, signInWithRedirect, GoogleAuthProvider } from "firebase/auth";
+import { Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, Unsubscribe, signInWithEmailAndPassword, signOut, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from "firebase/auth";
 import { Observable, ReplaySubject } from "rxjs";
-import { UserProperties } from "@/shared/service/domain/authentication/user";
+import { UserCredential, UserProperties } from "@/shared/service/domain/authentication/user";
 
 export class FirebaseAuthenticator implements Authenticator {
     #auth: Auth;
@@ -113,17 +113,13 @@ export class FirebaseAuthenticator implements Authenticator {
         });
     }
 
-    oauthToGoogle(): Observable<void> {
-        return new Observable(subscriber => {
-            const provider = new GoogleAuthProvider();
-            signInWithRedirect(this.#auth, provider)
-                .then(() => {
-                    subscriber.next();
-                    subscriber.complete();
-                })
-                .catch(error => {
-                    subscriber.error(error);
-                });
-        });
+    oauthToGoogle(scope: string[]): Promise<void> {
+        const provider = new GoogleAuthProvider();
+        scope.forEach(content => provider.addScope(content));
+        return signInWithRedirect(this.#auth, provider);
+    }
+
+    getGoogleOAuthRedirectResult(): Promise<UserCredential|null> {
+        return getRedirectResult(this.#auth);
     }
 }

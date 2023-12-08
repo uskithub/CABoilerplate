@@ -57,9 +57,14 @@ export function createApplicationPerformer(): ApplicationPerformer {
                         _shared.signInStatus = SignInStatuses.signIn({ user });
                         break;
                     }
-                    case goals.sessionNotExistsThenServicePresentsSignin: {
+                    case goals.googleOAuthRedirectResultNotExistsThenServicePresentsSignin: {
                         _shared.signInStatus = SignInStatuses.signOut();
                         _shared.currentRouteLocation = "/signin";
+                        break;
+                    }
+                    case goals.googleOAuthRedirectResultExistsThenServicePerformSignInWithGoogleOAuth: {
+                        _shared.signInStatus = SignInStatuses.signOut();
+                        dispatcher.dispatch(Nobody.usecases.signInWithGoogleOAuth.alternatives, actor, dispatcher);
                         break;
                     }
                     }

@@ -26,21 +26,31 @@ export type ChangedItems<T> = {
 export const ChangedTask = new SwiftEnum<ChangedItems<Task>>();
 export type ChangedTask = SwiftEnumCases<ChangedItems<Task>>;
 
-export interface Backend {
+export type UserFunctions = {
+    get: (userId: string) => Promise<void>;
+    // create: () => Promise<void>;
+    // update: () => Promise<void>;
+    // delete: () => Promise<void>;
+};
 
+export type TaskFunctions = {
     /**
      * ユーザのタスクを観測し、変更を通知します。
      */
-    observeTasks: (userId: string) => Observable<ChangedTask[]>;
+    observe(userId: string): Observable<ChangedTask[]>
+};
 
+export type ProjectFunctions = {
     /**
      * ユーザのプロジェクトを取得します。
      * @param userId 
      * @param projectId 
      */
-    observeUsersProjects(userId: string): Observable<ChangedTask[]>;
-
-    observeProject(userId: string, projectId: string): Observable<Task>;
-
-    // getWarranties: () => Observable<Warranty[]|null>;
+    observeUsersProjects(userId: string): Observable<ChangedTask[]> 
+    observe(userId: string, projectId: string): Observable<Task> 
+};
+export interface Backend {
+    users: UserFunctions;
+    tasks: TaskFunctions;
+    projects: ProjectFunctions;
 }

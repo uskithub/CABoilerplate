@@ -8,9 +8,15 @@ export class Nobody extends BaseActor<null> {
                 userOpensSite: "ユーザはサイトを開く"
                 , serviceChecksSession: "サービスはセッションがあるかを確認する"
             }
+            , alternatives: {
+                sessionNotExistsThenServiceCheckGoogleOAuthRedirectResult: "セッションがない場合_サービスはGoogleOAuthのリダイレクト結果を確認する"
+                , googleOAuthRedirectResultExistsThenServiceGetUserData: "GoogleOAuthのリダイレクト結果がある場合_サービスはユーザ情報を取得する"
+            }
             , goals: {
                 sessionExistsThenServicePresentsHome: "セッションがある場合_サービスはホーム画面を表示する"
-                , sessionNotExistsThenServicePresentsSignin: "セッションがない場合_サービスはサインイン画面を表示する"
+                , googleOAuthRedirectResultNotExistsThenServicePresentsSignin: "GoogleOAuthのリダイレクト結果がない場合_サービスはサインイン画面を表示する"
+                , userDataExistsThenServicePerformSignInWithGoogleOAuth: "ユーザ情報がある場合_サービスはGoogleOAuthでサインインするのユースケースを実行する"
+                , userDataNotExistsThenServicePerformSignUpWithGoogleOAuth: "ユーザ情報がない場合_サービスはGoogleOAuthでサインアップするのユースケースを実行する"
             }
         }
         , signIn : {
@@ -36,30 +42,34 @@ export class Nobody extends BaseActor<null> {
                 , onSuccessInValidatingThenServicePublishNewAccount: "入力項目に問題がない場合_サービスはアカウントを新規に発行する"
             }
             , alternatives: {
-                userTapsSignInButton: "ユーザはサインインボタンをタップする"
+                userStartsSignUpProcessWithGoogleOAuth: "ユーザはGoogleOAuthでのサインアップを開始する"
+                , serviceRedirectsToGoogleOAuth: "サービスはGoogle OAuth認証ページにリダイレクトする"
+                , userTapsSignInButton: "ユーザはサインインボタンをタップする"
             }
             , goals: {
                 onSuccessInPublishingThenServicePresentsHomeView: "アカウントの発行に成功した場合_サービスはホーム画面を表示する"
                 , onFailureInValidatingThenServicePresentsError: "入力項目に問題がある場合_サービスはエラーを表示する"
                 , onFailureInPublishingThenServicePresentsError: "アカウントの発行に失敗した場合_サービスはエラーを表示する"
+                , serviceDoNothing: "サービスはなにもしない"
                 , servicePresentsSignInView: "サインイン画面を表示する"
             }
         }
-        , signUpWithGoogleOAuth : {
-            basics: {
-                userStartsSignUpProcess: "ユーザはサインアップを開始する"
-                , systemRedirectsToGoogleOAuth: "システムはGoogle OAuth認証ページにリダイレクトする"
-                , userAuthenticatesWithGoogle: "ユーザはGoogleアカウントで認証を行う"
-                , systemReceivesAuthToken: "システムは認証トークンを受け取る"
-            }
-            , alternatives: {
-                errorDuringGoogleOAuth: "Google OAuth認証中にエラーが発生する"
-                , systemDisplaysErrorAndRedirects: "システムがエラーメッセージを表示し、ログインページにリダイレクトする"
-            }
-            , goals: {
-                systemDisplaysHomepage: "システムがホームページを表示する"
-            }
-        }
+        // , signInWithGoogleOAuth : {
+        //     basics: {
+        //         userStartsSignInProcess: "ユーザはサインインを開始する"
+        //         , systemRedirectsToGoogleOAuth: "システムはGoogle OAuth認証ページにリダイレクトする"
+        //         , userAuthenticatesWithGoogle: "ユーザはGoogleアカウントで認証を行う"
+        //         , systemReceivesAuthToken: "システムは認証トークンを受け取る"
+        //     }
+        //     , alternatives: {
+        //         service
+        //         errorDuringGoogleOAuth: "Google OAuth認証中にエラーが発生する"
+        //         , systemDisplaysErrorAndRedirects: "システムがエラーメッセージを表示し、ログインページにリダイレクトする"
+        //     }
+        //     , goals: {
+        //         systemDisplaysHomepage: "システムがホームページを表示する"
+        //     }
+        // }
     } as const;
 }
 export const isNobody = (actor: Actor): actor is Nobody => actor.constructor === Nobody;

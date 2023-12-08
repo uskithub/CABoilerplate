@@ -2,6 +2,9 @@ import { ValidationResult as r, AbstructValidation } from "@/shared/system/inter
 import dependencies from "../dependencies";
 import { Entity } from "@/shared/system/interfaces/architecture";
 import { Observable } from "rxjs";
+import { UserCredential as _UserCredential } from "firebase/auth";
+
+export type UserCredential = _UserCredential;
 
 export type UserProperties = {
     uid: string;
@@ -50,11 +53,26 @@ export class PasswordValidation extends AbstructValidation<string, PasswordValid
     }
 }
 
+const isUserCredential = (arg: UserProperties | UserCredential): arg is UserCredential => arg.user !== undefined;
 export class User implements Entity<UserProperties> {
     properties: UserProperties;
+    static requiredScope: string[] = ["https://www.googleapis.com/auth/contacts.readonly"];
 
-    constructor(properties: UserProperties) {
-        this.properties = properties;
+    constructor(properties: UserProperties)
+    constructor(userCredential: UserCredential)
+
+    constructor(arg: UserProperties | UserCredential) {
+        if (isUserCredential(arg)) {
+            this.properties = {
+                uid: arg.user.uid
+                , mailAddress: arg.user.email
+                , photoUrl: arg.user.photoURL
+                , displayName: arg.user.displayName
+                , isMailAddressVerified: arg.user.emailVerified
+            };
+        } else {
+            this.properties = arg;
+        }
     }
 
     /**
@@ -101,7 +119,15 @@ export class User implements Entity<UserProperties> {
         return dependencies.auth.signOut();
     }
     
-    static oauthToGoogle(): Observable<void> {
-        return dependencies.auth.oauthToGoogle();
+    static oauthToGoogle(): Promise<void> {
+        return dependencies.auth.oauthToGoogle(User.requiredScope);
+    }
+
+    static getGoogleOAuthRedirectResult(): Promise<UserCredential | null> {
+        return dependencies.auth.getGoogleOAuthRedirectResult();
+    }
+
+    getUserData(): Observable<UserProperties> {
+        return dependencies.backend.users.getUserData(this.properties.uid);
     }
 }

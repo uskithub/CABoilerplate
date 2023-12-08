@@ -1,6 +1,6 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import { Application } from "@/shared/service/domain/application/application";
-import { UserProperties } from "@/shared/service/domain/authentication/user";
+import { User, UserCredential, UserProperties } from "@/shared/service/domain/authentication/user";
 import { Nobody } from "../../actors/nobody";
 import { MyBaseScenario } from "../common";
 
@@ -18,10 +18,14 @@ export type BootScenes = {
         [_u.basics.userOpensSite]: Empty;
         [_u.basics.serviceChecksSession]: Empty;
     };
-    alternatives: Empty;
+    alternatives: {
+        [_u.alternatives.sessionNotExistsThenServiceCheckGoogleOAuthRedirectResult]: Empty;
+        [_u.alternatives.googleOAuthRedirectResultExistsThenServiceGetUserData]: { userCredential: UserCredential; };
+    };
     goals: {
         [_u.goals.sessionExistsThenServicePresentsHome]: { user: UserProperties; };
-        [_u.goals.sessionNotExistsThenServicePresentsSignin]: Empty;
+        [_u.goals.userDataExistsThenServicePerformSignInWithGoogleOAuth]: { user: UserProperties; };
+        [_u.goals.userDataNotExistsThenServicePerformSignUpWithGoogleOAuth]: { userCredential: UserCredential; };
     };
 };
 
@@ -39,7 +43,13 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
             return this.just(this.basics[_u.basics.serviceChecksSession]());
         }
         case _u.basics.serviceChecksSession: {
-            return this.check();
+            return this.checkSession();
+        }
+        case _u.alternatives.sessionNotExistsThenServiceCheckGoogleOAuthRedirectResult: {
+            return this.checkGoogleOAuthRedirectResult();
+        }
+        case _u.alternatives.googleOAuthRedirectResultExistsThenServiceGetUserData: {
+            return this.getUserData(to.userCredential);
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);
@@ -47,7 +57,7 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
         }
     }
 
-    private check(): Promise<Context<BootScenes>> {
+    private checkSession(): Promise<Context<BootScenes>> {
         return firstValueFrom(
             Application
                 .signInStatus()
@@ -58,11 +68,28 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
                             return this.goals[_u.goals.sessionExistsThenServicePresentsHome]({ user: signInStatus.user });
                         }
                         default: {     
-                            return this.goals[_u.goals.sessionNotExistsThenServicePresentsSignin]();
+                            return this.alternatives[_u.alternatives.sessionNotExistsThenServiceCheckGoogleOAuthRedirectResult]();
                         }
                         }
                     })
                 )
         );
+    }
+
+    private checkGoogleOAuthRedirectResult(): Promise<Context<BootScenes>> {
+        return User
+            .getGoogleOAuthRedirectResult()
+            .then(userCredential => {
+                if (userCredential === null) {
+                    return this.goals[_u.goals.googleOAuthRedirectResultNotExistsThenServicePresentsSignin]();
+                } else {
+                    return this.alternatives[_u.alternatives.googleOAuthRedirectResultExistsThenServiceGetUserData]( { userCredential });
+                }
+            });
+    }
+
+    private getUserData(userCredential: UserCredential): Promise<Context<BootScenes>> {
+        const user = new User(userCredential);
+        user.getUserData();
     }
 }

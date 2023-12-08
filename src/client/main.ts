@@ -12,7 +12,7 @@ import { initializeApp } from "firebase/app";
 import firebaseConfig from "@client/system/config/firebase.config.json";
 import { getFirestore } from "firebase/firestore";
 import { FirebaseAuthenticator } from "@client/service/infrastructure/firebaseAuthenticator";
-import { FirestoreBackend } from "./service/infrastructure/firestoreBackend";
+import { FirestoreBackend } from "./service/infrastructure/firestoreBackend/firestoreBackend";
 
 // Amplify
 import { Amplify } from "aws-amplify";

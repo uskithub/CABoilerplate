@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { UserProperties } from "../authentication/user";
+import { UserCredential, UserProperties } from "../authentication/user";
 import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
 import { Empty } from "robustive-ts";
 
@@ -46,5 +46,7 @@ export interface Authenticator {
      */
     signOut: () => Observable<void>;
 
-    oauthToGoogle: () => Observable<void>;
+    oauthToGoogle: (scope: string[]) => Promise<void>;
+
+    getGoogleOAuthRedirectResult: () => Promise<UserCredential|null>;
 }

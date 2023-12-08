@@ -17,12 +17,15 @@ export type SignUpScenes = {
         [_u.basics.onSuccessInValidatingThenServicePublishNewAccount]: { id: string; password: string; };
     };
     alternatives: {
+        [_u.alternatives.userStartsSignUpProcessWithGoogleOAuth]: Empty;
+        [_u.alternatives.serviceRedirectsToGoogleOAuth]: Empty;
         [_u.alternatives.userTapsSignInButton]: Empty;
     };
     goals : {
         [_u.goals.onSuccessInPublishingThenServicePresentsHomeView]: { user: UserProperties; };
         [_u.goals.onFailureInValidatingThenServicePresentsError]: { result: SignUpValidationResult; };
         [_u.goals.onFailureInPublishingThenServicePresentsError]: { error: Error; };
+        [_u.goals.serviceDoNothing]: Empty;
         [_u.goals.servicePresentsSignInView]: Empty;
     };
 };
@@ -39,6 +42,12 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         }
         case _u.basics.onSuccessInValidatingThenServicePublishNewAccount: {
             return this.publishNewAccount(to.id, to.password);
+        }
+        case _u.alternatives.userStartsSignUpProcessWithGoogleOAuth: {
+            return this.just(this.alternatives[_u.alternatives.serviceRedirectsToGoogleOAuth]());
+        }
+        case _u.alternatives.serviceRedirectsToGoogleOAuth: {
+            return this.redirect();
         }
         case _u.alternatives.userTapsSignInButton: {
             return this.just(this.goals[_u.goals.servicePresentsSignInView]());
@@ -68,5 +77,12 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
                     })
                 )
         );
+    }
+    private redirect(): Promise<Context<SignUpScenes>> {
+        return User
+            .oauthToGoogle()
+            .then(() => {
+                return this.goals[_u.goals.serviceDoNothing]();
+            });
     }
 }

@@ -61,7 +61,11 @@ v-container
         v-card-text
           v-row(align="center", justify="center")
             v-col(cols="auto")
-              v-btn(icon="mdi-google", size="x-large")
+              v-btn(
+                icon="mdi-google", 
+                size="x-large",
+                @click="dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userStartsSignUpProcessWithGoogleOAuth]())"
+              )
         v-divider.mb-4
         v-card-text
           v-btn.text-none.mr-4(

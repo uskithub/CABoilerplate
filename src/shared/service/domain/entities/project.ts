@@ -5,9 +5,9 @@ import { Task } from "./task";
 
 export default {
     observeUsersProjects: (userId: string): Observable<ChangedTask[]> => {
-        return dependencies.backend.observeUsersProjects(userId);
+        return dependencies.backend.projects.observeUsersProjects(userId);
     }
     , observeProject: (userId: string, projectId: string): Observable<Task> => {
-        return dependencies.backend.observeProject(userId, projectId);
+        return dependencies.backend.projects.observe(userId, projectId);
     }
 };

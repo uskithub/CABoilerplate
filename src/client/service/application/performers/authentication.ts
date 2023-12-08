@@ -91,6 +91,9 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     console.error("SERVICE ERROR:", context.error);
                     break;
                 }
+                case goals.serviceDoNothing: {
+                    break;
+                }
                 case goals.servicePresentsSignInView: {
                     _shared.currentRouteLocation = "/signin";
                     break;
