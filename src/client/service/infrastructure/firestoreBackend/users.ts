@@ -1,5 +1,5 @@
 import { UserFunctions } from "@/shared/service/domain/interfaces/backend";
-import { addDoc, collection, collectionGroup, doc, DocumentChangeType, Firestore, getDocs, onSnapshot, orderBy, where, query, DocumentSnapshot, DocumentData, Unsubscribe, Timestamp } from "firebase/firestore";
+import { addDoc, collection, collectionGroup, doc, DocumentChangeType, Firestore, getDocs, onSnapshot, orderBy, where, query, DocumentSnapshot, DocumentData, Unsubscribe, Timestamp, setDoc } from "firebase/firestore";
 import { CollectionType } from "./firestoreBackend";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 
@@ -32,8 +32,9 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                     });
             });
         }
-        , create: (user: UserProperties): Promise<void> => {
-            return addDoc(userCollectionRef, {
+        , create: (user: UserProperties): Promise<UserProperties> => {
+
+            return setDoc(doc(userCollectionRef, user.uid), {
                 uid: user.uid
                 , displayName: user.displayName
                 , email: user.mailAddress
@@ -41,8 +42,9 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                 , companions: []
                 , createdAt: Timestamp.now()
             })
-                .then((documentRef) => {
-                    console.log("Document written with ID: ", documentRef.id);
+                .then(() => {
+                    console.log("Document written with ID: ", user.uid);
+                    return user;
                 });
         }
     };

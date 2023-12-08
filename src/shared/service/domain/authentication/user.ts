@@ -127,7 +127,7 @@ export class User implements Entity<UserProperties> {
         return dependencies.auth.getGoogleOAuthRedirectResult();
     }
 
-    createData(): Promise<void> {
+    createData(): Promise<UserProperties | null> {
         return dependencies.backend.users.create(this.properties);
     }
 
