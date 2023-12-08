@@ -8,7 +8,7 @@ import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/actors/nobody";
-import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
+import { U, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { Task } from "@/shared/service/domain/entities/task";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
 import { InteractResultType } from "robustive-ts";
@@ -62,10 +62,15 @@ export function createApplicationPerformer(): ApplicationPerformer {
                         _shared.currentRouteLocation = "/signin";
                         break;
                     }
-                    case goals.googleOAuthRedirectResultExistsThenServicePerformSignInWithGoogleOAuth: {
+                    case goals.userDataExistsThenServicePerformSignInWithGoogleOAuth: {
                         _shared.signInStatus = SignInStatuses.signOut();
-                        dispatcher.dispatch(Nobody.usecases.signInWithGoogleOAuth.alternatives, actor, dispatcher);
-                        break;
+                        return dispatcher.dispatch(U.authentication.signIn.goals[Nobody.usecases.signIn.goals.onSuccessInSigningInThenServicePresentsHomeView]({ user: result.lastSceneContext.user }), actor)
+                            .then(() => { return; });
+                    }
+                    case goals.userDataNotExistsThenServicePerformSignUpWithGoogleOAuth: {
+                        _shared.signInStatus = SignInStatuses.signOut();
+                        return dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ user: result.lastSceneContext.userCredential }), actor)
+                            .then(() => { return; });
                     }
                     }
                 }

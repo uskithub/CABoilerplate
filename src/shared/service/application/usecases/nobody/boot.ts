@@ -24,6 +24,7 @@ export type BootScenes = {
     };
     goals: {
         [_u.goals.sessionExistsThenServicePresentsHome]: { user: UserProperties; };
+        [_u.goals.googleOAuthRedirectResultNotExistsThenServicePresentsSignin]:Empty;
         [_u.goals.userDataExistsThenServicePerformSignInWithGoogleOAuth]: { user: UserProperties; };
         [_u.goals.userDataNotExistsThenServicePerformSignUpWithGoogleOAuth]: { userCredential: UserCredential; };
     };
@@ -49,7 +50,7 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
             return this.checkGoogleOAuthRedirectResult();
         }
         case _u.alternatives.googleOAuthRedirectResultExistsThenServiceGetUserData: {
-            return this.getUserData(to.userCredential);
+            return this.getUserData(to.userCredential as UserCredential);
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);
@@ -82,14 +83,18 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
             .then(userCredential => {
                 if (userCredential === null) {
                     return this.goals[_u.goals.googleOAuthRedirectResultNotExistsThenServicePresentsSignin]();
-                } else {
-                    return this.alternatives[_u.alternatives.googleOAuthRedirectResultExistsThenServiceGetUserData]( { userCredential });
                 }
+                return this.alternatives[_u.alternatives.googleOAuthRedirectResultExistsThenServiceGetUserData]( { userCredential });
             });
     }
 
     private getUserData(userCredential: UserCredential): Promise<Context<BootScenes>> {
-        const user = new User(userCredential);
-        user.getUserData();
+        return new User(userCredential).getData()
+            .then(userProperties => {
+                if (userProperties === null) {
+                    return this.goals[_u.goals.userDataNotExistsThenServicePerformSignUpWithGoogleOAuth]({ userCredential });
+                }
+                return this.goals[_u.goals.userDataExistsThenServicePerformSignInWithGoogleOAuth]({ user: userProperties });
+            });
     }
 }

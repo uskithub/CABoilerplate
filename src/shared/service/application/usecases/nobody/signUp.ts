@@ -15,6 +15,7 @@ export type SignUpScenes = {
         [_u.basics.userStartsSignUpProcess]: { id: string | null; password: string | null; };
         [_u.basics.serviceValidateInputs]: { id: string | null; password: string | null; };
         [_u.basics.onSuccessInValidatingThenServicePublishNewAccount]: { id: string; password: string; };
+        [_u.basics.onSuccessPublishNewAccountThenServiceCreateUserData]: { user: UserProperties; };
     };
     alternatives: {
         [_u.alternatives.userStartsSignUpProcessWithGoogleOAuth]: Empty;
@@ -22,8 +23,9 @@ export type SignUpScenes = {
         [_u.alternatives.userTapsSignInButton]: Empty;
     };
     goals : {
-        [_u.goals.onSuccessInPublishingThenServicePresentsHomeView]: { user: UserProperties; };
+        [_u.goals.onSuccessInCreateUserDataThenServicePresentsHomeView]: { user: UserProperties; };
         [_u.goals.onFailureInValidatingThenServicePresentsError]: { result: SignUpValidationResult; };
+        [_u.goals.onFailureInCreateUserDataThenServicePresentsError]: { error: Error; };
         [_u.goals.onFailureInPublishingThenServicePresentsError]: { error: Error; };
         [_u.goals.serviceDoNothing]: Empty;
         [_u.goals.servicePresentsSignInView]: Empty;
@@ -42,6 +44,9 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         }
         case _u.basics.onSuccessInValidatingThenServicePublishNewAccount: {
             return this.publishNewAccount(to.id, to.password);
+        }
+        case _u.basics.onSuccessPublishNewAccountThenServiceCreateUserData: {
+            return this.createUser(to.user);
         }
         case _u.alternatives.userStartsSignUpProcessWithGoogleOAuth: {
             return this.just(this.alternatives[_u.alternatives.serviceRedirectsToGoogleOAuth]());
@@ -70,14 +75,25 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
     private publishNewAccount(id: string, password: string): Promise<Context<SignUpScenes>> {
         return firstValueFrom(
             User
-                .create(id, password)
+                .createAccount(id, password)
                 .pipe(
                     map((userProperties: UserProperties) => {
-                        return this.goals[_u.goals.onSuccessInPublishingThenServicePresentsHomeView]({ user: userProperties });
+                        return this.basics[_u.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ user: userProperties });
                     })
                 )
         );
     }
+
+    private createUser(user: UserProperties): Promise<Context<SignUpScenes>> {
+        return new User(user).createData()
+            .then(() => {
+                return this.goals[_u.goals.onSuccessInCreateUserDataThenServicePresentsHomeView]({ user });
+            })
+            .catch((error: Error) => {
+                return this.goals[_u.goals.onFailureInCreateUserDataThenServicePresentsError]({ error });
+            });
+    }
+
     private redirect(): Promise<Context<SignUpScenes>> {
         return User
             .oauthToGoogle()

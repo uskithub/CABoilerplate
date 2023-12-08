@@ -1,5 +1,5 @@
 import { ChangedTask, ItemChangeType, ProjectFunctions } from "@/shared/service/domain/interfaces/backend";
-import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "../entities/tasks";
+import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./entities/tasks";
 import { CollectionType } from "./firestoreBackend";
 import { Log, Task } from "@/shared/service/domain/entities/task";
 

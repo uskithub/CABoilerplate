@@ -104,7 +104,7 @@ export class User implements Entity<UserProperties> {
      * @param password 
      * @returns 
      */
-    static create(id: string, password: string): Observable<UserProperties> {
+    static createAccount(id: string, password: string): Observable<UserProperties> {
         return dependencies.auth.createAccount(id, password);
     }
 
@@ -127,7 +127,11 @@ export class User implements Entity<UserProperties> {
         return dependencies.auth.getGoogleOAuthRedirectResult();
     }
 
-    getUserData(): Observable<UserProperties> {
-        return dependencies.backend.users.getUserData(this.properties.uid);
+    createData(): Promise<void> {
+        return dependencies.backend.users.create(this.properties);
+    }
+
+    getData(): Promise<UserProperties | null> {
+        return dependencies.backend.users.get(this.properties.uid);
     }
 }

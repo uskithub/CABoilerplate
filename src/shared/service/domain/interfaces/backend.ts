@@ -1,6 +1,7 @@
 import { Observable } from "rxjs";
 import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
 import { Task } from "../entities/task";
+import { UserProperties } from "../authentication/user";
 
 export const ItemChangeType = {
     added : "added"
@@ -27,8 +28,8 @@ export const ChangedTask = new SwiftEnum<ChangedItems<Task>>();
 export type ChangedTask = SwiftEnumCases<ChangedItems<Task>>;
 
 export type UserFunctions = {
-    get: (userId: string) => Promise<void>;
-    // create: () => Promise<void>;
+    get: (userId: string) => Promise<UserProperties | null>;
+    create: (user: UserProperties) => Promise<void>;
     // update: () => Promise<void>;
     // delete: () => Promise<void>;
 };
@@ -49,6 +50,7 @@ export type ProjectFunctions = {
     observeUsersProjects(userId: string): Observable<ChangedTask[]> 
     observe(userId: string, projectId: string): Observable<Task> 
 };
+
 export interface Backend {
     users: UserFunctions;
     tasks: TaskFunctions;

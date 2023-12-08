@@ -40,6 +40,7 @@ export class Nobody extends BaseActor<null> {
                 userStartsSignUpProcess: "ユーザはサインアップを開始する"
                 , serviceValidateInputs: "サービスは入力項目に問題がないかを確認する"
                 , onSuccessInValidatingThenServicePublishNewAccount: "入力項目に問題がない場合_サービスはアカウントを新規に発行する"
+                , onSuccessPublishNewAccountThenServiceCreateUserData: "アカウントの発行に成功した場合_サービスはユーザ情報を作成する"
             }
             , alternatives: {
                 userStartsSignUpProcessWithGoogleOAuth: "ユーザはGoogleOAuthでのサインアップを開始する"
@@ -47,9 +48,10 @@ export class Nobody extends BaseActor<null> {
                 , userTapsSignInButton: "ユーザはサインインボタンをタップする"
             }
             , goals: {
-                onSuccessInPublishingThenServicePresentsHomeView: "アカウントの発行に成功した場合_サービスはホーム画面を表示する"
+                onSuccessInCreateUserDataThenServicePresentsHomeView: "ユーザ情報の作成に成功した場合_サービスはホーム画面を表示する"
                 , onFailureInValidatingThenServicePresentsError: "入力項目に問題がある場合_サービスはエラーを表示する"
                 , onFailureInPublishingThenServicePresentsError: "アカウントの発行に失敗した場合_サービスはエラーを表示する"
+                , onFailureInCreateUserDataThenServicePresentsError: "ユーザ情報の作成に失敗した場合_サービスはエラーを表示する"
                 , serviceDoNothing: "サービスはなにもしない"
                 , servicePresentsSignInView: "サインイン画面を表示する"
             }
