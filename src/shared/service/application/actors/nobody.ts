@@ -7,16 +7,12 @@ export class Nobody extends BaseActor<null> {
             basics: {
                 userOpensSite: "ユーザはサイトを開く"
                 , serviceChecksSession: "サービスはセッションがあるかを確認する"
-            }
-            , alternatives: {
-                sessionNotExistsThenServiceCheckGoogleOAuthRedirectResult: "セッションがない場合_サービスはGoogleOAuthのリダイレクト結果を確認する"
-                , googleOAuthRedirectResultExistsThenServiceGetUserData: "GoogleOAuthのリダイレクト結果がある場合_サービスはユーザ情報を取得する"
+                , sessionExistsThenServiceGetsUserData: "セッションがある場合_サービスはユーザ情報を取得する"
             }
             , goals: {
-                sessionExistsThenServicePresentsHome: "セッションがある場合_サービスはホーム画面を表示する"
-                , googleOAuthRedirectResultNotExistsThenServicePresentsSignin: "GoogleOAuthのリダイレクト結果がない場合_サービスはサインイン画面を表示する"
-                , userDataExistsThenServicePerformSignInWithGoogleOAuth: "ユーザ情報がある場合_サービスはGoogleOAuthでサインインするのユースケースを実行する"
-                , userDataNotExistsThenServicePerformSignUpWithGoogleOAuth: "ユーザ情報がない場合_サービスはGoogleOAuthでサインアップするのユースケースを実行する"
+                userDataExistsThenServicePresentsHomeView: "ユーザ情報がある場合_サービスはホーム画面を表示する"
+                , sessionNotExistsThenServicePresentsSignInView: "セッションがない場合_サービスはサインイン画面を表示する"
+                , userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: "ユーザ情報がない場合_サービスはGoogleOAuthでサインアップするのユースケースを実行する"
             }
         }
         , signIn : {

@@ -50,26 +50,21 @@ export function createApplicationPerformer(): ApplicationPerformer {
             .then((result) => {
                 if (result.type === InteractResultType.success) {
                     switch (result.lastSceneContext.scene) {
-                    case goals.sessionExistsThenServicePresentsHome: {
+                    case goals.userDataExistsThenServicePresentsHomeView: {
                         const user = { ...result.lastSceneContext.user };
                         const actor = new SignedInUser(user);
                         dispatcher.change(actor);
                         _shared.signInStatus = SignInStatuses.signIn({ user });
                         break;
                     }
-                    case goals.googleOAuthRedirectResultNotExistsThenServicePresentsSignin: {
+                    case goals.sessionNotExistsThenServicePresentsSignInView: {
                         _shared.signInStatus = SignInStatuses.signOut();
                         _shared.currentRouteLocation = "/signin";
                         break;
                     }
-                    case goals.userDataExistsThenServicePerformSignInWithGoogleOAuth: {
+                    case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {
                         _shared.signInStatus = SignInStatuses.signOut();
-                        return dispatcher.dispatch(U.authentication.signIn.goals[Nobody.usecases.signIn.goals.onSuccessInSigningInThenServicePresentsHomeView]({ user: result.lastSceneContext.user }), actor)
-                            .then(() => { return; });
-                    }
-                    case goals.userDataNotExistsThenServicePerformSignUpWithGoogleOAuth: {
-                        _shared.signInStatus = SignInStatuses.signOut();
-                        return dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ user: result.lastSceneContext.userCredential }), actor)
+                        return dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ user: result.lastSceneContext.user }), actor)
                             .then(() => { return; });
                     }
                     }

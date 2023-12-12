@@ -17,16 +17,13 @@ export type BootScenes = {
     basics: {
         [_u.basics.userOpensSite]: Empty;
         [_u.basics.serviceChecksSession]: Empty;
+        [_u.basics.sessionExistsThenServiceGetsUserData]: { user: UserProperties; };
     };
-    alternatives: {
-        [_u.alternatives.sessionNotExistsThenServiceCheckGoogleOAuthRedirectResult]: Empty;
-        [_u.alternatives.googleOAuthRedirectResultExistsThenServiceGetUserData]: { userCredential: UserCredential; };
-    };
+    alternatives: Empty;
     goals: {
-        [_u.goals.sessionExistsThenServicePresentsHome]: { user: UserProperties; };
-        [_u.goals.googleOAuthRedirectResultNotExistsThenServicePresentsSignin]:Empty;
-        [_u.goals.userDataExistsThenServicePerformSignInWithGoogleOAuth]: { user: UserProperties; };
-        [_u.goals.userDataNotExistsThenServicePerformSignUpWithGoogleOAuth]: { userCredential: UserCredential; };
+        [_u.goals.userDataExistsThenServicePresentsHomeView]: { user: UserProperties; };
+        [_u.goals.sessionNotExistsThenServicePresentsSignInView]:Empty;
+        [_u.goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth]: { user: UserProperties; };
     };
 };
 
@@ -46,11 +43,8 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
         case _u.basics.serviceChecksSession: {
             return this.checkSession();
         }
-        case _u.alternatives.sessionNotExistsThenServiceCheckGoogleOAuthRedirectResult: {
-            return this.checkGoogleOAuthRedirectResult();
-        }
-        case _u.alternatives.googleOAuthRedirectResultExistsThenServiceGetUserData: {
-            return this.getUserData(to.userCredential as UserCredential);
+        case _u.basics.sessionExistsThenServiceGetsUserData: {
+            return this.getUserData(to.user);
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);
@@ -66,10 +60,10 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
                     map((signInStatus) => {
                         switch (signInStatus.case) {
                         case SignInStatus.signIn: {
-                            return this.goals[_u.goals.sessionExistsThenServicePresentsHome]({ user: signInStatus.user });
+                            return this.basics[_u.basics.sessionExistsThenServiceGetsUserData]({ user: signInStatus.user });
                         }
                         default: {     
-                            return this.alternatives[_u.alternatives.sessionNotExistsThenServiceCheckGoogleOAuthRedirectResult]();
+                            return this.goals[_u.goals.sessionNotExistsThenServicePresentsSignInView]();
                         }
                         }
                     })
@@ -77,24 +71,13 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
         );
     }
 
-    private checkGoogleOAuthRedirectResult(): Promise<Context<BootScenes>> {
-        return User
-            .getGoogleOAuthRedirectResult()
-            .then(userCredential => {
-                if (userCredential === null) {
-                    return this.goals[_u.goals.googleOAuthRedirectResultNotExistsThenServicePresentsSignin]();
-                }
-                return this.alternatives[_u.alternatives.googleOAuthRedirectResultExistsThenServiceGetUserData]( { userCredential });
-            });
-    }
-
-    private getUserData(userCredential: UserCredential): Promise<Context<BootScenes>> {
-        return new User(userCredential).getData()
+    private getUserData(user: UserProperties): Promise<Context<BootScenes>> {
+        return new User(user).getData()
             .then(userProperties => {
                 if (userProperties === null) {
-                    return this.goals[_u.goals.userDataNotExistsThenServicePerformSignUpWithGoogleOAuth]({ userCredential });
+                    return this.goals[_u.goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth]({ user });
                 }
-                return this.goals[_u.goals.userDataExistsThenServicePerformSignInWithGoogleOAuth]({ user: userProperties });
+                return this.goals[_u.goals.userDataExistsThenServicePresentsHomeView]({ user: userProperties });
             });
     }
 }

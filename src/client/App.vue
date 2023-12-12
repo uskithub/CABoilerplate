@@ -9,7 +9,7 @@ const { stores } = inject<Dispatcher>(DISPATCHER_KEY)!;
 const router = useRouter();
 
 watch(() => stores.shared.currentRouteLocation, (newValue, oldValue) => {
-  console.log("★☆★☆★current", oldValue, "--->", newValue);
+  console.log("★☆★☆★ RouteLocation:", oldValue, "--->", newValue);
   router.replace(newValue);
 });
 
