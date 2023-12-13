@@ -50,12 +50,12 @@ export type Dispatcher = {
     dispatch: (usecase: Usecases, actor?: Actor) => Promise<Subscription | void>;
 };
 
-export function createDispatcher(): Dispatcher {
+export function createDispatcher(initialPath: string): Dispatcher {
     const shared = reactive<SharedStore>({
         actor: new Nobody()
         , executingUsecase: null
         , signInStatus: SignInStatuses.unknown()
-        , currentRouteLocation: "/"
+        , currentRouteLocation: initialPath
     });
 
     const performers = {

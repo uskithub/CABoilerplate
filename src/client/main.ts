@@ -53,40 +53,44 @@ loadFonts();
 
 const app = createApp(App);
 
-loadRouter(app);
+const router = loadRouter(app);
 loadVuetify(app);
 
-const dispatcher = createDispatcher();
-const { stores, dispatch } = dispatcher;
-app.provide(DISPATCHER_KEY, dispatcher);
-app.provide(DICTIONARY_KEY, dictionary);
+router
+    .isReady() // 直リン対策で初めのPathを取得するために待つ
+    .finally(() => {
+        const initialPath = router.currentRoute.value.path;
+        const dispatcher = createDispatcher(initialPath);
+        const { stores, dispatch } = dispatcher;
+        app.provide(DISPATCHER_KEY, dispatcher);
+        app.provide(DICTIONARY_KEY, dictionary);
 
-let subscriptions: Subscription[] = [];
-watch(() => stores.shared.signInStatus, (newValue) => {
-    if (newValue.case === SignInStatus.signIn) {
-        const user = stores.shared.signInStatus.user;
-        const serviceActor = new Service();
-        dispatch(U.projectManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }), serviceActor)
-            .then(subscription => {
-                if (subscription) subscriptions.push(subscription);
-            })
-            .catch(e => console.error(e));
+        let subscriptions: Subscription[] = [];
+        watch(() => stores.shared.signInStatus, (newValue) => {
+            if (newValue.case === SignInStatus.signIn) {
+                const user = stores.shared.signInStatus.user;
+                const serviceActor = new Service();
+                dispatch(U.projectManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }), serviceActor)
+                    .then(subscription => {
+                        if (subscription) subscriptions.push(subscription);
+                    })
+                    .catch(e => console.error(e));
         
-        dispatch(U.projectManagement.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }), serviceActor)
-            .then(subscription => {
-                if (subscription) subscriptions.push(subscription);
-            })
-            .catch(e => console.error(e));
-    } else if (newValue.case === SignInStatus.signingOut) {
-        subscriptions.forEach((s) => s.unsubscribe());
-        subscriptions = [];
-    }
-});
+                dispatch(U.projectManagement.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }), serviceActor)
+                    .then(subscription => {
+                        if (subscription) subscriptions.push(subscription);
+                    })
+                    .catch(e => console.error(e));
+            } else if (newValue.case === SignInStatus.signingOut) {
+                subscriptions.forEach((s) => s.unsubscribe());
+                subscriptions = [];
+            }
+        });
 
-if (stores.shared.signInStatus.case === SignInStatus.unknown) {
-    dispatch(U.application.boot.basics[Nobody.usecases.boot.basics.userOpensSite]())
-        .catch(e => console.error(e));
-}
+        if (stores.shared.signInStatus.case === SignInStatus.unknown) {
+            dispatch(U.application.boot.basics[Nobody.usecases.boot.basics.userOpensSite]())
+                .catch(e => console.error(e));
+        }
 
-app.mount("#app");
-
+        app.mount("#app");
+    });
