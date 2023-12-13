@@ -15,7 +15,7 @@ import { Log } from "@/shared/service/domain/analytics/log";
 import { Usecases, UsecaseLog, Requirements, UsecasesOf } from "@/shared/service/application/usecases";
 import { Subscription } from "rxjs";
 import { createProjectManagementPerformer, ProjectManagementStore } from "./projectManagement";
-import { RouteLocationRaw } from "vue-router";
+import { RouteLocationRaw, Router } from "vue-router";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -36,6 +36,7 @@ export interface SharedStore extends Store {
     readonly executingUsecase: ImmutableUsecaseLog | null;
     readonly signInStatus: SignInStatus;
     readonly currentRouteLocation: RouteLocationRaw;
+    readonly isLoading: boolean;
 }
 
 export type Dispatcher = {
@@ -43,19 +44,30 @@ export type Dispatcher = {
         shared: SharedStore;
         application: ApplicationStore;
         authentication: AuthenticationStore;
-        projectManagement: ProjectManagementStore
+        projectManagement: ProjectManagementStore;
     };
     change: (actor: Actor) => void;
     commonCompletionProcess: (subscription: Subscription | null) => void;
     dispatch: (usecase: Usecases, actor?: Actor) => Promise<Subscription | void>;
 };
 
-export function createDispatcher(initialPath: string): Dispatcher {
+export function createDispatcher(router: Router): Dispatcher {
+    const initialPath = router.currentRoute.value.path;
     const shared = reactive<SharedStore>({
         actor: new Nobody()
         , executingUsecase: null
         , signInStatus: SignInStatuses.unknown()
         , currentRouteLocation: initialPath
+        , isLoading: true
+    });
+
+    watch(() => shared.currentRouteLocation, (newValue, oldValue) => {
+        console.log("★☆★☆★ RouteLocation:", oldValue, "--->", newValue);
+        router.replace(newValue)
+            .finally(() => {
+                const _shared = shared as Mutable<SharedStore>;
+                _shared.isLoading = false;
+            });
     });
 
     const performers = {

@@ -55,6 +55,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                         const actor = new SignedInUser(user);
                         dispatcher.change(actor);
                         _shared.signInStatus = SignInStatuses.signIn({ user });
+                        _shared.isLoading = false;
                         break;
                     }
                     case goals.sessionNotExistsThenServicePresentsSignInView: {

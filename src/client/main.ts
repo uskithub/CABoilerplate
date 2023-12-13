@@ -59,8 +59,7 @@ loadVuetify(app);
 router
     .isReady() // 直リン対策で初めのPathを取得するために待つ
     .finally(() => {
-        const initialPath = router.currentRoute.value.path;
-        const dispatcher = createDispatcher(initialPath);
+        const dispatcher = createDispatcher(router);
         const { stores, dispatch } = dispatcher;
         app.provide(DISPATCHER_KEY, dispatcher);
         app.provide(DICTIONARY_KEY, dictionary);
