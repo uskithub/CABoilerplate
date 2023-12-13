@@ -60,7 +60,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     }
                     case goals.sessionNotExistsThenServicePresentsSignInView: {
                         _shared.signInStatus = SignInStatuses.signOut();
-                        _shared.currentRouteLocation = "/signin";
+                        dispatcher.routingTo("/signin");
                         break;
                     }
                     case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {

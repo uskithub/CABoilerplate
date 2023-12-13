@@ -51,7 +51,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     const user = context.user;
                     const actor = new SignedInUser(user);
                     _shared.actor = actor;
-                    _shared.currentRouteLocation = "/";
+                    dispatcher.routingTo("/");
                     break;
                 }
                 case goals.onFailureInValidatingThenServicePresentsError: {
@@ -99,7 +99,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     break;
                 }
                 case goals.servicePresentsSignInView: {
-                    _shared.currentRouteLocation = "/signin";
+                    dispatcher.routingTo("/signin");
                     break;
                 }
                 }
@@ -117,7 +117,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 const context = result.lastSceneContext;
                 switch (context.scene) {
                 case goals.onSuccessInSigningInThenServicePresentsHomeView:
-                    _shared.currentRouteLocation = "/";
+                    dispatcher.routingTo("/");
                     break;
 
                 case goals.onFailureInValidatingThenServicePresentsError: {
@@ -159,7 +159,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     break;
                 }
                 case goals.servicePresentsSignUpView: {
-                    _shared.currentRouteLocation = "/signup";
+                    dispatcher.routingTo("/signup");
                     break;
                 }
                 }
@@ -186,7 +186,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     console.error("SERVICE ERROR:", context.error);
                     break;
                 case goals.servicePresentsHomeView:
-                    _shared.currentRouteLocation = "/";
+                    dispatcher.routingTo("/");
                     break;
                 }
             });

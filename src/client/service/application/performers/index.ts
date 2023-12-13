@@ -16,6 +16,7 @@ import { Usecases, UsecaseLog, Requirements, UsecasesOf } from "@/shared/service
 import { Subscription } from "rxjs";
 import { createProjectManagementPerformer, ProjectManagementStore } from "./projectManagement";
 import { RouteLocationRaw, Router } from "vue-router";
+import path from "path";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -47,6 +48,7 @@ export type Dispatcher = {
         projectManagement: ProjectManagementStore;
     };
     change: (actor: Actor) => void;
+    routingTo: (path: string) => void;
     commonCompletionProcess: (subscription: Subscription | null) => void;
     dispatch: (usecase: Usecases, actor?: Actor) => Promise<Subscription | void>;
 };
@@ -83,10 +85,15 @@ export function createDispatcher(router: Router): Dispatcher {
             , authentication: performers.authentication.store
             , projectManagement: performers.projectManagement.store
         }
-        , change(actor: Actor) {
+        , change: (actor: Actor) => {
             const _shared = shared as Mutable<SharedStore>;
             _shared.actor = actor;
             console.log("actor changed: ", actor);
+        }
+        , routingTo: (path: string) => {
+            const _shared = shared as Mutable<SharedStore>;
+            _shared.currentRouteLocation = path;
+            _shared.isLoading = false;
         }
         , commonCompletionProcess: (subscription: Subscription | null) => {
             subscription?.unsubscribe();
@@ -94,7 +101,7 @@ export function createDispatcher(router: Router): Dispatcher {
             _shared.executingUsecase = null;
         }
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        , dispatch(usecase: Usecases, actor?: Actor): Promise<Subscription | void> {
+        , dispatch: (usecase: Usecases, actor?: Actor): Promise<Subscription | void> => {
             const _shared = shared as Mutable<SharedStore>;
             const _actor = actor || shared.actor;
     
