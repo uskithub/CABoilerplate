@@ -11,7 +11,7 @@ import { U } from "@/shared/service/application/usecases";
 import { useRoute } from "vue-router";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
 import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
-import { type UserProperties } from "@/shared/service/domain/authentication/user";
+import { type Account } from "@/shared/service/domain/authentication/user";
 import type { Actor } from "@/shared/service/application/actors";
 import { whenNoLongerNull } from "@/client/system/common";
 
@@ -40,7 +40,7 @@ watch(route, (newVal: RouteLocationNormalizedLoaded) => {
     state.projectId = (Array.isArray(projectId)) ? projectId[0] : projectId;
 });
 
-whenNoLongerNull(() => stores.shared.actor.user, (user: UserProperties) => {
+whenNoLongerNull(() => stores.shared.actor.user, (user: Account) => {
     dispatch(U.projectManagement.observingProject.basics[SignedInUser.usecases.observingProject.basics.userSelectsAProject]({ user, projectId: state.projectId }));
 });
 

@@ -1,4 +1,4 @@
-import { User, type SignUpValidationResult, type UserProperties } from "@/shared/service/domain/authentication/user";
+import { User, type SignUpValidationResult, type Account, UserProperties } from "@/shared/service/domain/authentication/user";
 import { Nobody } from "../../actors/nobody";
 import { MyBaseScenario } from "../common";
 
@@ -15,7 +15,7 @@ export type SignUpScenes = {
         [_u.basics.userStartsSignUpProcess]: { id: string | null; password: string | null; };
         [_u.basics.serviceValidateInputs]: { id: string | null; password: string | null; };
         [_u.basics.onSuccessInValidatingThenServicePublishNewAccount]: { id: string; password: string; };
-        [_u.basics.onSuccessPublishNewAccountThenServiceCreateUserData]: { user: UserProperties; };
+        [_u.basics.onSuccessPublishNewAccountThenServiceCreateUserData]: { account: Account; };
     };
     alternatives: {
         [_u.alternatives.userStartsSignUpProcessWithGoogleOAuth]: Empty;
@@ -46,7 +46,7 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
             return this.publishNewAccount(to.id, to.password);
         }
         case _u.basics.onSuccessPublishNewAccountThenServiceCreateUserData: {
-            return this.createUser(to.user);
+            return this.createUser(to.account);
         }
         case _u.alternatives.userStartsSignUpProcessWithGoogleOAuth: {
             return this.just(this.alternatives[_u.alternatives.serviceRedirectsToGoogleOAuth]());
@@ -77,17 +77,18 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
             User
                 .createAccount(id, password)
                 .pipe(
-                    map((userProperties: UserProperties) => {
-                        return this.basics[_u.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ user: userProperties });
+                    map((account: Account) => {
+                        return this.basics[_u.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account });
                     })
                 )
         );
     }
 
-    private createUser(user: UserProperties): Promise<Context<SignUpScenes>> {
-        return new User(user).createData()
+    private createUser(account: Account): Promise<Context<SignUpScenes>> {
+        return new User(account).create()
             .then(() => {
-                return this.goals[_u.goals.onSuccessInCreateUserDataThenServicePresentsHomeView]({ user });
+                // TODO: userPropertiesが返るようにする
+                return this.goals[_u.goals.onSuccessInCreateUserDataThenServicePresentsHomeView]({ user: account });
             })
             .catch((error: Error) => {
                 return this.goals[_u.goals.onFailureInCreateUserDataThenServicePresentsError]({ error });

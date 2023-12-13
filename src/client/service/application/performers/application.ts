@@ -54,7 +54,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                         const user = { ...result.lastSceneContext.user };
                         const actor = new SignedInUser(user);
                         dispatcher.change(actor);
-                        _shared.signInStatus = SignInStatuses.signIn({ user });
+                        _shared.signInStatus = SignInStatuses.signIn({ account: user });
                         _shared.isLoading = false;
                         break;
                     }
@@ -65,7 +65,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     }
                     case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {
                         _shared.signInStatus = SignInStatuses.signOut();
-                        return dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ user: result.lastSceneContext.user }), actor)
+                        return dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
                             .then(() => { return; });
                     }
                     }

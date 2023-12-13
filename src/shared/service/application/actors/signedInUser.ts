@@ -1,9 +1,9 @@
 
-import { UserProperties } from "@/shared/service/domain/authentication/user";
+import { Account } from "@/shared/service/domain/authentication/user";
 import { BaseActor } from "robustive-ts";
 import { Actor } from ".";
 
-export class SignedInUser extends BaseActor<UserProperties> {
+export class SignedInUser extends BaseActor<Account> {
     static usecases = {
         signOut : {
             basics : {

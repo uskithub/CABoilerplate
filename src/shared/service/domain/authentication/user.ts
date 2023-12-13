@@ -6,13 +6,17 @@ import { UserCredential as _UserCredential } from "firebase/auth";
 
 export type UserCredential = _UserCredential;
 
-export type UserProperties = {
+export type Account = {
     uid: string;
     mailAddress: string|null;
     photoUrl: string|null;
     displayName: string|null;
     isMailAddressVerified: boolean;
 };
+
+export type UserProperties = {
+    isDomainOwner: boolean;
+} & Account;
 
 const idValidationResults = [r.isRequired, r.isMalformed] as const;
 const passwordValidationResults = [r.isRequired, r.isTooLong, r.isTooShort] as const;
@@ -53,17 +57,18 @@ export class PasswordValidation extends AbstructValidation<string, PasswordValid
     }
 }
 
-const isUserCredential = (arg: UserProperties | UserCredential): arg is UserCredential => arg.user !== undefined;
+const isUserCredential = (arg: Account | UserCredential): arg is UserCredential => arg.user !== undefined;
+
 export class User implements Entity<UserProperties> {
-    properties: UserProperties;
+    account: Account;
     static requiredScope: string[] = ["https://www.googleapis.com/auth/contacts.readonly"];
 
-    constructor(properties: UserProperties)
+    constructor(account: Account)
     constructor(userCredential: UserCredential)
 
-    constructor(arg: UserProperties | UserCredential) {
+    constructor(arg: Account | UserCredential) {
         if (isUserCredential(arg)) {
-            this.properties = {
+            this.account = {
                 uid: arg.user.uid
                 , mailAddress: arg.user.email
                 , photoUrl: arg.user.photoURL
@@ -71,7 +76,7 @@ export class User implements Entity<UserProperties> {
                 , isMailAddressVerified: arg.user.emailVerified
             };
         } else {
-            this.properties = arg;
+            this.account = arg;
         }
     }
 
@@ -104,14 +109,14 @@ export class User implements Entity<UserProperties> {
      * @param password 
      * @returns 
      */
-    static createAccount(id: string, password: string): Observable<UserProperties> {
+    static createAccount(id: string, password: string): Observable<Account> {
         return dependencies.auth.createAccount(id, password);
     }
 
     /**
      * アプリはユーザが入力したIDとパスワードでアカウントを認証できなければならない。
      */ 
-    static signIn(id: string, password: string): Observable<UserProperties> {
+    static signIn(id: string, password: string): Observable<Account> {
         return dependencies.auth.signIn(id, password);
     }
 
@@ -127,11 +132,11 @@ export class User implements Entity<UserProperties> {
         return dependencies.auth.getGoogleOAuthRedirectResult();
     }
 
-    createData(): Promise<UserProperties | null> {
-        return dependencies.backend.users.create(this.properties);
+    create(): Promise<UserProperties | null> {
+        return dependencies.backend.users.create(this.account);
     }
 
-    getData(): Promise<UserProperties | null> {
-        return dependencies.backend.users.get(this.properties.uid);
+    get(): Promise<UserProperties | null> {
+        return dependencies.backend.users.get(this.account.uid);
     }
 }

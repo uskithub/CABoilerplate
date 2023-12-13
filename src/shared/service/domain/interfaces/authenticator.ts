@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { UserCredential, UserProperties } from "../authentication/user";
+import { Account, UserCredential } from "../authentication/user";
 import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
 import { Empty } from "robustive-ts";
 
@@ -15,7 +15,7 @@ export const SignInStatus = {
 } as const;
 
 type SignInStatusContext = { 
-    [SignInStatus.signIn] : { user: UserProperties; };
+    [SignInStatus.signIn] : { account: Account; };
     [SignInStatus.signingIn] : Empty;
     [SignInStatus.signOut] : Empty;
     [SignInStatus.signingOut] : Empty;
@@ -34,12 +34,12 @@ export interface Authenticator {
     /**
      * アカウントを作成します。
      */
-    createAccount: (mailAddress: string, password: string) => Observable<UserProperties>;
+    createAccount: (mailAddress: string, password: string) => Observable<Account>;
 
     /**
      * サインインします。
      */
-    signIn: (mailAddress: string, password: string) => Observable<UserProperties>;
+    signIn: (mailAddress: string, password: string) => Observable<Account>;
 
     /**
      * サインアウトします。

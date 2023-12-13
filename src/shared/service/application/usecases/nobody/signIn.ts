@@ -1,5 +1,5 @@
 
-import { SignInValidationResult, User, UserProperties } from "@/shared/service/domain/authentication/user";
+import { SignInValidationResult, User, Account } from "@/shared/service/domain/authentication/user";
 import { Nobody } from "../../actors/nobody";
 import { MyBaseScenario } from "../common";
 
@@ -22,7 +22,7 @@ export type SignInScenes = {
         [_u.alternatives.userTapsSignUpButton]: Empty;
     };
     goals : {
-        [_u.goals.onSuccessInSigningInThenServicePresentsHomeView]: { user: UserProperties; };
+        [_u.goals.onSuccessInSigningInThenServicePresentsHomeView]: { account: Account; };
         [_u.goals.onFailureInValidatingThenServicePresentsError]: { result: SignInValidationResult; };
         [_u.goals.onFailureInSigningInThenServicePresentsError]: { error: Error; };
         [_u.goals.servicePresentsSignUpView]: Empty;
@@ -65,7 +65,7 @@ export class SignInScenario extends MyBaseScenario<SignInScenes> {
         return firstValueFrom(
             User.signIn(id, password)
                 .pipe(
-                    map(userProperties => this.goals[_u.goals.onSuccessInSigningInThenServicePresentsHomeView]({ user: userProperties }))
+                    map(account => this.goals[_u.goals.onSuccessInSigningInThenServicePresentsHomeView]({ account }))
                     , catchError((error: Error) => this.just(this.goals[_u.goals.onFailureInSigningInThenServicePresentsError]({ error })))
                 )
         );

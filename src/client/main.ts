@@ -67,19 +67,20 @@ router
         let subscriptions: Subscription[] = [];
         watch(() => stores.shared.signInStatus, (newValue) => {
             if (newValue.case === SignInStatus.signIn) {
-                const user = stores.shared.signInStatus.user;
-                const serviceActor = new Service();
-                dispatch(U.projectManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }), serviceActor)
-                    .then(subscription => {
-                        if (subscription) subscriptions.push(subscription);
-                    })
-                    .catch(e => console.error(e));
+                // TODO: accountでなくてUserを取得する
+                // const account = stores.shared.signInStatus.account;
+                // const serviceActor = new Service();
+                // dispatch(U.projectManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }), serviceActor)
+                //     .then(subscription => {
+                //         if (subscription) subscriptions.push(subscription);
+                //     })
+                //     .catch(e => console.error(e));
         
-                dispatch(U.projectManagement.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }), serviceActor)
-                    .then(subscription => {
-                        if (subscription) subscriptions.push(subscription);
-                    })
-                    .catch(e => console.error(e));
+                // dispatch(U.projectManagement.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }), serviceActor)
+                //     .then(subscription => {
+                //         if (subscription) subscriptions.push(subscription);
+                //     })
+                //     .catch(e => console.error(e));
             } else if (newValue.case === SignInStatus.signingOut) {
                 subscriptions.forEach((s) => s.unsubscribe());
                 subscriptions = [];
