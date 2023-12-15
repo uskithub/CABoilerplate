@@ -14,9 +14,9 @@ export interface FSUser {
     createdAt: Timestamp;
 }
 // TODO: この辺の修正から
-function convert(user: FSUser): UserProperties {
+function convert(id: string, user: FSUser): UserProperties {
     return {
-        uid: user.id
+        id: id
         , mailAddress: user.email
         , photoUrl: user.photoURL
         , displayName: user.displayName
@@ -36,7 +36,7 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                     doc(userCollectionRef, userId)
                     , (snapshot: DocumentSnapshot<DocumentData>) => {
                         if (snapshot.exists()) {
-                            const _user = { id: snapshot.id, ...snapshot.data() } as FSUser;
+                            const userData = { id: snapshot.id, ...snapshot.data() } as FSUser;
                             resolve(null);
                         } else {
                             resolve(null);

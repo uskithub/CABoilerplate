@@ -5,16 +5,6 @@ import type { Dispatcher } from "./service/application/performers";
 
 const { stores } = inject<Dispatcher>(DISPATCHER_KEY)!;
 
-const dump = () => {
-  if ( stores && stores.shared ) {
-    console.log("★★★★ stores.shared is exists", stores.shared.isLoading);
-    return ;
-  } else {
-    console.log("★★★★ stores.shared is null")
-    return true;
-  }
-}
-
 </script>
 <template lang="pug">
 v-app(id="inspire")
