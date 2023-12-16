@@ -3,7 +3,7 @@ import { Account } from "@/shared/service/domain/authentication/user";
 import { BaseActor } from "robustive-ts";
 import { Actor } from ".";
 
-export class SignedInUser extends BaseActor<Account> {
+export class AuthorizedUser extends BaseActor<Account> {
     static usecases = {
         signOut : {
             basics : {
@@ -66,4 +66,4 @@ export class SignedInUser extends BaseActor<Account> {
         }
     } as const;
 }
-export const isSignedInUser = (actor: Actor): actor is SignedInUser => actor.constructor === SignedInUser;
+export const isAuthorizedUser = (actor: Actor): actor is AuthorizedUser => actor.constructor === AuthorizedUser;
