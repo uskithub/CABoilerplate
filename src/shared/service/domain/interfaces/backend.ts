@@ -29,7 +29,7 @@ export type ChangedTask = SwiftEnumCases<ChangedItems<Task>>;
 
 export type UserFunctions = {
     get: (userId: string) => Promise<UserProperties | null>;
-    create: (user: Account) => Promise<UserProperties | null>;
+    create: (user: Account) => Promise<UserProperties>;
     getObservable: (userId: string) => Observable<UserProperties | null>;
     // update: () => Promise<void>;
     // delete: () => Promise<void>;

@@ -23,7 +23,7 @@ export type SignUpScenes = {
         [_u.alternatives.userTapsSignInButton]: Empty;
     };
     goals : {
-        [_u.goals.onSuccessInCreateUserDataThenServicePresentsHomeView]: { user: UserProperties; };
+        [_u.goals.onSuccessInCreateUserDataThenServicePresentsHomeView]: { userProperties: UserProperties; };
         [_u.goals.onFailureInValidatingThenServicePresentsError]: { result: SignUpValidationResult; };
         [_u.goals.onFailureInCreateUserDataThenServicePresentsError]: { error: Error; };
         [_u.goals.onFailureInPublishingThenServicePresentsError]: { error: Error; };
@@ -86,9 +86,8 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
 
     private createUser(account: Account): Promise<Context<SignUpScenes>> {
         return new User(account).create()
-            .then(() => {
-                // TODO: userPropertiesが返るようにする
-                return this.goals[_u.goals.onSuccessInCreateUserDataThenServicePresentsHomeView]({ user: account });
+            .then((userProperties) => {
+                return this.goals[_u.goals.onSuccessInCreateUserDataThenServicePresentsHomeView]({ userProperties });
             })
             .catch((error: Error) => {
                 return this.goals[_u.goals.onFailureInCreateUserDataThenServicePresentsError]({ error });

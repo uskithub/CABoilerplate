@@ -44,7 +44,6 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                             const userProperties = convert(snapshot.id, userData);
                             subscriber.next(userProperties);       
                         } else {
-                            unsubscribe();
                             subscriber.next(null);       
                         }
                     }
@@ -70,18 +69,21 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                 unsubscribes.push(unsubscribe);
             });
         }
-        , create: (user: Account): Promise<UserProperties> => {
-
-            return setDoc(doc(userCollectionRef, user.id), {
-                displayName: user.displayName
-                , email: user.mailAddress
-                , photoURL: user.photoUrl
-                , companions: []
+        , create: (account: Account): Promise<UserProperties> => {
+            const userProperties = {
+                mailAddress: account.mailAddress
+                , photoUrl: account.photoUrl
+                , displayName: account.displayName
+                , isMailAddressVerified: account.isMailAddressVerified
+                , isDomainOwner: false
+            };
+            return setDoc(doc(userCollectionRef, account.id), {
+                ...userProperties
                 , createdAt: Timestamp.now()
             })
                 .then(() => {
-                    console.log("Document written with ID: ", user.id);
-                    return user;
+                    console.log("Document written with ID: ", account.id);
+                    return { id: account.id, ...userProperties } as UserProperties;
                 });
         }
     };

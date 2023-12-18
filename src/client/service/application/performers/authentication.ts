@@ -48,9 +48,10 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
 
                 switch (context.scene) {
                 case goals.onSuccessInCreateUserDataThenServicePresentsHomeView: {
-                    const user = context.user;
-                    const actor = new AuthorizedUser(user);
-                    _shared.actor = actor;
+                    const userProperties = context.userProperties;
+                    const actor = new AuthorizedUser(userProperties);
+                    dispatcher.change(actor);
+                    _shared.signInStatus = SignInStatuses.signIn({ userProperties });
                     dispatcher.routingTo("/");
                     break;
                 }

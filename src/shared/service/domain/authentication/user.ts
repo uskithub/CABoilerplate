@@ -136,7 +136,7 @@ export class User implements Entity<UserProperties> {
         return dependencies.backend.users.getObservable(this.account.id);
     }
 
-    create(): Promise<UserProperties | null> {
+    create(): Promise<UserProperties> {
         return dependencies.backend.users.create(this.account);
     }
 
