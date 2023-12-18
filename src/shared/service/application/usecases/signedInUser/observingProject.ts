@@ -1,13 +1,13 @@
 import ProjectModel from "@domain/entities/project";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
-import { SignedInUser } from "../../actors/signedInUser";
+import { AuthorizedUser } from "../../actors/authorizedUser";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { map } from "rxjs";
 import { Task } from "@/shared/service/domain/entities/task";
 
-const _u = SignedInUser.usecases.observingProject;
+const _u = AuthorizedUser.usecases.observingProject;
 
 /**
  * usecase: ユーザのプロジェクトを観測する
@@ -48,7 +48,7 @@ export class ObservingProjectScenario extends MyBaseScenario<ObservingProjectSce
 
     private startObservingProjectThatMeetConditions(user: UserProperties, projectId: string): Promise<Context<ObservingProjectScenes>> {
         let isFirst = true;
-        return ProjectModel.observeProject(user.uid, projectId)
+        return ProjectModel.observeProject(user.id, projectId)
             .pipe(
                 map(task => {
                     if (isFirst) {

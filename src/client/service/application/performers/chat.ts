@@ -8,7 +8,7 @@ import { useRouter } from "vue-router";
 import { Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { MessageProperties } from "@/shared/service/domain/chat/message";
-import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Usecase } from "@/shared/service/application/usecases";
 import { InteractResultType } from "robustive-ts";
 
@@ -29,7 +29,7 @@ export function createChatPerformer(dispatcher: Dispatcher): ChatPerformer {
     return {
         store
         , consult: (usecase: Usecase<"projectManagement", "consult">, actor: Actor) : Promise<void> => {
-            const goals = SignedInUser.usecases.consult.goals;
+            const goals = AuthorizedUser.usecases.consult.goals;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             return usecase
                 .interactedBy(actor)

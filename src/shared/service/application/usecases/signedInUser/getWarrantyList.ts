@@ -1,11 +1,11 @@
 import WarrantyModel, { Warranty } from "@domain/entities/warranty";
-import { SignedInUser } from "../../actors/signedInUser";
+import { AuthorizedUser } from "../../actors/authorizedUser";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { firstValueFrom, map } from "rxjs";
 
-const _u = SignedInUser.usecases.getWarrantyList;
+const _u = AuthorizedUser.usecases.getWarrantyList;
 
 /**
  * usecase: 保証一覧を取得する

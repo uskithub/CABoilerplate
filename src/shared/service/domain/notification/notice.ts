@@ -28,9 +28,9 @@ export class Notice implements Entity<NoticeProperties> {
     /**
      * ユーザはサービスからの通知を受け取ることができなければならない。
      */
-    static getUsersNotices(uid: string): Observable<[NoticeProperties]> {
+    static getUsersNotices(id: string): Observable<[NoticeProperties]> {
         // TODO: ページングの表現
-        return dependencies.notification.getUsersNotices(uid);
+        return dependencies.notification.getUsersNotices(id);
     }
 
     /**

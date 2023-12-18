@@ -7,9 +7,8 @@ import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
 import { DISPATCHER_KEY } from "../../application/performers";
 import type { Dispatcher } from "../../application/performers";
-import { isSignedInUser } from "@shared/service/application/actors/signedInUser";
 import { U } from "@/shared/service/application/usecases";
-import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { AuthenticatedUser, isAuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 
 const t = inject<Dictionary>(DICTIONARY_KEY)!;
@@ -23,7 +22,7 @@ const state = reactive<{
     , password: null
 });
 
-const isPresentDialog = computed(() => isSignedInUser(stores.shared.actor));
+const isPresentDialog = computed(() => isAuthenticatedUser(stores.shared.actor));
 const isFormValid = computed(() => state.email !== null && state.password !== null);
 
 </script>
@@ -86,11 +85,11 @@ v-container
             v-btn(
               color="warning",
               text,
-              @click="dispatch(U.authentication.signOut.basics[SignedInUser.usecases.signOut.basics.userStartsSignOutProcess]())"
+              @click="dispatch(U.authentication.signOut.basics[AuthenticatedUser.usecases.signOut.basics.userStartsSignOutProcess]())"
             ) Sign Out
             v-btn(
               color="success",
               text,
-              @click="dispatch(U.authentication.signOut.alternatives[SignedInUser.usecases.signOut.alternatives.userResignSignOut]())"
+              @click="dispatch(U.authentication.signOut.alternatives[AuthenticatedUser.usecases.signOut.alternatives.userResignSignOut]())"
             ) Go Home
 </template>

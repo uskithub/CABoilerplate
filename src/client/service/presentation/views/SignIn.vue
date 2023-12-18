@@ -6,7 +6,7 @@ import { DISPATCHER_KEY } from "../../application/performers";
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import { U } from "@/shared/service/application/usecases";
 import { Nobody } from "@/shared/service/application/actors/nobody";
-import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 
 import { computed, inject, reactive } from "vue";
 
@@ -92,11 +92,11 @@ v-container
             v-btn(
               color="warning",
               text,
-              @click="dispatch(U.authentication.signOut.basics[SignedInUser.usecases.signOut.basics.userStartsSignOutProcess]())"
+              @click="dispatch(U.authentication.signOut.basics[AuthorizedUser.usecases.signOut.basics.userStartsSignOutProcess]())"
             ) Sign Out
             v-btn(
               color="success",
               text,
-              @click="dispatch(U.authentication.signOut.alternatives[SignedInUser.usecases.signOut.alternatives.userResignSignOut]())"
+              @click="dispatch(U.authentication.signOut.alternatives[AuthorizedUser.usecases.signOut.alternatives.userResignSignOut]())"
             ) Go Home
 </template>

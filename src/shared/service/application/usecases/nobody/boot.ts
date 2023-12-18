@@ -5,7 +5,7 @@ import { Nobody } from "../../actors/nobody";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { firstValueFrom, map } from "rxjs";
+import { Observable, firstValueFrom, map } from "rxjs";
 
 
 const _u = Nobody.usecases.boot;
@@ -17,13 +17,12 @@ export type BootScenes = {
     basics: {
         [_u.basics.userOpensSite]: Empty;
         [_u.basics.serviceChecksSession]: Empty;
-        [_u.basics.sessionExistsThenServiceGetsUserData]: { account: Account; };
+        [_u.basics.sessionExistsThenServicePreparesForObservingUserData]: { account: Account; };
     };
     alternatives: Empty;
     goals: {
-        [_u.goals.userDataExistsThenServicePresentsHomeView]: { user: UserProperties; };
+        [_u.goals.servicePresentsHomeView]: { account: Account, observable: Observable<UserProperties | null>; };
         [_u.goals.sessionNotExistsThenServicePresentsSignInView]:Empty;
-        [_u.goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth]: { account: Account; };
     };
 };
 
@@ -43,8 +42,8 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
         case _u.basics.serviceChecksSession: {
             return this.checkSession();
         }
-        case _u.basics.sessionExistsThenServiceGetsUserData: {
-            return this.getUserData(to.account);
+        case _u.basics.sessionExistsThenServicePreparesForObservingUserData: {
+            return this.getUserDataObservable(to.account);
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);
@@ -60,7 +59,7 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
                     map((signInStatus) => {
                         switch (signInStatus.case) {
                         case SignInStatus.signIn: {
-                            return this.basics[_u.basics.sessionExistsThenServiceGetsUserData]({ account: signInStatus.account });
+                            return this.basics[_u.basics.sessionExistsThenServicePreparesForObservingUserData]({ account: signInStatus.account });
                         }
                         default: {     
                             return this.goals[_u.goals.sessionNotExistsThenServicePresentsSignInView]();
@@ -71,13 +70,11 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
         );
     }
 
-    private getUserData(account: Account): Promise<Context<BootScenes>> {
-        return new User(account).get()
-            .then(userProperties => {
-                if (userProperties === null) {
-                    return this.goals[_u.goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth]({ account });
-                }
-                return this.goals[_u.goals.userDataExistsThenServicePresentsHomeView]({ user: userProperties });
+    private getUserDataObservable(account: Account): Promise<Context<BootScenes>> {
+        return Promise.resolve()
+            .then(() => {
+                const observable = new User(account).observable;
+                return this.goals[_u.goals.servicePresentsHomeView]({ account, observable });
             });
     }
 }

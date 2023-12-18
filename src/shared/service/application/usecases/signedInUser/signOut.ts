@@ -1,11 +1,11 @@
 import { User } from "@/shared/service/domain/authentication/user";
-import { SignedInUser } from "../../actors/signedInUser";
+import { AuthorizedUser } from "../../actors/authorizedUser";
 import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { catchError, firstValueFrom, map } from "rxjs";
 
-const _u = SignedInUser.usecases.signOut;
+const _u = AuthorizedUser.usecases.signOut;
 
 /**
  * usecase: サインアウトする

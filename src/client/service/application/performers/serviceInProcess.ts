@@ -7,7 +7,7 @@ import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
 import { inject, reactive } from "vue";
 import { Subscription } from "rxjs";
 import { useRouter } from "vue-router";
-import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Usecase } from "@/shared/service/application/usecases";
 import { InteractResultType } from "robustive-ts";
 
@@ -32,7 +32,7 @@ export function createServiceInProcessPerformer(dispatcher: Dispatcher): Service
     return {
         store
         , list: (usecase: Usecase<"projectManagement", "listInsuranceItems">, actor: Actor) : Promise<void> => {
-            const goals = SignedInUser.usecases.listInsuranceItems.goals;
+            const goals = AuthorizedUser.usecases.listInsuranceItems.goals;
             const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             return usecase
                 .interactedBy(actor)

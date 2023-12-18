@@ -34,7 +34,7 @@ export class ObservingUsersProjectsScenario extends MyBaseScenario<ObservingUser
     next(to: MutableContext<ObservingUsersProjectsScenes>): Promise<Context<ObservingUsersProjectsScenes>> {
         switch (to.scene) {
         case _u.basics.serviceDetectsSigningIn: {
-            const observable = ProjectModel.observeUsersProjects(to.user.uid);
+            const observable = ProjectModel.observeUsersProjects(to.user.id);
             return this.just(this.goals[_u.goals.startObservingUsersProjects]({ observable }));
         }
         default: {

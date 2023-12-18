@@ -7,7 +7,7 @@ import { useRouter } from "vue-router";
 import { Observable, Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { MessageProperties } from "@/shared/service/domain/chat/message";
-import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { InteractResultType } from "robustive-ts";
 import { Service } from "@/shared/service/application/actors/service";
@@ -170,7 +170,7 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
         }
         // TODO ここの実装から
         , observingProject: (usecase: Usecase<"projectManagement", "observingProject">, actor: Actor) : Promise<void> => {
-            const goals = SignedInUser.usecases.observingProject.goals;
+            const goals = AuthorizedUser.usecases.observingProject.goals;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             return usecase
                 .interactedBy(actor)

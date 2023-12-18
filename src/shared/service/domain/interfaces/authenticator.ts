@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { Account, UserCredential } from "../authentication/user";
+import { Account, UserCredential, UserProperties } from "../authentication/user";
 import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
 import { Empty } from "robustive-ts";
 
@@ -15,8 +15,8 @@ export const SignInStatus = {
 } as const;
 
 type SignInStatusContext = { 
-    [SignInStatus.signIn] : { account: Account; };
-    [SignInStatus.signingIn] : Empty;
+    [SignInStatus.signIn] : { userProperties: UserProperties; };
+    [SignInStatus.signingIn] : { account: Account; };
     [SignInStatus.signOut] : Empty;
     [SignInStatus.signingOut] : Empty;
     [SignInStatus.unknown] : Empty;

@@ -6,10 +6,11 @@ import { SignInStatus } from "../interfaces/authenticator";
 import { Observable } from "rxjs";
 import { Actor } from "../../application/actors";
 import { Service } from "@/shared/system/interfaces/architecture";
-import { isNobody } from "robustive-ts";
-import { isSignedInUser } from "../../application/actors/signedInUser";
 import { DomainKeys, UsecaseKeys } from "../../application/usecases";
+import { isNobody } from "robustive-ts";
+import { isAuthorizedUser } from "../../application/actors/authorizedUser";
 import { isService } from "../../application/actors/service";
+import { isAuthenticatedUser } from "../../application/actors/authenticatedUser";
 
 export class Application implements Service {
 
@@ -34,7 +35,9 @@ export class Application implements Service {
         case "boot": {
             return true;
         }
-        case "signUp":
+        case "signUp": {
+            return isNobody(actor) || isAuthenticatedUser(actor);
+        }
         case "signIn": {
             return isNobody(actor);
         }
@@ -42,7 +45,7 @@ export class Application implements Service {
         case "consult": 
         case "getWarrantyList": 
         case "listInsuranceItems": {
-            return isSignedInUser(actor);
+            return isAuthorizedUser(actor);
         }
         
         case "observingUsersTasks":

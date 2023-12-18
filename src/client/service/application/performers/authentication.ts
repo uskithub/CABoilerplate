@@ -10,7 +10,7 @@ import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces
 
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/actors/nobody";
-import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { dictionary as t } from "@/client/main";
 
@@ -49,7 +49,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 switch (context.scene) {
                 case goals.onSuccessInCreateUserDataThenServicePresentsHomeView: {
                     const user = context.user;
-                    const actor = new SignedInUser(user);
+                    const actor = new AuthorizedUser(user);
                     _shared.actor = actor;
                     dispatcher.routingTo("/");
                     break;
@@ -170,7 +170,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
     };
     
     const signOut = (usecase: Usecase<"authentication", "signOut">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
-        const goals = SignedInUser.usecases.signOut.goals;
+        const goals = AuthorizedUser.usecases.signOut.goals;
         const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)

@@ -1,10 +1,12 @@
 import { UserFunctions } from "@/shared/service/domain/interfaces/backend";
-import { addDoc, collection, collectionGroup, doc, DocumentChangeType, Firestore, getDocs, onSnapshot, orderBy, where, query, DocumentSnapshot, DocumentData, Unsubscribe, Timestamp, setDoc } from "firebase/firestore";
+import { addDoc, collection, collectionGroup, doc, DocumentChangeType, Firestore, getDocs, onSnapshot, orderBy, where, query, DocumentSnapshot, DocumentData, Unsubscribe, Timestamp, setDoc, FirestoreError } from "firebase/firestore";
 import { CollectionType } from "./firestoreBackend";
 import { Account, UserProperties } from "@/shared/service/domain/authentication/user";
+import { Observable } from "rxjs";
+import { resolve } from "path";
+import { rejects } from "assert";
 
 export interface FSUser {
-    id: string;
     displayName: string;
     email: string;
     photoURL: string;
@@ -16,7 +18,7 @@ export interface FSUser {
 // TODO: この辺の修正から
 function convert(id: string, user: FSUser): UserProperties {
     return {
-        id: id
+        id
         , mailAddress: user.email
         , photoUrl: user.photoURL
         , displayName: user.displayName
@@ -29,8 +31,31 @@ function convert(id: string, user: FSUser): UserProperties {
 
 export function createUserFunctions(db: Firestore): UserFunctions {
     const userCollectionRef = collection(db, CollectionType.users);
+    const unsubscribes: Unsubscribe[] = [];
+
     return {
-        get: (userId: string): Promise<UserProperties | null> => {
+        getObservable: (userId: string): Observable<UserProperties | null> => {
+            return new Observable(subscriber => {
+                const unsubscribe = onSnapshot(
+                    doc(userCollectionRef, userId)
+                    , (snapshot: DocumentSnapshot<DocumentData>)=> {
+                        if (snapshot.exists()) {
+                            const userData = snapshot.data() as FSUser;
+                            const userProperties = convert(snapshot.id, userData);
+                            subscriber.next(userProperties);       
+                        } else {
+                            unsubscribe();
+                            subscriber.next(null);       
+                        }
+                    }
+                    , (error: FirestoreError) => {
+                        // TODO: ログアウトすると「Missing or insufficient permissions.」が発生する。
+                        subscriber.error(error);
+                    });
+                unsubscribes.push(unsubscribe);
+            });
+        }
+        , get: (userId: string): Promise<UserProperties | null> => {
             return new Promise<UserProperties | null>((resolve, reject) => {
                 const unsubscribe = onSnapshot(
                     doc(userCollectionRef, userId)
@@ -41,13 +66,13 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                         } else {
                             resolve(null);
                         }
-                        unsubscribe();
                     });
+                unsubscribes.push(unsubscribe);
             });
         }
         , create: (user: Account): Promise<UserProperties> => {
 
-            return setDoc(doc(userCollectionRef, user.uid), {
+            return setDoc(doc(userCollectionRef, user.id), {
                 displayName: user.displayName
                 , email: user.mailAddress
                 , photoURL: user.photoUrl
@@ -55,7 +80,7 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                 , createdAt: Timestamp.now()
             })
                 .then(() => {
-                    console.log("Document written with ID: ", user.uid);
+                    console.log("Document written with ID: ", user.id);
                     return user;
                 });
         }

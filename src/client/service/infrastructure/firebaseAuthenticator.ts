@@ -45,7 +45,7 @@ export class FirebaseAuthenticator implements Authenticator {
              */
             if (user) {
                 const account: Account = {
-                    uid: user.uid
+                    id: user.uid
                     , mailAddress: user.email
                     , photoUrl: user.photoURL
                     , displayName: user.displayName
@@ -70,7 +70,7 @@ export class FirebaseAuthenticator implements Authenticator {
                 .then(userCredential => {
                     const user = userCredential.user;
                     subscriber.next({
-                        uid: user.uid
+                        id: user.uid
                         , mailAddress: user.email
                         , photoUrl: user.photoURL
                         , displayName: user.displayName
@@ -90,7 +90,7 @@ export class FirebaseAuthenticator implements Authenticator {
                 .then(userCredential => {
                     const user = userCredential.user;
                     subscriber.next({
-                        uid: user.uid
+                        id: user.uid
                         , mailAddress: user.email
                         , photoUrl: user.photoURL
                         , displayName: user.displayName

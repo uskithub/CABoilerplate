@@ -5,13 +5,16 @@ import { reactive } from "vue";
 import { Performer, Mutable, SharedStore, Store, Dispatcher } from ".";
 import { Subscription } from "rxjs";
 import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
-import { SignedInUser } from "@/shared/service/application/actors/signedInUser";
+import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Actor } from "@/shared/service/application/actors";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 import { U, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { Task } from "@/shared/service/domain/entities/task";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
 import { InteractResultType } from "robustive-ts";
+import { Observable } from "@apollo/client";
+import { UserProperties } from "@/shared/service/domain/authentication/user";
+import { AuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
 
 type ImmutableDrawerItems = Readonly<DrawerItem>;
 
@@ -50,12 +53,31 @@ export function createApplicationPerformer(): ApplicationPerformer {
             .then((result) => {
                 if (result.type === InteractResultType.success) {
                     switch (result.lastSceneContext.scene) {
-                    case goals.userDataExistsThenServicePresentsHomeView: {
-                        const user = { ...result.lastSceneContext.user };
-                        const actor = new SignedInUser(user);
-                        dispatcher.change(actor);
-                        _shared.signInStatus = SignInStatuses.signIn({ account: user });
-                        _shared.isLoading = false;
+                    case goals.servicePresentsHomeView: {
+                        const observable = result.lastSceneContext.observable as unknown as Observable<UserProperties | null>;
+                        const account = result.lastSceneContext.account;
+                        const subscription = observable.subscribe({
+                            next: (userProperties) => {
+                                if (userProperties === null) {
+                                    const actor = new AuthenticatedUser(account);
+                                    dispatcher.change(actor);
+                                    _shared.signInStatus = SignInStatuses.signingIn({ account });
+                                    dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account }), actor)
+                                        .catch(error => console.error(error));
+                                } else {
+                                    const actor = new AuthorizedUser(userProperties);
+                                    dispatcher.change(actor);
+                                    _shared.signInStatus = SignInStatuses.signIn({ userProperties });
+                                    _shared.isLoading = false;
+                                }
+                            }
+                            , error: (e) => console.error(e)
+                            , complete: () => {
+                                console.info("complete");
+                                subscription?.unsubscribe();
+                            }
+                        });
+
                         break;
                     }
                     case goals.sessionNotExistsThenServicePresentsSignInView: {
@@ -63,11 +85,11 @@ export function createApplicationPerformer(): ApplicationPerformer {
                         dispatcher.routingTo("/signin");
                         break;
                     }
-                    case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {
-                        _shared.signInStatus = SignInStatuses.signOut();
-                        return dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
-                            .then(() => { return; });
-                    }
+                    // case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {
+                    //     _shared.signInStatus = SignInStatuses.signOut();
+                    //     return dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
+                    //         .then(() => { return; });
+                    // }
                     }
                 }
             });

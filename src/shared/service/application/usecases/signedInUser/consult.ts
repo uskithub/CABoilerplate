@@ -1,11 +1,11 @@
 import { Message, MessageProperties } from "@/shared/service/domain/chat/message";
-import { SignedInUser } from "../../actors/signedInUser";
+import { AuthorizedUser } from "../../actors/authorizedUser";
 import { MyBaseScenario } from "../common";
 
 import type { Context, MutableContext } from "robustive-ts";
 
 
-const _u = SignedInUser.usecases.consult;
+const _u = AuthorizedUser.usecases.consult;
 
 /**
  * usecase: 相談する

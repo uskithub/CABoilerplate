@@ -7,7 +7,7 @@ import { UserCredential as _UserCredential } from "firebase/auth";
 export type UserCredential = _UserCredential;
 
 export type Account = {
-    uid: string;
+    id: string;
     mailAddress: string|null;
     photoUrl: string|null;
     displayName: string|null;
@@ -69,7 +69,7 @@ export class User implements Entity<UserProperties> {
     constructor(arg: Account | UserCredential) {
         if (isUserCredential(arg)) {
             this.account = {
-                uid: arg.user.uid
+                id: arg.user.uid
                 , mailAddress: arg.user.email
                 , photoUrl: arg.user.photoURL
                 , displayName: arg.user.displayName
@@ -132,11 +132,15 @@ export class User implements Entity<UserProperties> {
         return dependencies.auth.getGoogleOAuthRedirectResult();
     }
 
+    get observable(): Observable<UserProperties | null> { // read-only property with getter function (this is not the same thing as a “function-property”)
+        return dependencies.backend.users.getObservable(this.account.id);
+    }
+
     create(): Promise<UserProperties | null> {
         return dependencies.backend.users.create(this.account);
     }
 
     get(): Promise<UserProperties | null> {
-        return dependencies.backend.users.get(this.account.uid);
+        return dependencies.backend.users.get(this.account.id);
     }
 }
