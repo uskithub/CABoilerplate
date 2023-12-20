@@ -37,11 +37,16 @@ export class Nobody extends BaseActor<null> {
                 , serviceValidateInputs: "サービスは入力項目に問題がないかを確認する"
                 , onSuccessInValidatingThenServicePublishNewAccount: "入力項目に問題がない場合_サービスはアカウントを新規に発行する"
                 , onSuccessPublishNewAccountThenServiceCreateUserData: "アカウントの発行に成功した場合_サービスはユーザ情報を作成する"
+                , onSuccessPublishNewAccountThenServiceGetsOrganizationOfDomain: "アカウントの発行に成功した場合_サービスはドメインの組織を取得する"
             }
             , alternatives: {
                 userStartsSignUpProcessWithGoogleOAuth: "ユーザはGoogleOAuthでのサインアップを開始する"
                 , serviceRedirectsToGoogleOAuth: "サービスはGoogle OAuth認証ページにリダイレクトする"
                 , userTapsSignInButton: "ユーザはサインインボタンをタップする"
+                , userSelectToBeAdministrator: "ユーザは管理者になるを選択する"
+                , serviceCreatesNewOrganization: "サービスは新規組織を作成する"
+                , onSuccessCreateNewOrganizationThenThenServiceCreateUserData: "新規組織の作成に成功した場合_サービスはユーザ情報を作成する"
+                , userSelectNotToBeAdministrator: "ユーザは管理者にならないを選択する"
             }
             , goals: {
                 onSuccessInCreateUserDataThenServicePresentsHomeView: "ユーザ情報の作成に成功した場合_サービスはホーム画面を表示する"
@@ -50,6 +55,7 @@ export class Nobody extends BaseActor<null> {
                 , onFailureInCreateUserDataThenServicePresentsError: "ユーザ情報の作成に失敗した場合_サービスはエラーを表示する"
                 , serviceDoNothing: "サービスはなにもしない"
                 , servicePresentsSignInView: "サインイン画面を表示する"
+                , domainOrganizationNotExistsThenServicePresentsAdministratorRegistrationDialog: "ドメインの組織がない場合_サービスは管理者登録ダイアログを表示する"
             }
         }
         // , signInWithGoogleOAuth : {

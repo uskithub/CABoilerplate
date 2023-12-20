@@ -31,6 +31,16 @@ export default {
                 , isTooLong: (what: string, maxLength: number) => `${ what } is too long. It should be equal to or less than ${maxLength} characters.`
             }
         }
+        , admin : {
+            dialog : {
+                title : "Register New Administrator"
+                , body : (domain: string) => `TODO "${ domain }" is required`
+                , buttons : {
+                    yes : "Yes, creating organization."
+                    , no : "No, just signing up individually."
+                }
+            }
+        }
         
     }
 };

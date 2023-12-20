@@ -3,19 +3,35 @@ import dependencies from "../dependencies";
 import { Entity } from "@/shared/system/interfaces/architecture";
 import { Observable } from "rxjs";
 import { UserCredential as _UserCredential } from "firebase/auth";
+import { Role } from "../chat/message";
 
 export type UserCredential = _UserCredential;
 
 export type Account = {
     id: string;
-    mailAddress: string|null;
+    email: string|null;
     photoUrl: string|null;
     displayName: string|null;
-    isMailAddressVerified: boolean;
+    isEmailVerified: boolean;
 };
 
+export const RoleType = {
+    owner: "owner"
+    , administrator: "administrator"
+    , member: "member"
+    , collaborator: "collaborator"
+} as const;
+
+export type RoleType = typeof RoleType[keyof typeof RoleType];
+
+export type OrganizationAndRole = {
+    organizationId: string;
+    role: RoleType;
+}
+
 export type UserProperties = {
-    isDomainOwner: boolean;
+    organizationAndRoles: OrganizationAndRole[]
+    createdAt: Date;
 } & Account;
 
 const idValidationResults = [r.isRequired, r.isMalformed] as const;
@@ -70,10 +86,10 @@ export class User implements Entity<UserProperties> {
         if (isUserCredential(arg)) {
             this.account = {
                 id: arg.user.uid
-                , mailAddress: arg.user.email
+                , email: arg.user.email
                 , photoUrl: arg.user.photoURL
                 , displayName: arg.user.displayName
-                , isMailAddressVerified: arg.user.emailVerified
+                , isEmailVerified: arg.user.emailVerified
             };
         } else {
             this.account = arg;
@@ -136,8 +152,8 @@ export class User implements Entity<UserProperties> {
         return dependencies.backend.users.getObservable(this.account.id);
     }
 
-    create(): Promise<UserProperties> {
-        return dependencies.backend.users.create(this.account);
+    create(organizationAndRole?: OrganizationAndRole | undefined): Promise<UserProperties> {
+        return dependencies.backend.users.create(this.account, organizationAndRole);
     }
 
     get(): Promise<UserProperties | null> {

@@ -46,10 +46,10 @@ export class FirebaseAuthenticator implements Authenticator {
             if (user) {
                 const account: Account = {
                     id: user.uid
-                    , mailAddress: user.email
+                    , email: user.email
                     , photoUrl: user.photoURL
                     , displayName: user.displayName
-                    , isMailAddressVerified: user.emailVerified
+                    , isEmailVerified: user.emailVerified
                 };
                 console.log("onAuthStateChanged: signIn", user);
                 this.#signInStatus.next(SignInStatuses.signIn({ account }));
@@ -71,10 +71,10 @@ export class FirebaseAuthenticator implements Authenticator {
                     const user = userCredential.user;
                     subscriber.next({
                         id: user.uid
-                        , mailAddress: user.email
+                        , email: user.email
                         , photoUrl: user.photoURL
                         , displayName: user.displayName
-                        , isMailAddressVerified: user.emailVerified
+                        , isEmailVerified: user.emailVerified
                     } as Account);
                     subscriber.complete();
                 })
@@ -91,10 +91,10 @@ export class FirebaseAuthenticator implements Authenticator {
                     const user = userCredential.user;
                     subscriber.next({
                         id: user.uid
-                        , mailAddress: user.email
+                        , email: user.email
                         , photoUrl: user.photoURL
                         , displayName: user.displayName
-                        , isMailAddressVerified: user.emailVerified
+                        , isEmailVerified: user.emailVerified
                     } as Account);
                     subscriber.complete();
                 })

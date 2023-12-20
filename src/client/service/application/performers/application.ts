@@ -62,7 +62,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                                     const actor = new AuthenticatedUser(account);
                                     dispatcher.change(actor);
                                     _shared.signInStatus = SignInStatuses.signingIn({ account });
-                                    dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account }), actor)
+                                    dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceGetsOrganizationOfDomain]({ account }), actor)
                                         .catch(error => console.error(error));
                                 } else {
                                     const actor = new AuthorizedUser(userProperties);

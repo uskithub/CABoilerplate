@@ -13,12 +13,17 @@ import { Nobody } from "@/shared/service/application/actors/nobody";
 import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { dictionary as t } from "@/client/main";
+import { fa } from "vuetify/lib/iconsets/fa-svg.mjs";
+import { Account } from "@/shared/service/domain/authentication/user";
 
 export interface AuthenticationStore extends Store {
     readonly signInStatus: SignInStatus | null;
     readonly idInvalidMessage: string | string[] | undefined;
     readonly passwordInvalidMessage: string | string[] | undefined;
     readonly signInFailureMessage: string | undefined;
+    readonly isPresentAdministratorRegistrationDialog: boolean;
+    readonly domain: string | null;
+    readonly account: Account | null;
 }
 
 export interface AuthenticationPerformer extends Performer<"authentication", AuthenticationStore> {
@@ -33,6 +38,9 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
         , idInvalidMessage: "" // ホントは null でいいはずが...
         , passwordInvalidMessage: "" // ホントは null でいいはずが...
         , signInFailureMessage: undefined
+        , isPresentAdministratorRegistrationDialog: false
+        , domain : null
+        , account : null
     });
 
     const _store = store as Mutable<AuthenticationStore>;
@@ -101,6 +109,13 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 }
                 case goals.servicePresentsSignInView: {
                     dispatcher.routingTo("/signin");
+                    break;
+                }
+                case goals.domainOrganizationNotExistsThenServicePresentsAdministratorRegistrationDialog: {
+                    _store.domain = context.domain;
+                    _store.account = context.account;
+                    _store.isPresentAdministratorRegistrationDialog = true;
+                    _shared.isLoading = false;
                     break;
                 }
                 }

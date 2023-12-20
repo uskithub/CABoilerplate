@@ -8,6 +8,7 @@ import type { Dictionary } from "@shared/system/localizations";
 import { DISPATCHER_KEY } from "../../application/performers";
 import type { Dispatcher } from "../../application/performers";
 import { U } from "@/shared/service/application/usecases";
+import { AuthenticatedUser, isAuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
 import { AuthorizedUser, isAuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 
@@ -25,6 +26,12 @@ const state = reactive<{
 const isPresentDialog = computed(() => isAuthorizedUser(stores.shared.actor));
 const isFormValid = computed(() => state.email !== null && state.password !== null);
 
+const onClickYes = () => { 
+    if (stores.authentication.domain && isAuthenticatedUser(stores.shared.actor) && stores.shared.actor.user) { 
+        dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userSelectToBeAdministrator]({ domain: stores.authentication.domain, account: stores.shared.actor.user }))
+    }
+}
+
 </script>
 
 <template lang="pug">
@@ -37,7 +44,7 @@ v-container
       variant="flat", 
       max-width="500"
     )
-      v-form(ref="form", v-model="isFormValid", lazy-validation)
+      v-form(:model-value="isFormValid", ref="form", lazy-validation)
         v-card-text
           div.text-subtitle-2.font-weight-black.mb-1 {{ t.authentication.common.labels.mailAddress }}
           v-text-field(
@@ -84,12 +91,28 @@ v-container
             v-spacer
             v-btn(
               color="warning",
-              text,
               @click="dispatch(U.authentication.signOut.basics[AuthorizedUser.usecases.signOut.basics.userStartsSignOutProcess]())"
             ) Sign Out
             v-btn(
               color="success",
-              text,
               @click="dispatch(U.authentication.signOut.alternatives[AuthorizedUser.usecases.signOut.alternatives.userResignSignOut]())"
             ) Go Home
+      v-dialog(
+        :model-value="stores.authentication.isPresentAdministratorRegistrationDialog"
+        persistent, 
+        max-width="700"
+      )
+        v-card
+          v-card-title.text-h5 {{ t.authentication.admin.dialog.title }}
+          v-card-text {{ t.authentication.admin.dialog.body(stores.authentication.domain ?? "") }}
+          v-card-actions
+            v-spacer
+            v-btn(
+              color="warning",
+              @click="dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userSelectNotToBeAdministrator]())"
+            ) {{ t.authentication.admin.dialog.buttons.no }}
+            v-btn(
+              color="success",
+              @click="dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userSelectToBeAdministrator]({ domain: stores.authentication.domain, account: stores.authentication.account }))"
+            ) {{ t.authentication.admin.dialog.buttons.yes }}
 </template>
