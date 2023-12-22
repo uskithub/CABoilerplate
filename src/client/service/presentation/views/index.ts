@@ -1,5 +1,6 @@
 // service
 import Home from "@views/Home.vue";
+import Profile from "@views/Profile.vue";
 import SignIn from "@views/SignIn.vue";
 import SignUp from "@views/SignUp.vue";
 import Chat from "@views/home/Chat.vue";
@@ -20,6 +21,7 @@ export const routes = [
             , { path: "/projects/:projectId", component: Project }
             , { path: "/warranties", component: Warranty }
             , { path: "/insuranceItems", component: Insuranace }
+            , { path: "/profile", component: Profile }
         ]
     }
     , { path: "/signin", component: SignIn }

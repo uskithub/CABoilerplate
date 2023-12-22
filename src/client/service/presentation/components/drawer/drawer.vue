@@ -28,23 +28,25 @@ watch(() => props.modelValue, (newVal: boolean) => {
     state.isOpen = newVal;
 });
 
-const photoUrl = computed((): string | null => {
+const photoUrl = computed((): string | undefined => {
     switch (props.signInStatus.case) {
         case SignInStatus.signIn:
-            return props.signInStatus.userProperties.photoUrl;
+            return props.signInStatus.userProperties.photoUrl ?? undefined;
         default:
-            return null;
+            return undefined;
     }
 });
 
-const displayName = computed((): string | null => {
+const displayName = computed((): string | undefined => {
     switch (props.signInStatus.case) {
         case SignInStatus.signIn:
-            return props.signInStatus.userProperties.displayName;
+            return props.signInStatus.userProperties.displayName ?? undefined;
         default:
-            return null;
+            return undefined;
     }
 });
+
+const status = "TODO:ステータスを表示";
 
 </script>
 
@@ -53,11 +55,20 @@ v-navigation-drawer(
   v-model="state.isOpen" 
   @update:model-value="emits('update:modelValue', state.isOpen)"
 )
-  v-sheet.pa-4(color="grey-lighten-4")
-    v-list-item.px-2
-      v-list-item-avatar
-        v-img(:src="photoUrl")
-      v-list-item-title {{ displayName }}
+  v-list(bg-color="grey-lighten-4")
+    v-list-item(
+      :title="displayName"
+      :subtitle="status"
+      to="/profile"
+    )
+      template(v-slot:prepend)
+        v-avatar(size="x-large")
+          v-img(
+            v-if="photoUrl"
+            :src="photoUrl"
+            :alt="displayName"
+          )
+          span.text-h5(v-else) {{ displayName }}
   v-divider
   v-list(nav v-model:opened="state.openings")
     template(v-for="(item, idx) in props.items")
