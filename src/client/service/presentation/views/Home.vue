@@ -27,7 +27,11 @@ const state = reactive<{
 </script>
 
 <template lang="pug">
-drawer(v-model="state.isDrawerOpen", :items="stores.application.drawerItems")
+drawer(
+  v-model="state.isDrawerOpen",
+  :signInStatus="stores.shared.signInStatus",
+  :items="stores.application.drawerItems"
+)
 v-app-bar
   v-app-bar-nav-icon(@click="state.isDrawerOpen = !state.isDrawerOpen")
   v-toolbar-title Application

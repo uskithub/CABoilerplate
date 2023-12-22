@@ -7,7 +7,7 @@ import { Observable } from "rxjs";
 interface FSUser {
     displayName: string;
     email: string;
-    photoURL: string;
+    photoUrl: string;
     companions: Array<string>;
     // notifications: [FSNotificaiton]|null;
     // doing: { task: FSTask; log: FSLog };
@@ -79,7 +79,7 @@ const userConverter: FirestoreDataConverter<UserProperties> = {
         return {
             id
             , email: data.email
-            , photoUrl: data.photoURL
+            , photoUrl: data.photoUrl
             , displayName: data.displayName
             , isEmailVerified: true
             // , notifications: user.notifications

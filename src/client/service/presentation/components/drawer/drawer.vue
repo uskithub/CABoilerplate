@@ -3,9 +3,12 @@
 import { reactive, watch } from "vue";
 import { DrawerContentType } from ".";
 import type { DrawerItem } from ".";
+import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
+import { computed } from "vue";
 
 const props = defineProps<{
     modelValue: boolean
+    , signInStatus: SignInStatus
     , items: Array<DrawerItem>
 }>();
 
@@ -25,11 +28,37 @@ watch(() => props.modelValue, (newVal: boolean) => {
     state.isOpen = newVal;
 });
 
+const photoUrl = computed((): string | null => {
+    switch (props.signInStatus.case) {
+        case SignInStatus.signIn:
+            return props.signInStatus.userProperties.photoUrl;
+        default:
+            return null;
+    }
+});
+
+const displayName = computed((): string | null => {
+    switch (props.signInStatus.case) {
+        case SignInStatus.signIn:
+            return props.signInStatus.userProperties.displayName;
+        default:
+            return null;
+    }
+});
+
 </script>
 
 <template lang="pug">
-v-navigation-drawer(v-model="state.isOpen" 
-  @update:model-value="emits('update:modelValue', state.isOpen)")
+v-navigation-drawer(
+  v-model="state.isOpen" 
+  @update:model-value="emits('update:modelValue', state.isOpen)"
+)
+  v-sheet.pa-4(color="grey-lighten-4")
+    v-list-item.px-2
+      v-list-item-avatar
+        v-img(:src="photoUrl")
+      v-list-item-title {{ displayName }}
+  v-divider
   v-list(nav v-model:opened="state.openings")
     template(v-for="(item, idx) in props.items")
       v-list-subheader(v-if="item.case === DrawerContentType.header") {{ item.title }}
