@@ -50,4 +50,9 @@ export default {
         }
         
     }
+    , timeline: {
+        views : {
+            title: "Timeline"
+        }
+    }
 };

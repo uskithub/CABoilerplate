@@ -15,6 +15,7 @@ import { InteractResultType } from "robustive-ts";
 import { Observable } from "@apollo/client";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { AuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
+import { dictionary as t } from "@/client/main";
 
 type ImmutableDrawerItems = Readonly<DrawerItem>;
 
@@ -32,6 +33,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
     const store = reactive<ApplicationStore>({
         drawerItems : [
             DrawerItem.header({ title: "Menu1" })
+            , DrawerItem.link({ title: t.timeline.views.title, href: "/" })
             , DrawerItem.link({ title: "保証一覧", href: "/warranties" })
             , DrawerItem.link({ title: "保険加入アイテム", href: "/insuranceItems" })
             , DrawerItem.divider()
