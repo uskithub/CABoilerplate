@@ -1,73 +1,79 @@
 import { UserFunctions } from "@/shared/service/domain/interfaces/backend";
-import { addDoc, collection, collectionGroup, doc, DocumentChangeType, Firestore, getDocs, onSnapshot, orderBy, where, query, DocumentSnapshot, DocumentData, Unsubscribe, Timestamp, setDoc, FirestoreError, FirestoreDataConverter, PartialWithFieldValue, QueryDocumentSnapshot, SetOptions, SnapshotOptions, WithFieldValue } from "firebase/firestore";
+import { collection, doc, Firestore, getDocs, onSnapshot, where, query, DocumentSnapshot, DocumentData, Unsubscribe, Timestamp, setDoc, FirestoreError, FirestoreDataConverter, QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 import { CollectionType, MAX_ID } from "./firestoreBackend";
 import { Account, OrganizationAndRole, RoleType, UserProperties } from "@/shared/service/domain/authentication/user";
 import { Observable } from "rxjs";
 
 interface FSUser {
+    id: string;  // where("id", "in", ["xxx", "yyy"]) で検索できるようにするためにフィールドにも持たせる
     displayName: string;
     email: string;
     photoUrl: string;
     companions: Array<string>;
     // notifications: [FSNotificaiton]|null;
     // doing: { task: FSTask; log: FSLog };
-    organizationAndRoles: Array<string>;
+    organizationAndRoles?: Array<string> | undefined;
     createdAt: Timestamp;
 }
 
 const userConverter: FirestoreDataConverter<UserProperties> = {
     toFirestore(modelObject: UserProperties): DocumentData {
-        const encodeOrganizationAndRole = (organizaiotnAndRole: OrganizationAndRole): string => {
-            switch(organizaiotnAndRole.role) {
+        const encodeOrganizationAndRole = (organizationAndRole: OrganizationAndRole): string => {
+            switch(organizationAndRole.role) {
             case RoleType.owner: {
-                return `${organizaiotnAndRole.organizationId}O`;
+                return `${organizationAndRole.organizationId}O`;
             }
             case RoleType.administrator: {
-                return `${organizaiotnAndRole.organizationId}A`;
+                return `${organizationAndRole.organizationId}A`;
             }
             case RoleType.member: {
-                return `${organizaiotnAndRole.organizationId}M`;
+                return `${organizationAndRole.organizationId}M`;
             }
             case RoleType.collaborator: {
-                return `${organizaiotnAndRole.organizationId}C`;
+                return `${organizationAndRole.organizationId}C`;
             }
             }
         };
         return {
-            email: modelObject.email
+            id: modelObject.id
+            , email: modelObject.email
             , photoUrl: modelObject.photoUrl
             , displayName: modelObject.displayName
             , isEmailVerified: modelObject.isEmailVerified
-            , organizationAndRoles: modelObject.organizationAndRoles.map(item => encodeOrganizationAndRole(item))
+            , organizationAndRoles: modelObject.organizationAndRoles?.map(item => encodeOrganizationAndRole(item))
             , createdAt: Timestamp.fromDate(modelObject.createdAt)
         };
     }
     , fromFirestore: (snapshot: QueryDocumentSnapshot<DocumentData>, options?: SnapshotOptions | undefined): UserProperties => {
         const id  = snapshot.id;
         const data = snapshot.data(options) as FSUser;
-        const decodeOrganizationAndRole = (organizaiotnAndRole: string): OrganizationAndRole => {
-            switch(organizaiotnAndRole.slice(MAX_ID.length)) {
+        const decodeOrganizationAndRole = (organizationAndRole: string): OrganizationAndRole => {
+            switch(organizationAndRole.slice(MAX_ID.length)) {
             case "O": {
                 return {
-                    organizationId: organizaiotnAndRole.slice(-1 * MAX_ID.length, -1)
+                    organizationId: organizationAndRole.slice(0, MAX_ID.length)
+                    , name: null
                     , role: RoleType.owner
                 };
             }
             case "A": {
                 return {
-                    organizationId: organizaiotnAndRole.slice(-1 * MAX_ID.length, -1)
+                    organizationId: organizationAndRole.slice(0, MAX_ID.length)
+                    , name: null
                     , role: RoleType.administrator
                 };
             }
             case "M": {
                 return {
-                    organizationId: organizaiotnAndRole.slice(-1 * MAX_ID.length, -1)
+                    organizationId: organizationAndRole.slice(0, MAX_ID.length)
+                    , name: null
                     , role: RoleType.member
                 };
             }
             case "C": {
                 return {
-                    organizationId: organizaiotnAndRole.slice(-1 * MAX_ID.length, -1)
+                    organizationId: organizationAndRole.slice(0, MAX_ID.length)
+                    , name: null
                     , role: RoleType.collaborator
                 };
             }
@@ -84,7 +90,7 @@ const userConverter: FirestoreDataConverter<UserProperties> = {
             , isEmailVerified: true
             // , notifications: user.notifications
             // , doing: user.doing
-            , organizationAndRoles: data.organizationAndRoles.map(item => decodeOrganizationAndRole(item))
+            , organizationAndRoles: data.organizationAndRoles?.map(item => decodeOrganizationAndRole(item)) ?? []
             , createdAt: data.createdAt.toDate()
         };
     }
@@ -92,7 +98,28 @@ const userConverter: FirestoreDataConverter<UserProperties> = {
 
 export function createUserFunctions(db: Firestore): UserFunctions {
     const userCollectionRef = collection(db, CollectionType.users).withConverter(userConverter);
+    const organizationCollectionRef = collection(db, CollectionType.organizations);
+
     const unsubscribes: Unsubscribe[] = [];
+
+    const getOrganizationName = (organizationAndRoles: OrganizationAndRole[]): Promise<OrganizationAndRole[]> => {
+        return getDocs(
+            query(
+                organizationCollectionRef
+                , where("id", "in", organizationAndRoles.map(i => i.organizationId))
+            )
+        ).then((querySnapshot) => {
+            if (querySnapshot.empty) {
+                return organizationAndRoles;
+            } else {
+                return organizationAndRoles.map(i => {
+                    const data = querySnapshot.docs.find(doc => doc.id == i.organizationId)?.data();
+                    i.name = (data?.name ?? data?.domain) as string | null;
+                    return i;
+                });
+            }
+        });
+    }; 
     return {
         getObservable: (userId: string): Observable<UserProperties | null> => {
             return new Observable(subscriber => {
@@ -100,7 +127,19 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                     doc(userCollectionRef, userId)
                     , (snapshot: DocumentSnapshot<UserProperties>)=> {
                         if (snapshot.exists()) {
-                            subscriber.next(snapshot.data());       
+                            const userProperties = snapshot.data();
+                            if (userProperties.organizationAndRoles.length > 0) {
+                                getOrganizationName(userProperties.organizationAndRoles)
+                                    .then(organizationAndRoles => {
+                                        userProperties.organizationAndRoles = organizationAndRoles;
+                                        subscriber.next(userProperties);
+                                    })
+                                    .catch(error => {
+                                        subscriber.error(error);
+                                    });
+                            } else {
+                                subscriber.next(userProperties);
+                            }
                         } else {
                             subscriber.next(null);       
                         }

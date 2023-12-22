@@ -26,11 +26,12 @@ export type RoleType = typeof RoleType[keyof typeof RoleType];
 
 export type OrganizationAndRole = {
     organizationId: string;
+    name: string | null;
     role: RoleType;
 }
 
 export type UserProperties = {
-    organizationAndRoles: OrganizationAndRole[]
+    organizationAndRoles: OrganizationAndRole[];
     createdAt: Date;
 } & Account;
 

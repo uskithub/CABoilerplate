@@ -2,7 +2,6 @@ import { Observable } from "rxjs";
 import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
 import { Task } from "../entities/task";
 import { Account, OrganizationAndRole, UserProperties } from "../authentication/user";
-import { type } from "os";
 import { OrganizationProperties } from "../authentication/organization";
 
 export const ItemChangeType = {

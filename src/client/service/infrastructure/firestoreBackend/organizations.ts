@@ -1,11 +1,12 @@
-import { ChangedTask, OrganizationFunctions } from "@/shared/service/domain/interfaces/backend";
-import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./entities/tasks";
-import { CollectionType } from "./firestoreBackend";
+import { OrganizationFunctions } from "@/shared/service/domain/interfaces/backend";
+import { CollectionType, autoId } from "./firestoreBackend";
 
-import { collection, Firestore, onSnapshot, where, query, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, SnapshotOptions, getDoc, getDocs, QuerySnapshot, Timestamp, addDoc, DocumentReference } from "firebase/firestore";
+import { collection, Firestore, where, query, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, SnapshotOptions, getDoc, getDocs, QuerySnapshot, Timestamp, addDoc, DocumentReference, setDoc, doc } from "firebase/firestore";
 import { OrganizationProperties } from "@/shared/service/domain/authentication/organization";
 
+
 interface FSOrganization {
+    id: string; // where("id", "in", ["xxx", "yyy"]) で検索できるようにするためにフィールドにも持たせる
     domain: string;
     ownerIds: string[];
     administratorIds: string[];
@@ -14,10 +15,11 @@ interface FSOrganization {
     createdAt: Timestamp;
 }
 
-const userConverter: FirestoreDataConverter<OrganizationProperties> = {
+const organizationConverter: FirestoreDataConverter<OrganizationProperties> = {
     toFirestore(modelObject: OrganizationProperties): DocumentData {
         return {
-            domain: modelObject.domain
+            id: modelObject.id
+            , domain: modelObject.domain
             , ownerIds: modelObject.ownerIds
             , administratorIds: modelObject.administratorIds
             , memberIds: modelObject.memberIds
@@ -41,7 +43,7 @@ const userConverter: FirestoreDataConverter<OrganizationProperties> = {
 };
 
 export function createOrganizationFunctions(db: Firestore): OrganizationFunctions {
-    const organizationCollectionRef = collection(db, CollectionType.organizations).withConverter(userConverter);
+    const organizationCollectionRef = collection(db, CollectionType.organizations).withConverter(organizationConverter);
     
     return {
         get: (domain: string): Promise<OrganizationProperties | null> => {
@@ -64,18 +66,19 @@ export function createOrganizationFunctions(db: Firestore): OrganizationFunction
             });
         }
         , create: (domain: string, ownerId: string): Promise<OrganizationProperties> => {
+            const id = autoId();
             const organizationProperties = {
-                domain
+                id
+                , domain
                 , ownerIds: [ownerId]
                 , administratorIds: new Array<string>()
                 , memberIds: new Array<string>()
                 , collaboratorIds: new Array<string>()
                 , createdAt: new Date()
             } as OrganizationProperties;
-            return addDoc(organizationCollectionRef, organizationProperties)
-                .then((docRef: DocumentReference<OrganizationProperties>) => {
-                    console.log("Document written with ID: ", docRef.id);
-                    organizationProperties.id = docRef.id;
+            return setDoc(doc(organizationCollectionRef, id), organizationProperties)
+                .then(() => {
+                    console.log("Document written with ID: ", id);
                     return organizationProperties;
                 });
         }
