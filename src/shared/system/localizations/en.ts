@@ -16,6 +16,13 @@ export default {
                     signIn: "Sign In"
                 }
             }
+            , profile : {
+                title : "Profile"
+                , organizaionList : {
+                    header : "Organizations Participating In:"
+                    , headerNoContent : "No organizations participating."
+                }
+            }
         }
     }
     , authentication: {

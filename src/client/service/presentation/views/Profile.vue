@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { DICTIONARY_KEY } from "@shared/system/localizations";
+import type { Dictionary } from "@shared/system/localizations";
 import { inject, reactive } from "vue";
 import type { Dispatcher } from "../../application/performers";
 import { DISPATCHER_KEY } from "../../application/performers";
 import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 
+const t = inject<Dictionary>(DICTIONARY_KEY)!;
 const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
 
 const state = reactive<{
@@ -23,12 +26,12 @@ const organizations = (): ListItem[] => {
     if (SignInStatus.signIn === stores.shared.signInStatus.case) {
         if (stores.shared.signInStatus.userProperties.organizationAndRoles.length === 0) {
             return [
-               { type: "header", title: "参加中の組織はありません。" }
+               { type: "header", title: t.application.views.profile.organizaionList.headerNoContent }
             ];
         }
         
         return ([
-            { type: "header", title: "参加中の組織" }
+            { type: "header", title: t.application.views.profile.organizaionList.header }
         ] as ListItem[])
             .concat(stores.shared.signInStatus.userProperties.organizationAndRoles.map((i, idx) => {
                 return {
