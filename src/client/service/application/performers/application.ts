@@ -56,7 +56,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                 if (result.type === InteractResultType.success) {
                     switch (result.lastSceneContext.scene) {
                     case goals.servicePresentsHomeView: {
-                        const observable = result.lastSceneContext.observable as unknown as Observable<UserProperties | null>;
+                        const observable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
                         const account = result.lastSceneContext.account;
                         const subscription = observable.subscribe({
                             next: (userProperties) => {

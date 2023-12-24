@@ -7,7 +7,8 @@ export class Nobody extends BaseActor<null> {
             basics: {
                 userOpensSite: "ユーザはサイトを開く"
                 , serviceChecksSession: "サービスはセッションがあるかを確認する"
-                , sessionExistsThenServicePreparesForObservingUserData: "セッションがある場合_サービスはユーザ情報の観測を準備する"
+                , sessionExistsThenServiceStartsNotifyingPresence: "セッションがある場合_サービスはプレゼンスの通知を開始する"
+                , ServicePreparesForObservingUserData: "サービスはユーザ情報の観測を準備する"
             }
             , goals: {
                 servicePresentsHomeView: "サービスはホーム画面を表示する"

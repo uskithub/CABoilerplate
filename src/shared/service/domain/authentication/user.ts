@@ -160,4 +160,8 @@ export class User implements Entity<UserProperties> {
     get(): Promise<UserProperties | null> {
         return dependencies.backend.users.get(this.account.id);
     }
+
+    startNotifyingPresence(): void {
+        return dependencies.presence.startsNotifying(this.account.id);
+    }
 }

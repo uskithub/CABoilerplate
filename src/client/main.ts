@@ -29,6 +29,7 @@ import { U } from "@/shared/service/application/usecases";
 import { Service } from "@/shared/service/application/actors/service";
 import { Subscription } from "rxjs";
 import { Nobody } from "@/shared/service/application/actors/nobody";
+import { FirebasePresence } from "./service/infrastructure/firebasePresence";
 // import { GraphqlAuthenticator } from "./service/infrastructure/graphqlAuthenticator";
 
 export const dictionary = i18n(navigator.language);
@@ -37,6 +38,7 @@ export const dictionary = i18n(navigator.language);
 const firebaseApp = initializeApp(firebaseConfig);
 dependencies.auth = new FirebaseAuthenticator(firebaseApp);
 // dependencies.auth = new GraphqlAuthenticator();
+dependencies.presence = new FirebasePresence(firebaseApp);
 dependencies.backend = new FirestoreBackend(getFirestore(firebaseApp));
 // dependencies.backend = new AmplifyBackend();
 dependencies.serviceInProcess = new ServiceInProcessApi();

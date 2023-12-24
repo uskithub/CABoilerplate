@@ -1,5 +1,6 @@
 import { Analytics } from "./interfaces/analytics";
 import { Authenticator } from "./interfaces/authenticator";
+import { Presence } from "./interfaces/presence";
 import { Backend } from "./interfaces/backend";
 import { Notifier } from "./interfaces/notifier";
 import { Recollector } from "./interfaces/recollection";
@@ -9,6 +10,7 @@ import { ServiceInProcessBackend } from "./ServiceInProcess/interfaces/serviceIn
 
 export interface Dependencies {
     auth: Authenticator;
+    presence : Presence;
     backend: Backend;
     serviceInProcess: ServiceInProcessBackend;
     analytics: Analytics;
@@ -20,6 +22,7 @@ export interface Dependencies {
 
 export default {
     auth : {} as Authenticator
+    , presence : {} as Presence
     , backend : {} as Backend
     , serviceInProcess : {} as ServiceInProcessBackend
     , analytics: {} as Analytics

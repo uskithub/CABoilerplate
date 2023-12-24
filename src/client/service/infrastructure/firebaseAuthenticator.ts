@@ -52,7 +52,7 @@ export class FirebaseAuthenticator implements Authenticator {
                     , isEmailVerified: user.emailVerified
                 };
                 console.log("onAuthStateChanged: signIn", user);
-                this.#signInStatus.next(SignInStatuses.signIn({ account }));
+                this.#signInStatus.next(SignInStatuses.signingIn({ account }));
             } else {
                 console.log("onAuthStateChanged: signOut");
                 this.#signInStatus.next(SignInStatuses.signOut());
