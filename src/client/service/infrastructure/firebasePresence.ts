@@ -13,7 +13,7 @@ export class FirebasePresence implements Presence {
     }
 
     startsNotifying(userId: string) {
-        const statusRef = ref(this.#db, "/status/" + userId);
+        const statusRef = ref(this.#db, "/presence/" + userId);
         
         const unsubscribe: Unsubscribe = onValue(this.#connectedRef, (snapshot) => {
             if (snapshot.val() === true) {
