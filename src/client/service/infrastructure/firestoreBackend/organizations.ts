@@ -1,17 +1,17 @@
 import { OrganizationFunctions } from "@/shared/service/domain/interfaces/backend";
-import { CollectionType, autoId } from "./firestoreBackend";
+import { CollectionType, ID, autoId } from ".";
 
 import { collection, Firestore, where, query, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, SnapshotOptions, getDoc, getDocs, QuerySnapshot, Timestamp, addDoc, DocumentReference, setDoc, doc } from "firebase/firestore";
 import { OrganizationProperties } from "@/shared/service/domain/authentication/organization";
 
 
 interface FSOrganization {
-    id: string; // where("id", "in", ["xxx", "yyy"]) で検索できるようにするためにフィールドにも持たせる
+    id: ID; // where("id", "in", ["xxx", "yyy"]) で検索できるようにするためにフィールドにも持たせる
     domain: string;
-    ownerIds: string[];
-    administratorIds: string[];
-    memberIds: string[];
-    collaboratorIds: string[];
+    ownerIds: ID[];
+    administratorIds: ID[];
+    memberIds: ID[];
+    collaboratorIds: ID[];
     createdAt: Timestamp;
 }
 

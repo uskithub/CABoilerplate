@@ -1,11 +1,11 @@
 import { UserFunctions } from "@/shared/service/domain/interfaces/backend";
 import { collection, doc, Firestore, getDocs, onSnapshot, where, query, DocumentSnapshot, DocumentData, Unsubscribe, Timestamp, setDoc, FirestoreError, FirestoreDataConverter, QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
-import { CollectionType, MAX_ID } from "./firestoreBackend";
+import { CollectionType, ID, MAX_ID } from ".";
 import { Account, OrganizationAndRole, RoleType, UserProperties } from "@/shared/service/domain/authentication/user";
 import { Observable } from "rxjs";
 
 interface FSUser {
-    id: string;  // where("id", "in", ["xxx", "yyy"]) で検索できるようにするためにフィールドにも持たせる
+    id: ID;  // where("id", "in", ["xxx", "yyy"]) で検索できるようにするためにフィールドにも持たせる
     displayName: string;
     email: string;
     photoUrl: string;

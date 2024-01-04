@@ -3,6 +3,7 @@ import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
 import { Task } from "../entities/task";
 import { Account, OrganizationAndRole, UserProperties } from "../authentication/user";
 import { OrganizationProperties } from "../authentication/organization";
+import { LogProperties } from "../timeline/log";
 
 export const ItemChangeType = {
     added : "added"
@@ -36,6 +37,14 @@ export type UserFunctions = {
     // delete: () => Promise<void>;
 };
 
+export const ChangedLog = new SwiftEnum<ChangedItems<LogProperties>>();
+export type ChangedLog = SwiftEnumCases<ChangedItems<LogProperties>>;
+
+export type LogFunctions = {
+    record: (userId: string, to: string | null, mention: string[] | null, text: string) => Promise<LogProperties>;
+    getObservable: (userId: string, followeeIds: string[], groupIds: string[], isAdministrator: boolean) => Observable<ChangedLog[]>;
+};
+
 export type OrganizationFunctions = {
     get: (domain: string) => Promise<OrganizationProperties | null>;
     create: (domain: string, ownerId: string) => Promise<OrganizationProperties>;
@@ -60,6 +69,7 @@ export type ProjectFunctions = {
 
 export interface Backend {
     users: UserFunctions;
+    logs: LogFunctions;
     organizations: OrganizationFunctions;
     tasks: TaskFunctions;
     projects: ProjectFunctions;
