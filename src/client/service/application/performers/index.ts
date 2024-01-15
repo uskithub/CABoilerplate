@@ -6,7 +6,6 @@ import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces
 import { Actor } from "@/shared/service/application/actors";
 import { createWarrantyPerformer } from "./warranty";
 import { createServiceInProcessPerformer } from "./serviceInProcess";
-import { createChatPerformer } from "./chat";
 
 // System
 import { Nobody } from "robustive-ts";

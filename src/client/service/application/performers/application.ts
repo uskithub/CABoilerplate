@@ -35,10 +35,9 @@ export function createApplicationPerformer(): ApplicationPerformer {
             DrawerItem.header({ title: "Menu1" })
             , DrawerItem.link({ title: t.timeline.views.title, href: "/" })
             , DrawerItem.link({ title: "保証一覧", href: "/warranties" })
-            , DrawerItem.link({ title: "保険加入アイテム", href: "/insuranceItems" })
+    
             , DrawerItem.divider()
             , DrawerItem.header({ title: "Menu2" })
-            , DrawerItem.link({ title: "Chat", href: "/" })
             , DrawerItem.link({ title: "タスク一覧", href: "/tasks" })
             , DrawerItem.group({ title: "プロジェクト", children: Array<DrawerItem>() })
             // , DrawerItem.link({ title: "link3", href: "/link3" })
