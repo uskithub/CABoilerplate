@@ -5,8 +5,6 @@ import { SignUpScenario } from "./nobody/signUp";
 import { SignOutScenario } from "./signedInUser/signOut";
 
 import { GetWarrantyListScenario } from "./signedInUser/getWarrantyList";
-import { ListInsuranceItemsScenario } from "./ServiceInProcess/signedInUser/listInsuranceItems";
-import { ConsultScenario } from "./signedInUser/consult";
 import { ObservingProjectScenario } from "./signedInUser/observingProject";
 import { ObservingUsersTasksScenario } from "./service/observingUsersTasks";
 import { ObservingUsersProjectsScenario } from "./service/observingUsersProjects";
@@ -23,9 +21,7 @@ export const requirements = {
     }
     , projectManagement : {
         observingProject : ObservingProjectScenario
-        , listInsuranceItems : ListInsuranceItemsScenario
         , getWarrantyList : GetWarrantyListScenario
-        , consult : ConsultScenario
         /* service actor */
         , observingUsersTasks : ObservingUsersTasksScenario
         , observingUsersProjects : ObservingUsersProjectsScenario
