@@ -1,7 +1,7 @@
 import { ChangedLog, LogFunctions, OrganizationFunctions } from "@/shared/service/domain/interfaces/backend";
 import { CollectionType, ID, autoId } from ".";
 
-import { collection, Firestore, where, query, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, SnapshotOptions, getDoc, getDocs, QuerySnapshot, Timestamp, addDoc, DocumentReference, setDoc, doc, onSnapshot, DocumentSnapshot, or, and } from "firebase/firestore";
+import { collection, Firestore, where, query, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, SnapshotOptions, getDoc, getDocs, QuerySnapshot, Timestamp, addDoc, DocumentReference, setDoc, doc, onSnapshot, DocumentSnapshot, or, and, orderBy, limit } from "firebase/firestore";
 import { OrganizationProperties } from "@/shared/service/domain/authentication/organization";
 import { LogProperties, LogTypes } from "@/shared/service/domain/timeline/log";
 import { Observable } from "rxjs";
@@ -78,6 +78,7 @@ export function createLogFunctions(db: Firestore, unsubscribers: Array<() => voi
                 const unsubscribe = onSnapshot(
                     query(
                         logCollectionRef
+                        // 分離句: 1 + followeeIds.length + groupIds.length + 2 < 30 であること
                         , or (
                             where("from", "==", userId)                   // 自分のlog
                             , and(                                        // フォローしている人のlog
@@ -86,6 +87,8 @@ export function createLogFunctions(db: Firestore, unsubscribers: Array<() => voi
                             )
                             , where("to", "in", groupIds.concat(myRoles)) // 所属グループ内のlog + 運営からのお知らせ
                         )
+                        , orderBy("createdAt", "desc")
+                        , limit(25)
                     )
                     , (snapshot: QuerySnapshot<LogProperties>)=> {
                         const changedItems = snapshot.docChanges()
