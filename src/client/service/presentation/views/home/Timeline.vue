@@ -61,5 +61,13 @@ v-container
   v-list(:items="items" item-props lines="three")
     template(v-slot:subtitle="{ subtitle }")
        div(v-html="subtitle")
+  v-bottom-sheet
+    template(v-slot:activator="{ props }")
+      v-btn(v-bind="props" text="仕様")
+    v-card(
+      title="仕様メモ"
+    )
+      v-card-text 自分の全行動／1:1のメッセージ／所属グループへのメッセージを表示
+
 </template>
 <style lang="sass" scoped></style>

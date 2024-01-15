@@ -20,6 +20,14 @@ export class Service extends BaseActor<null> {
                 startObservingUsersProjects: "サービスはユーザのプロジェクトの観測を開始する"
             }
         }
+        , observingUsersTimeline : {
+            basics : {
+                serviceDetectsSigningIn: "サービスはユーザのサインインを検知する"
+            }
+            , goals: {
+                startObservingUsersTimeline: "サービスはユーザのタイムラインの観測を開始する"
+            }
+        }
     } as const;
         
 }

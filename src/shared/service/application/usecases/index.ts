@@ -8,6 +8,7 @@ import { GetWarrantyListScenario } from "./signedInUser/getWarrantyList";
 import { ObservingProjectScenario } from "./signedInUser/observingProject";
 import { ObservingUsersTasksScenario } from "./service/observingUsersTasks";
 import { ObservingUsersProjectsScenario } from "./service/observingUsersProjects";
+import { ObservingUsersTimelineScenario } from "./service/observingUsersTimeline";
 import { AllUsecases, AllUsecasesOverDomain, Robustive, Usecase as _Usecase } from "robustive-ts";
 
 export const requirements = {
@@ -18,6 +19,9 @@ export const requirements = {
         signIn : SignInScenario
         , signUp : SignUpScenario
         , signOut : SignOutScenario
+    }
+    , timeline : {
+        observingUsersTimeline : ObservingUsersTimelineScenario
     }
     , projectManagement : {
         observingProject : ObservingProjectScenario

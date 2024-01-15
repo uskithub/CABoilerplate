@@ -1,10 +1,10 @@
-import { Backend, LogFunctions, OrganizationFunctions, ProjectFunctions, TaskFunctions, UserFunctions } from "@/shared/service/domain/interfaces/backend";
+import { Backend, ConductFunctions, OrganizationFunctions, ProjectFunctions, TaskFunctions, UserFunctions } from "@/shared/service/domain/interfaces/backend";
 import { Firestore } from "firebase/firestore";
 import { createUserFunctions } from "./users";
 import { createTaskFunctions } from "./tasks";
 import { createProjectFunctions } from "./projects";
 import { createOrganizationFunctions } from "./organizations";
-import { createLogFunctions } from "./logs";
+import { createConductFunctions } from "./conducts";
 
 export type ID = string;
 
@@ -14,7 +14,7 @@ export const CollectionType = {
     , rooms : "rooms"
     , tasks : "tasks"
     , templates : "templates"
-    , logs : "logs"
+    , conducts : "conducts"
     , deeds : "deeds"
     , invitations : "invitations"
     , notifications : "notifications"
@@ -52,7 +52,7 @@ export class FirestoreBackend implements Backend {
     #unsubscribers: Array<() => void>; // TODO: サインアウト時に unscribe する
 
     users: UserFunctions;
-    logs: LogFunctions;
+    conducts: ConductFunctions;
     organizations: OrganizationFunctions;
     tasks: TaskFunctions;
     projects: ProjectFunctions;
@@ -61,7 +61,7 @@ export class FirestoreBackend implements Backend {
         this.#db = db;
         this.#unsubscribers = new Array<() => void>();
         this.users = createUserFunctions(db);
-        this.logs = createLogFunctions(db, this.#unsubscribers);
+        this.conducts = createConductFunctions(db, this.#unsubscribers);
         this.organizations = createOrganizationFunctions(db);
         this.tasks = createTaskFunctions(db, this.#unsubscribers);
         this.projects = createProjectFunctions(db, this.#unsubscribers);

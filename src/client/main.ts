@@ -19,10 +19,11 @@ import { FirebaseAnalytics } from "./service/infrastructure/firebaseAnalytics/fi
 import { DISPATCHER_KEY, createDispatcher } from "./service/application/performers";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { U } from "@/shared/service/application/usecases";
-import { Service } from "@/shared/service/application/actors/service";
 import { Subscription } from "rxjs";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 import { FirebasePresence } from "./service/infrastructure/firebasePresence";
+import { Service } from "@/shared/service/application/actors/service";
+import { UserProperties } from "@/shared/service/domain/authentication/user";
 
 export const dictionary = i18n(navigator.language);
 
@@ -51,9 +52,8 @@ router
         let subscriptions: Subscription[] = [];
         watch(() => stores.shared.signInStatus, (newValue) => {
             if (newValue.case === SignInStatus.signIn) {
-                // TODO: accountでなくてUserを取得する
-                // const account = stores.shared.signInStatus.account;
-                // const serviceActor = new Service();
+                const userProperties = newValue.userProperties as unknown as UserProperties;
+                const serviceActor = new Service();
                 // dispatch(U.projectManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }), serviceActor)
                 //     .then(subscription => {
                 //         if (subscription) subscriptions.push(subscription);
@@ -65,6 +65,12 @@ router
                 //         if (subscription) subscriptions.push(subscription);
                 //     })
                 //     .catch(e => console.error(e));
+                
+                dispatch(U.timeline.observingUsersTimeline.basics[Service.usecases.observingUsersTimeline.basics.serviceDetectsSigningIn]({ user: userProperties }), serviceActor)
+                    .then(subscription => {
+                        if (subscription) subscriptions.push(subscription);
+                    })
+                    .catch(e => console.error(e));
             } else if (newValue.case === SignInStatus.signingOut) {
                 subscriptions.forEach((s) => s.unsubscribe());
                 subscriptions = [];

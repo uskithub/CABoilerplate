@@ -37,7 +37,9 @@ export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerform
             return usecase
                 .interactedBy(actor)
                 .then(result => {
-                    if (result.type !== InteractResultType.success) { return; }
+                    if (result.type !== InteractResultType.success) {
+                        return console.error("TODO", result);
+                    }
                     const context = result.lastSceneContext;
                     
                     switch (context.scene) {

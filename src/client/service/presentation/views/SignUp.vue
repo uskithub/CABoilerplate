@@ -115,4 +115,11 @@ v-container
               color="success",
               @click="dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userSelectToBeAdministrator]({ domain: stores.authentication.domain, account: stores.authentication.account }))"
             ) {{ t.authentication.admin.dialog.buttons.yes }}
+  v-bottom-sheet
+    template(v-slot:activator="{ props }")
+      v-btn(v-bind="props" text="仕様")
+    v-card(
+      title="仕様メモ"
+    )
+      v-card-text GoogleのOAuthでサインアップする場合は、ユーザのメールアドレスのドメインが未登録の場合、管理者として登録するかを確認する。
 </template>

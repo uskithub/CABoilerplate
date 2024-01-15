@@ -42,14 +42,13 @@ export class Application implements Service {
             return isNobody(actor);
         }
         case "signOut": 
-        case "consult": 
-        case "getWarrantyList": 
-        case "listInsuranceItems": {
+        case "getWarrantyList": {
             return isAuthorizedUser(actor);
         }
         
         case "observingUsersTasks":
-        case "observingUsersProjects": {
+        case "observingUsersProjects":
+        case "observingUsersTimeline": {
             return isService(actor);
         }
         }

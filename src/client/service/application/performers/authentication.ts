@@ -51,7 +51,9 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
         return usecase
             .interactedBy(actor)
             .then(result => {
-                if (result.type !== InteractResultType.success) { return; }
+                if (result.type !== InteractResultType.success) {
+                    return console.error("TODO", result);
+                }
                 const context = result.lastSceneContext;
 
                 switch (context.scene) {
@@ -129,7 +131,9 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
         return usecase
             .interactedBy(actor)
             .then(result => {
-                if (result.type !== InteractResultType.success) { return; }
+                if (result.type !== InteractResultType.success) {
+                    return console.error("TODO", result);
+                }
                 const context = result.lastSceneContext;
                 switch (context.scene) {
                 case goals.onSuccessInSigningInThenServicePresentsHomeView:
@@ -191,7 +195,9 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
         return usecase
             .interactedBy(actor)
             .then(result => {
-                if (result.type !== InteractResultType.success) { return; }
+                if (result.type !== InteractResultType.success) {
+                    return console.error("TODO", result);
+                }
                 const context = result.lastSceneContext;
                 switch (context.scene) {
                 case goals.onSuccessThenServicePresentsSignInView:

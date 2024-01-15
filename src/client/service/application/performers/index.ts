@@ -4,8 +4,7 @@ import { createAuthenticationPerformer } from "./authentication";
 import type { AuthenticationStore } from "./authentication";
 import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { Actor } from "@/shared/service/application/actors";
-import { createWarrantyPerformer } from "./warranty";
-import { createServiceInProcessPerformer } from "./serviceInProcess";
+import { createTimelinePerformer } from "./timeline";
 
 // System
 import { Nobody } from "robustive-ts";
@@ -75,6 +74,7 @@ export function createDispatcher(router: Router): Dispatcher {
         application: createApplicationPerformer()
         , authentication: createAuthenticationPerformer()
         , projectManagement: createProjectManagementPerformer()
+        , timeline: createTimelinePerformer()
     };
     
     const dispatcher = {
@@ -141,6 +141,12 @@ export function createDispatcher(router: Router): Dispatcher {
                     }
                     case "projectManagement": {
                         return performers.projectManagement.dispatch(usecase, _actor, dispatcher);
+                    }
+                    case "timeline": {
+                        return performers.timeline.dispatch(usecase, _actor, dispatcher);
+                    }
+                    default: {
+                        console.warn("未実装ドメインのユースケースです: ", usecase);
                     }
                     }
                 })

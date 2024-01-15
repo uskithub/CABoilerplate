@@ -51,47 +51,49 @@ export function createApplicationPerformer(): ApplicationPerformer {
         const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)
-            .then((result) => {
-                if (result.type === InteractResultType.success) {
-                    switch (result.lastSceneContext.scene) {
-                    case goals.servicePresentsHomeView: {
-                        const observable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
-                        const account = result.lastSceneContext.account;
-                        const subscription = observable.subscribe({
-                            next: (userProperties) => {
-                                if (userProperties === null) {
-                                    const actor = new AuthenticatedUser(account);
-                                    dispatcher.change(actor);
-                                    _shared.signInStatus = SignInStatuses.signingIn({ account });
-                                    dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceGetsOrganizationOfDomain]({ account }), actor)
-                                        .catch(error => console.error(error));
-                                } else {
-                                    const actor = new AuthorizedUser(userProperties);
-                                    dispatcher.change(actor);
-                                    _shared.signInStatus = SignInStatuses.signIn({ userProperties });
-                                    _shared.isLoading = false;
-                                }
-                            }
-                            , error: (e) => console.error(e)
-                            , complete: () => {
-                                console.info("complete");
-                                subscription?.unsubscribe();
-                            }
-                        });
+            .then(result => {
+                if (result.type !== InteractResultType.success) {
+                    return console.error("TODO", result);
+                }
 
-                        break;
-                    }
-                    case goals.sessionNotExistsThenServicePresentsSignInView: {
-                        _shared.signInStatus = SignInStatuses.signOut();
-                        dispatcher.routingTo("/signin");
-                        break;
-                    }
-                    // case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {
-                    //     _shared.signInStatus = SignInStatuses.signOut();
-                    //     return dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
-                    //         .then(() => { return; });
-                    // }
-                    }
+                switch (result.lastSceneContext.scene) {
+                case goals.servicePresentsHomeView: {
+                    const observable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
+                    const account = result.lastSceneContext.account;
+                    const subscription = observable.subscribe({
+                        next: (userProperties) => {
+                            if (userProperties === null) {
+                                const actor = new AuthenticatedUser(account);
+                                dispatcher.change(actor);
+                                _shared.signInStatus = SignInStatuses.signingIn({ account });
+                                dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceGetsOrganizationOfDomain]({ account }), actor)
+                                    .catch(error => console.error(error));
+                            } else {
+                                const actor = new AuthorizedUser(userProperties);
+                                dispatcher.change(actor);
+                                _shared.signInStatus = SignInStatuses.signIn({ userProperties });
+                                _shared.isLoading = false;
+                            }
+                        }
+                        , error: (e) => console.error(e)
+                        , complete: () => {
+                            console.info("complete");
+                            subscription?.unsubscribe();
+                        }
+                    });
+
+                    break;
+                }
+                case goals.sessionNotExistsThenServicePresentsSignInView: {
+                    _shared.signInStatus = SignInStatuses.signOut();
+                    dispatcher.routingTo("/signin");
+                    break;
+                }
+                // case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {
+                //     _shared.signInStatus = SignInStatuses.signOut();
+                //     return dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
+                //         .then(() => { return; });
+                // }
                 }
             });
     };

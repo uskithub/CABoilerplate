@@ -40,7 +40,7 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
             .interactedBy(actor)
             .then(result => {
                 if (result.type !== InteractResultType.success || result.lastSceneContext.scene !== goals.serviceStartsObservingUsersTasks) {
-                    return;
+                    return console.error("TODO", result);
                 }
                 console.log("Started observing user's tasks...");
                 const observable = result.lastSceneContext.observable as Observable<ChangedTask[]>; // 一度 DeepReadonly しているからか、型が壊れてしまう
@@ -101,7 +101,7 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
             .interactedBy(actor)
             .then(result => {
                 if (result.type !== InteractResultType.success || result.lastSceneContext.scene !== goals.startObservingUsersProjects) {
-                    return;
+                    return console.error("TODO", result);
                 }
                 const observable = result.lastSceneContext.observable as Observable<ChangedTask[]>; // 一度 DeepReadonly しているからか、型が壊れてしまう
                 return observable
@@ -175,7 +175,9 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
             return usecase
                 .interactedBy(actor)
                 .then(result => {
-                    if (result.type !== InteractResultType.success) { return; }
+                    if (result.type !== InteractResultType.success) {
+                        return console.error("TODO", result);
+                    }
                     const context = result.lastSceneContext;
                     switch (context.scene) {
                     case goals.onSuccessThenServiceDisplaysMessages: {

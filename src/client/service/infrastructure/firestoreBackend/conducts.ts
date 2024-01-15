@@ -1,13 +1,13 @@
-import { ChangedLog, LogFunctions, OrganizationFunctions } from "@/shared/service/domain/interfaces/backend";
+import { ChangedConduct, ConductFunctions, OrganizationFunctions } from "@/shared/service/domain/interfaces/backend";
 import { CollectionType, ID, autoId } from ".";
 
 import { collection, Firestore, where, query, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, SnapshotOptions, getDoc, getDocs, QuerySnapshot, Timestamp, addDoc, DocumentReference, setDoc, doc, onSnapshot, DocumentSnapshot, or, and } from "firebase/firestore";
 import { OrganizationProperties } from "@/shared/service/domain/authentication/organization";
-import { LogProperties, LogTypes } from "@/shared/service/domain/timeline/log";
+import { ConductProperties, ConductTypes } from "@/shared/service/domain/timeline/conduct";
 import { Observable } from "rxjs";
 
 
-interface FSLog {
+interface FSConduct {
     type: string;
     from: ID;
     to?: ID | undefined;
@@ -16,8 +16,8 @@ interface FSLog {
     createdAt: Timestamp;
 }
 
-const logConverter: FirestoreDataConverter<LogProperties> = {
-    toFirestore(modelObject: LogProperties): DocumentData {
+const conductConverter: FirestoreDataConverter<ConductProperties> = {
+    toFirestore(modelObject: ConductProperties): DocumentData {
         return {
             type: modelObject.type
             , from: modelObject.from
@@ -27,19 +27,19 @@ const logConverter: FirestoreDataConverter<LogProperties> = {
             , createdAt: Timestamp.fromDate(modelObject.createdAt)
         };
     }
-    , fromFirestore: (snapshot: QueryDocumentSnapshot<DocumentData>, options?: SnapshotOptions | undefined): LogProperties => {
+    , fromFirestore: (snapshot: QueryDocumentSnapshot<DocumentData>, options?: SnapshotOptions | undefined): ConductProperties => {
         const id  = snapshot.id;
-        const data = snapshot.data(options) as FSLog;
+        const data = snapshot.data(options) as FSConduct;
         
         return {
             id
-            , type: ((type: string): LogTypes => { 
+            , type: ((type: string): ConductTypes => { 
                 switch (type) {
-                case LogTypes.text: {
-                    return LogTypes.text;
+                case ConductTypes.text: {
+                    return ConductTypes.text;
                 }
                 default:
-                    return LogTypes.text; 
+                    return ConductTypes.text; 
                 }
             })(data.type)
             , from: data.from
@@ -51,48 +51,48 @@ const logConverter: FirestoreDataConverter<LogProperties> = {
     }
 };
 
-export function createLogFunctions(db: Firestore, unsubscribers: Array<() => void>): LogFunctions {
-    const logCollectionRef = collection(db, CollectionType.logs).withConverter(logConverter);
+export function createConductFunctions(db: Firestore, unsubscribers: Array<() => void>): ConductFunctions {
+    const conductCollectionRef = collection(db, CollectionType.conducts).withConverter(conductConverter);
     
     return {
-        record: (userId: ID, to: ID | null, mention: ID[] | null, text: string): Promise<LogProperties> => {
+        record: (userId: ID, to: ID | null, mention: ID[] | null, text: string): Promise<ConductProperties> => {
             const id = autoId();
-            const logProperties = {
+            const conductProperties = {
                 id
-                , type: LogTypes.text
+                , type: ConductTypes.text
                 , from: userId
                 , to
                 , mention
                 , text
                 , createdAt: new Date()
-            } as LogProperties;
-            return setDoc(doc(logCollectionRef, id), logProperties)
+            } as ConductProperties;
+            return setDoc(doc(conductCollectionRef, id), conductProperties)
                 .then(() => {
                     console.log("Document written with ID: ", id);
-                    return logProperties;
+                    return conductProperties;
                 });
         }
-        , getObservable: (userId: ID, followeeIds: ID[], groupIds: ID[], isAdministrator: boolean): Observable<ChangedLog[]> => {
+        , getObservable: (userId: ID, followeeIds: ID[], groupIds: ID[], isAdministrator: boolean): Observable<ChangedConduct[]> => {
             return new Observable(subscriber => {
-                const myRoles = isAdministrator ? [] : [];
+                const myRoles = isAdministrator ? ["dummy"] : ["dummy"];
                 const unsubscribe = onSnapshot(
                     query(
-                        logCollectionRef
+                        conductCollectionRef
                         , or (
                             where("from", "==", userId)                   // 自分のlog
-                            , and(                                        // フォローしている人のlog
-                                where("from", "in", followeeIds)
-                                , where("isPublic", "==", true)
-                            )
+                            // , and(                                        // フォローしている人のパブリックなlog
+                            //     where("from", "in", followeeIds)
+                            //     , where("isPublic", "==", true)
+                            // )
                             , where("to", "in", groupIds.concat(myRoles)) // 所属グループ内のlog + 運営からのお知らせ
                         )
                     )
-                    , (snapshot: QuerySnapshot<LogProperties>)=> {
+                    , (snapshot: QuerySnapshot<ConductProperties>)=> {
                         const changedItems = snapshot.docChanges()
                             .map(item => {
                                 const id = item.doc.id;
                                 const logProperties = item.doc.data();
-                                return ChangedLog[item.type]({ id, item: logProperties });
+                                return ChangedConduct[item.type]({ id, item: logProperties });
                             });
                         subscriber.next(changedItems);
                     });
