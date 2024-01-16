@@ -1,10 +1,10 @@
 import ProjectModel from "@domain/entities/project";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
-import { MyBaseScenario } from "./common";
+import { Task } from "@/shared/service/domain/entities/task";
+import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { map } from "rxjs";
-import { Task } from "@/shared/service/domain/entities/task";
 
 /**
  * usecase: ユーザのプロジェクトを観測する

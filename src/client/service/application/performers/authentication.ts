@@ -1,11 +1,5 @@
 // service
-
-// system
-import { reactive } from "vue";
 import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
-import { Subscription } from "rxjs";
-import { InteractResultType, Nobody as NobodyActor } from "robustive-ts";
-
 import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 
 import { Actor } from "@/shared/service/application/actors";
@@ -14,6 +8,14 @@ import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { dictionary as t } from "@/client/main";
 import { fa } from "vuetify/lib/iconsets/fa-svg.mjs";
 import { Account } from "@/shared/service/domain/authentication/user";
+
+// system
+import { reactive } from "vue";
+import { Subscription } from "rxjs";
+import { InteractResultType } from "robustive-ts";
+import { Nobody } from "@/shared/service/application/actors/nobody";
+
+
 
 export interface AuthenticationStore extends Store {
     readonly signInStatus: SignInStatus | null;
@@ -202,7 +204,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 const context = result.lastSceneContext;
                 switch (context.scene) {
                 case goals.onSuccessThenServicePresentsSignInView:
-                    dispatcher.change(new NobodyActor());
+                    dispatcher.change(new Nobody());
                     _shared.signInStatus = SignInStatuses.signOut();
                     break;
                 case goals.onFailureThenServicePresentsError:

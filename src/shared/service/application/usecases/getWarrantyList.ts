@@ -1,5 +1,5 @@
 import WarrantyModel, { Warranty } from "@domain/entities/warranty";
-import { MyBaseScenario } from "./common";
+import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { firstValueFrom, map } from "rxjs";

@@ -1,19 +1,18 @@
-import { InjectionKey, reactive } from "vue";
 import { ApplicationStore, createApplicationPerformer } from "./application";
 import { createAuthenticationPerformer } from "./authentication";
 import type { AuthenticationStore } from "./authentication";
-import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { Actor } from "@/shared/service/application/actors";
+import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { createTimelinePerformer } from "./timeline";
-
-// System
-import { Nobody } from "robustive-ts";
-import { watch, WatchStopHandle } from "vue";
 import { Log } from "@/shared/service/domain/analytics/log";
 import { Usecases, UsecaseLog, Requirements, UsecasesOf, R } from "@/shared/service/application/usecases";
 import { createProjectManagementPerformer, ProjectManagementStore } from "./projectManagement";
+
+// System
+import { InjectionKey, reactive, watch, WatchStopHandle } from "vue";
 import { RouteLocationRaw, Router } from "vue-router";
 import { Subscription } from "rxjs";
+import { Nobody } from "@/shared/service/application/actors/nobody";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];

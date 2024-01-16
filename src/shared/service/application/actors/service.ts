@@ -1,8 +1,28 @@
 
-import { BaseActor } from "robustive-ts";
 import { Actor } from ".";
+import { MyBaseActor } from "../common";
+import { DomainKeys, R, UsecaseKeys } from "../usecases";
 
-export class Service extends BaseActor<null> {
+export class Service extends MyBaseActor<null> {
     
+    isAuthorizedTo(domain: DomainKeys, usecase: UsecaseKeys): boolean {
+
+        if (domain === R.keys.application && usecase === R.application.keys.boot) {
+            return true;
+        }
+
+        if (domain === R.keys.projectManagement 
+            && (usecase === R.projectManagement.keys.observingUsersProjects
+                || usecase === R.projectManagement.keys.observingUsersTasks)
+        ) {
+            return true;
+        }
+
+        if (domain === R.keys.timeline && usecase === R.timeline.keys.observingUsersTimeline) {
+            return true;
+        }
+        
+        return false;
+    }
 }
 export const isService = (actor: Actor): actor is Service => actor.constructor === Service;

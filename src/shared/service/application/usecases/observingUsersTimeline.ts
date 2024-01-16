@@ -1,10 +1,10 @@
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedConduct } from "@/shared/service/domain/interfaces/backend";
-import { MyBaseScenario } from "./common";
+import { Conduct } from "@/shared/service/domain/timeline/conduct";
+import { MyBaseScenario } from "../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { Observable } from "rxjs";
-import { Conduct } from "@/shared/service/domain/timeline/conduct";
 
 /**
  * usecase: ユーザのプロジェクトを観測する
