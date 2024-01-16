@@ -6,9 +6,9 @@ import { OrganizationProperties } from "../authentication/organization";
 import { ConductProperties } from "../timeline/conduct";
 
 export const ItemChangeType = {
-    added : "added"
-    , modified : "modified"
-    , removed : "removed"
+    added: "added"
+    , modified: "modified"
+    , removed: "removed"
 } as const;
 
 export type ItemChangeType = typeof ItemChangeType[keyof typeof ItemChangeType];
@@ -21,9 +21,9 @@ export type ItemChangeType = typeof ItemChangeType[keyof typeof ItemChangeType];
 // };
 // こうする
 export type ChangedItems<T> = {
-    added : { id: string; item: T; };
-    modified : { id: string; item: T; };
-    removed : { id: string; };
+    added: { id: string; item: T; };
+    modified: { id: string; item: T; };
+    removed: { id: string; };
 };
 
 export const ChangedTask = new SwiftEnum<ChangedItems<Task>>();
@@ -54,7 +54,13 @@ export type TaskFunctions = {
     /**
      * ユーザのタスクを観測し、変更を通知します。
      */
-    observe(userId: string): Observable<ChangedTask[]>
+    observe(userId: string): Observable<ChangedTask[]>;
+
+    /**
+     * ユーザのタスクを取得します。
+     * TODO: これの実装から
+     */
+    create: (task: Task) => Promise<Task>;
 };
 
 export type ProjectFunctions = {
@@ -63,8 +69,8 @@ export type ProjectFunctions = {
      * @param userId 
      * @param projectId 
      */
-    observeUsersProjects(userId: string): Observable<ChangedTask[]> 
-    observe(userId: string, projectId: string): Observable<Task> 
+    observeUsersProjects(userId: string): Observable<ChangedTask[]>
+    observe(userId: string, projectId: string): Observable<Task>
 };
 
 export interface Backend {
