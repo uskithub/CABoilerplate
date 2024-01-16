@@ -6,7 +6,7 @@ import { SignInStatus } from "../interfaces/authenticator";
 import { Observable } from "rxjs";
 import { Actor } from "../../application/actors";
 import { Service } from "@/shared/system/interfaces/architecture";
-import { DomainKeys, UsecaseKeys } from "../../application/usecases";
+import { DomainKeys, R, UsecaseKeys } from "../../application/usecases";
 import { isNobody } from "robustive-ts";
 import { isAuthorizedUser } from "../../application/actors/authorizedUser";
 import { isService } from "../../application/actors/service";
@@ -30,25 +30,26 @@ export class Application implements Service {
      */
     static authorize(actor: Actor, domain: DomainKeys, usecase: UsecaseKeys): boolean {
 
+        console.log(`IN: ${ usecase} <==> CASE: ${ R.application.keys.boot }`)
         switch (usecase) {
         /* Nobody */
-        case "boot": {
+        case R.application.keys.boot: {
             return true;
         }
-        case "signUp": {
+        case R.authentication.keys.signUp: {
             return isNobody(actor) || isAuthenticatedUser(actor);
         }
-        case "signIn": {
+        case R.authentication.keys.signIn: {
             return isNobody(actor);
         }
-        case "signOut": 
+        case R.authentication.keys.signOut: 
         case "getWarrantyList": {
             return isAuthorizedUser(actor);
         }
         
-        case "observingUsersTasks":
-        case "observingUsersProjects":
-        case "observingUsersTimeline": {
+        case R.projectManagement.keys.observingUsersTasks:
+        case R.projectManagement.keys.observingUsersProjects:
+        case R.timeline.keys.observingUsersTimeline: {
             return isService(actor);
         }
         }

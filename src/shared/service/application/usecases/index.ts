@@ -1,14 +1,14 @@
-import { BootScenario } from "./nobody/boot";
-import { SignInScenario } from "./nobody/signIn";
-import { SignUpScenario } from "./nobody/signUp";
+import { BootScenario } from "./boot";
+import { SignInScenario } from "./signIn";
+import { SignUpScenario } from "./signUp";
 
-import { SignOutScenario } from "./signedInUser/signOut";
+import { SignOutScenario } from "./signOut";
 
-import { GetWarrantyListScenario } from "./signedInUser/getWarrantyList";
-import { ObservingProjectScenario } from "./signedInUser/observingProject";
-import { ObservingUsersTasksScenario } from "./service/observingUsersTasks";
-import { ObservingUsersProjectsScenario } from "./service/observingUsersProjects";
-import { ObservingUsersTimelineScenario } from "./service/observingUsersTimeline";
+import { GetWarrantyListScenario } from "./getWarrantyList";
+import { ObservingProjectScenario } from "./observingProject";
+import { ObservingUsersTasksScenario } from "./observingUsersTasks";
+import { ObservingUsersProjectsScenario } from "./observingUsersProjects";
+import { ObservingUsersTimelineScenario } from "./observingUsersTimeline";
 import { AllUsecases, AllUsecasesOverDomain, Robustive, Usecase as _Usecase } from "robustive-ts";
 
 export const requirements = {
@@ -32,7 +32,7 @@ export const requirements = {
     }
 };
 
-export const U = new Robustive(requirements);
+export const R = new Robustive(requirements);
 
 export type Requirements = typeof requirements;
 export type DomainKeys = keyof Requirements;

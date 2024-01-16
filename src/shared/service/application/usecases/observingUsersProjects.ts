@@ -1,25 +1,21 @@
 import ProjectModel from "@domain/entities/project";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
-import { Service } from "../../actors/service";
-import { MyBaseScenario } from "../common";
+import { MyBaseScenario } from "./common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { Observable } from "rxjs";
-
-
-const _u = Service.usecases.observingUsersProjects;
 
 /**
  * usecase: ユーザのプロジェクトを観測する
  */
 export type ObservingUsersProjectsScenes = {
     basics : {
-        [_u.basics.serviceDetectsSigningIn]: { user: UserProperties; };
+        serviceDetectsSigningIn: { user: UserProperties; };
     };
     alternatives: Empty;
     goals : {
-        [_u.goals.startObservingUsersProjects]: { observable: Observable<ChangedTask[]> };
+        startObservingUsersProjects: { observable: Observable<ChangedTask[]> };
     };
 };
 
@@ -33,9 +29,9 @@ export class ObservingUsersProjectsScenario extends MyBaseScenario<ObservingUser
 
     next(to: MutableContext<ObservingUsersProjectsScenes>): Promise<Context<ObservingUsersProjectsScenes>> {
         switch (to.scene) {
-        case _u.basics.serviceDetectsSigningIn: {
+        case this.keys.basics.serviceDetectsSigningIn: {
             const observable = ProjectModel.observeUsersProjects(to.user.id);
-            return this.just(this.goals[_u.goals.startObservingUsersProjects]({ observable }));
+            return this.just(this.goals.startObservingUsersProjects({ observable }));
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);

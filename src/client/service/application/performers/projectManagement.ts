@@ -8,7 +8,7 @@ import { Observable, Subscription } from "rxjs";
 import { Actor } from "@/shared/service/application/actors";
 import { MessageProperties } from "@/shared/service/domain/chat/message";
 import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
-import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
+import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { InteractResultType } from "robustive-ts";
 import { Service } from "@/shared/service/application/actors/service";
 import { ChangedTask, ItemChangeType } from "@/shared/service/domain/interfaces/backend";
@@ -34,8 +34,10 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
 
     const _store = store as Mutable<ProjectManagementStore>;
 
+    const d = R.projectManagement;
+
     const observingUsersTasks = (usecase: Usecase<"projectManagement", "observingUsersTasks">, actor: Actor, dispatcher: Dispatcher): Promise<Subscription | void> => {
-        const goals = Service.usecases.observingUsersTasks.goals;
+        const goals = d.observingUsersTasks.keys.goals;
         return usecase
             .interactedBy(actor)
             .then(result => {
@@ -43,7 +45,7 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
                     return console.error("TODO", result);
                 }
                 console.log("Started observing user's tasks...");
-                const observable = result.lastSceneContext.observable as Observable<ChangedTask[]>; // 一度 DeepReadonly しているからか、型が壊れてしまう
+                const observable = result.lastSceneContext.observable as unknown as Observable<ChangedTask[]>; // 一度 DeepReadonly しているからか、型が壊れてしまう
                 return observable
                     .subscribe({
                         next: changedTasks => {
@@ -92,7 +94,7 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
     };
 
     const observingUsersProjects = (usecase: Usecase<"projectManagement", "observingUsersProjects">, actor: Actor, dispatcher: Dispatcher): Promise<Subscription | void> =>  {
-        const goals = Service.usecases.observingUsersProjects.goals;
+        const goals = d.observingUsersProjects.keys.goals;
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const _projectMenu = dispatcher.stores.application.drawerItems.find((item) => item.case === DrawerContentType.group && item.title === "プロジェクト")!.children as DrawerItem[];
@@ -170,7 +172,7 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
         }
         // TODO ここの実装から
         , observingProject: (usecase: Usecase<"projectManagement", "observingProject">, actor: Actor) : Promise<void> => {
-            const goals = AuthorizedUser.usecases.observingProject.goals;
+            const goals = d.observingProject.keys.goals;
             // const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
             return usecase
                 .interactedBy(actor)

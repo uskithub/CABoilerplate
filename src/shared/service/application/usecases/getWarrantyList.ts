@@ -1,24 +1,21 @@
 import WarrantyModel, { Warranty } from "@domain/entities/warranty";
-import { AuthorizedUser } from "../../actors/authorizedUser";
-import { MyBaseScenario } from "../common";
+import { MyBaseScenario } from "./common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { firstValueFrom, map } from "rxjs";
-
-const _u = AuthorizedUser.usecases.getWarrantyList;
 
 /**
  * usecase: 保証一覧を取得する
  */
 export type GetWarrantyListScenes = {
     basics : {
-        [_u.basics.userInitiatesWarrantyListing]: Empty;
-        [_u.basics.serviceSelectsWarrantiesThatMeetConditions]: Empty;
+        userInitiatesWarrantyListing: Empty;
+        serviceSelectsWarrantiesThatMeetConditions: Empty;
     };
     alternatives: Empty;
     goals : {
-        [_u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView]: { warranties: Warranty[]; };
-        [_u.goals.resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView]: Empty;
+        resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView: { warranties: Warranty[]; };
+        resultIsZeroThenServiceDisplaysNoResultOnWarrantyListView: Empty;
     };
 };
 
@@ -26,10 +23,10 @@ export class GetWarrantyListScenario extends MyBaseScenario<GetWarrantyListScene
 
     next(to: MutableContext<GetWarrantyListScenes>): Promise<Context<GetWarrantyListScenes>> {
         switch (to.scene) {
-        case _u.basics.userInitiatesWarrantyListing: {
-            return this.just(this.basics[_u.basics.serviceSelectsWarrantiesThatMeetConditions]());
+        case this.keys.basics.userInitiatesWarrantyListing: {
+            return this.just(this.basics.serviceSelectsWarrantiesThatMeetConditions());
         }
-        case _u.basics.serviceSelectsWarrantiesThatMeetConditions: {
+        case this.keys.basics.serviceSelectsWarrantiesThatMeetConditions: {
             return this.select();
         }
         default: {
@@ -44,7 +41,7 @@ export class GetWarrantyListScenario extends MyBaseScenario<GetWarrantyListScene
                 .get()
                 .pipe(
                     map((warranties) => {
-                        return this.goals[_u.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView]({ warranties });
+                        return this.goals.resultIsOneOrMoreThenServiceDisplaysResultOnWarrantyListView({ warranties });
                     })
                 // , catchError(error => this.just({ scene: SignOut.goals.onFailureThenServicePresentsError, error }))
                 )

@@ -4,9 +4,7 @@ import type { Dictionary } from "@shared/system/localizations";
 import type { Dispatcher } from "../../application/performers";
 import { DISPATCHER_KEY } from "../../application/performers";
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
-import { U } from "@/shared/service/application/usecases";
-import { Nobody } from "@/shared/service/application/actors/nobody";
-import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
+import { R } from "@/shared/service/application/usecases";
 
 import { computed, inject, reactive } from "vue";
 
@@ -71,7 +69,7 @@ v-container
             block,
             size="x-large",
             variant="flat"
-            @click="dispatch(U.authentication.signIn.basics[Nobody.usecases.signIn.basics.userStartsSignInProcess]({ id: state.email, password: state.password }))"
+            @click="dispatch(R.authentication.signIn.basics.userStartsSignInProcess({ id: state.email, password: state.password }))"
           ) {{ t.application.views.signIn.buttons.signIn }}
         v-divider.mb-4
         v-card-text
@@ -80,7 +78,7 @@ v-container
             block,
             size="x-large",
             variant="text"
-            @click="dispatch(U.authentication.signIn.alternatives[Nobody.usecases.signIn.alternatives.userTapsSignUpButton]())"
+            @click="dispatch(R.authentication.signIn.alternatives.userTapsSignUpButton())"
           ) {{ t.application.views.signUp.buttons.signUp }}
     v-row(justify="center")
       v-dialog(v-model="isPresentDialog", persistent, max-width="290")
@@ -92,11 +90,11 @@ v-container
             v-btn(
               color="warning",
               text,
-              @click="dispatch(U.authentication.signOut.basics[AuthorizedUser.usecases.signOut.basics.userStartsSignOutProcess]())"
+              @click="dispatch(R.authentication.signOut.basics.userStartsSignOutProcess())"
             ) Sign Out
             v-btn(
               color="success",
               text,
-              @click="dispatch(U.authentication.signOut.alternatives[AuthorizedUser.usecases.signOut.alternatives.userResignSignOut]())"
+              @click="dispatch(R.authentication.signOut.alternatives.userResignSignOut())"
             ) Go Home
 </template>

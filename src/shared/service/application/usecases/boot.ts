@@ -1,29 +1,25 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import { Application } from "@/shared/service/domain/application/application";
 import { User, Account, UserProperties } from "@/shared/service/domain/authentication/user";
-import { Nobody } from "../../actors/nobody";
-import { MyBaseScenario } from "../common";
+import { MyBaseScenario } from "./common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { Observable, firstValueFrom, map } from "rxjs";
-
-
-const _u = Nobody.usecases.boot;
 
 /**
  * usecase: 起動する
  */
 export type BootScenes = {
     basics: {
-        [_u.basics.userOpensSite]: Empty;
-        [_u.basics.serviceChecksSession]: Empty;
-        [_u.basics.sessionExistsThenServiceStartsNotifyingPresence]: { account: Account; };
-        [_u.basics.ServicePreparesForObservingUserData]: { account: Account; };
+        userOpensSite: Empty;
+        serviceChecksSession: Empty;
+        sessionExistsThenServiceStartsNotifyingPresence: { account: Account; };
+        servicePreparesForObservingUserData: { account: Account; };
     };
     alternatives: Empty;
     goals: {
-        [_u.goals.servicePresentsHomeView]: { account: Account, userDataObservable: Observable<UserProperties | null>; };
-        [_u.goals.sessionNotExistsThenServicePresentsSignInView]:Empty;
+        servicePresentsHomeView: { account: Account, userDataObservable: Observable<UserProperties | null>; };
+        sessionNotExistsThenServicePresentsSignInView: Empty;
     };
 };
 
@@ -37,16 +33,16 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
 
     next(to: MutableContext<BootScenes>): Promise<Context<BootScenes>> {
         switch (to.scene) {
-        case _u.basics.userOpensSite: {
-            return this.just(this.basics[_u.basics.serviceChecksSession]());
+        case this.keys.basics.userOpensSite: {
+            return this.just(this.basics.serviceChecksSession());
         }
-        case _u.basics.serviceChecksSession: {
+        case this.keys.basics.serviceChecksSession: {
             return this.checkSession();
         }
-        case _u.basics.sessionExistsThenServiceStartsNotifyingPresence: {
+        case this.keys.basics.sessionExistsThenServiceStartsNotifyingPresence: {
             return this.startsNotifyingPresence(to.account);
         }
-        case _u.basics.ServicePreparesForObservingUserData: {
+        case this.keys.basics.servicePreparesForObservingUserData: {
             return this.getUserDataObservable(to.account);
         }
         default: {
@@ -63,10 +59,10 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
                     map((signInStatus) => {
                         switch (signInStatus.case) {
                         case SignInStatus.signingIn: {
-                            return this.basics[_u.basics.sessionExistsThenServiceStartsNotifyingPresence]({ account: signInStatus.account });
+                            return this.basics.sessionExistsThenServiceStartsNotifyingPresence({ account: signInStatus.account });
                         }
                         default: {     
-                            return this.goals[_u.goals.sessionNotExistsThenServicePresentsSignInView]();
+                            return this.goals.sessionNotExistsThenServicePresentsSignInView();
                         }
                         }
                     })
@@ -76,11 +72,11 @@ export class BootScenario extends MyBaseScenario<BootScenes> {
 
     private startsNotifyingPresence(account: Account): Promise<Context<BootScenes>> {
         new User(account).startNotifyingPresence();
-        return this.just(this.basics[_u.basics.ServicePreparesForObservingUserData]({ account }));
+        return this.just(this.basics.servicePreparesForObservingUserData({ account }));
     }
 
     private getUserDataObservable(account: Account): Promise<Context<BootScenes>> {
         const observable = new User(account).observable;
-        return this.just(this.goals[_u.goals.servicePresentsHomeView]({ account, userDataObservable: observable }));
+        return this.just(this.goals.servicePresentsHomeView({ account, userDataObservable: observable }));
     }
 }

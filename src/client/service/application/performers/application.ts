@@ -3,16 +3,14 @@
 // system
 import { reactive } from "vue";
 import { Performer, Mutable, SharedStore, Store, Dispatcher } from ".";
-import { Subscription } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Actor } from "@/shared/service/application/actors";
-import { Nobody } from "@/shared/service/application/actors/nobody";
-import { U, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
+import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { Task } from "@/shared/service/domain/entities/task";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
 import { InteractResultType } from "robustive-ts";
-import { Observable } from "@apollo/client";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { AuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
 import { dictionary as t } from "@/client/main";
@@ -45,9 +43,11 @@ export function createApplicationPerformer(): ApplicationPerformer {
     });
 
     const _store = store as Mutable<ApplicationStore>;
+
+    const d = R.application;
     
     const boot = (usecase: Usecase<"application", "boot">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
-        const goals = Nobody.usecases.boot.goals;
+        const goals = d.boot.keys.goals;
         const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)
@@ -66,7 +66,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                                 const actor = new AuthenticatedUser(account);
                                 dispatcher.change(actor);
                                 _shared.signInStatus = SignInStatuses.signingIn({ account });
-                                dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceGetsOrganizationOfDomain]({ account }), actor)
+                                dispatcher.dispatch(R.authentication.signUp.basics.onSuccessPublishNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
                                     .catch(error => console.error(error));
                             } else {
                                 const actor = new AuthorizedUser(userProperties);
@@ -91,7 +91,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                 }
                 // case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {
                 //     _shared.signInStatus = SignInStatuses.signOut();
-                //     return dispatcher.dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
+                //     return dispatcher.dispatch(R.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
                 //         .then(() => { return; });
                 // }
                 }
@@ -102,7 +102,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
         store
         , dispatch: (usecase: UsecasesOf<"application">, actor: Actor, dispatcher: Dispatcher): Promise<Subscription | void> => {
             switch (usecase.name) {
-            case "boot": {
+            case d.keys.boot: {
                 return boot(usecase, actor, dispatcher);
             }
             }

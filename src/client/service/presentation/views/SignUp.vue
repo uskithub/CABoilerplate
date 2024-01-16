@@ -7,10 +7,9 @@ import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
 import { DISPATCHER_KEY } from "../../application/performers";
 import type { Dispatcher } from "../../application/performers";
-import { U } from "@/shared/service/application/usecases";
-import { AuthenticatedUser, isAuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
-import { AuthorizedUser, isAuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
-import { Nobody } from "@/shared/service/application/actors/nobody";
+import { R } from "@/shared/service/application/usecases";
+import { isAuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
+import { isAuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 
 const t = inject<Dictionary>(DICTIONARY_KEY)!;
 const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
@@ -28,7 +27,7 @@ const isFormValid = computed(() => state.email !== null && state.password !== nu
 
 const onClickYes = () => { 
     if (stores.authentication.domain && isAuthenticatedUser(stores.shared.actor) && stores.shared.actor.user) { 
-        dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userSelectToBeAdministrator]({ domain: stores.authentication.domain, account: stores.shared.actor.user }))
+        dispatch(R.authentication.signUp.alternatives.userSelectToBeAdministrator({ domain: stores.authentication.domain, account: stores.shared.actor.user }))
     }
 }
 
@@ -61,7 +60,7 @@ v-container
             block,
             size="x-large",
             variant="flat"
-            @click="dispatch(U.authentication.signUp.basics[Nobody.usecases.signUp.basics.userStartsSignUpProcess]({ id: state.email, password: state.password }))"
+            @click="dispatch(R.authentication.signUp.basics.userStartsSignUpProcess({ id: state.email, password: state.password }))"
           ) {{ t.application.views.signUp.buttons.next }}
         v-divider.mb-4
         v-card-text
@@ -70,7 +69,7 @@ v-container
               v-btn(
                 icon="mdi-google", 
                 size="x-large",
-                @click="dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userStartsSignUpProcessWithGoogleOAuth]())"
+                @click="dispatch(R.authentication.signUp.alternatives.userStartsSignUpProcessWithGoogleOAuth())"
               )
         v-divider.mb-4
         v-card-text
@@ -79,7 +78,7 @@ v-container
             block,
             size="x-large",
             variant="text"
-            @click="dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userTapsSignInButton]())"
+            @click="dispatch(R.authentication.signUp.alternatives.userTapsSignInButton())"
           ) {{ t.application.views.signUp.buttons.signIn }}
 
     v-row(justify="center")
@@ -91,11 +90,11 @@ v-container
             v-spacer
             v-btn(
               color="warning",
-              @click="dispatch(U.authentication.signOut.basics[AuthorizedUser.usecases.signOut.basics.userStartsSignOutProcess]())"
+              @click="dispatch(R.authentication.signOut.basics.userStartsSignOutProcess())"
             ) Sign Out
             v-btn(
               color="success",
-              @click="dispatch(U.authentication.signOut.alternatives[AuthorizedUser.usecases.signOut.alternatives.userResignSignOut]())"
+              @click="dispatch(R.authentication.signOut.alternatives.userResignSignOut())"
             ) Go Home
       v-dialog(
         :model-value="stores.authentication.isPresentAdministratorRegistrationDialog"
@@ -109,11 +108,11 @@ v-container
             v-spacer
             v-btn(
               color="warning",
-              @click="dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userSelectNotToBeAdministrator]())"
+              @click="dispatch(R.authentication.signUp.alternatives.userSelectNotToBeAdministrator())"
             ) {{ t.authentication.admin.dialog.buttons.no }}
             v-btn(
               color="success",
-              @click="dispatch(U.authentication.signUp.alternatives[Nobody.usecases.signUp.alternatives.userSelectToBeAdministrator]({ domain: stores.authentication.domain, account: stores.authentication.account }))"
+              @click="dispatch(R.authentication.signUp.alternatives.userSelectToBeAdministrator({ domain: stores.authentication.domain, account: stores.authentication.account }))"
             ) {{ t.authentication.admin.dialog.buttons.yes }}
   v-bottom-sheet
     template(v-slot:activator="{ props }")

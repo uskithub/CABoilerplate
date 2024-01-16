@@ -10,13 +10,12 @@ import type { Action, DataTableHeader } from "../../components/dataTable";
 import { inject, reactive, ref } from "vue";
 import type { Dispatcher } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
-import { U } from "@/shared/service/application/usecases";
-import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
+import { R } from "@/shared/service/application/usecases";
 
 
 const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
 
-dispatch(U.projectManagement.getWarrantyList.basics[AuthorizedUser.usecases.getWarrantyList.basics.userInitiatesWarrantyListing]()); 
+dispatch(R.projectManagement.getWarrantyList.basics.userInitiatesWarrantyListing()); 
 
 // const state = reactive<{
 //   isDrawerOpen: boolean;

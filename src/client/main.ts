@@ -18,7 +18,7 @@ import { DICTIONARY_KEY, i18n } from "@/shared/system/localizations";
 import { FirebaseAnalytics } from "./service/infrastructure/firebaseAnalytics/firebaseAnalytics";
 import { DISPATCHER_KEY, createDispatcher } from "./service/application/performers";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
-import { U } from "@/shared/service/application/usecases";
+import { R } from "@/shared/service/application/usecases";
 import { Subscription } from "rxjs";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 import { FirebasePresence } from "./service/infrastructure/firebasePresence";
@@ -54,19 +54,19 @@ router
             if (newValue.case === SignInStatus.signIn) {
                 const userProperties = newValue.userProperties as unknown as UserProperties;
                 const serviceActor = new Service();
-                // dispatch(U.projectManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }), serviceActor)
+                // dispatch(R.projectManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }), serviceActor)
                 //     .then(subscription => {
                 //         if (subscription) subscriptions.push(subscription);
                 //     })
                 //     .catch(e => console.error(e));
         
-                // dispatch(U.projectManagement.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }), serviceActor)
+                // dispatch(R.projectManagement.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }), serviceActor)
                 //     .then(subscription => {
                 //         if (subscription) subscriptions.push(subscription);
                 //     })
                 //     .catch(e => console.error(e));
                 
-                dispatch(U.timeline.observingUsersTimeline.basics[Service.usecases.observingUsersTimeline.basics.serviceDetectsSigningIn]({ user: userProperties }), serviceActor)
+                dispatch(R.timeline.observingUsersTimeline.basics.serviceDetectsSigningIn({ user: userProperties }), serviceActor)
                     .then(subscription => {
                         if (subscription) subscriptions.push(subscription);
                     })
@@ -76,9 +76,8 @@ router
                 subscriptions = [];
             }
         });
-
         if (stores.shared.signInStatus.case === SignInStatus.unknown) {
-            dispatch(U.application.boot.basics[Nobody.usecases.boot.basics.userOpensSite]())
+            dispatch(R.application.boot.basics.userOpensSite())
                 .catch(e => console.error(e));
         }
 

@@ -6,8 +6,7 @@ import type { Dispatcher } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
 import { Role } from "@/shared/service/domain/chat/message";
 import type { MessageProperties } from "@/shared/service/domain/chat/message";
-import { U } from "@/shared/service/application/usecases";
-import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
+import { R } from "@/shared/service/application/usecases";
 
 const t = inject<Dictionary>(DICTIONARY_KEY)!;
 const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;

@@ -1,25 +1,21 @@
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedConduct } from "@/shared/service/domain/interfaces/backend";
-import { Service } from "../../actors/service";
-import { MyBaseScenario } from "../common";
+import { MyBaseScenario } from "./common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { Observable } from "rxjs";
 import { Conduct } from "@/shared/service/domain/timeline/conduct";
-
-
-const _u = Service.usecases.observingUsersTimeline;
 
 /**
  * usecase: ユーザのプロジェクトを観測する
  */
 export type ObservingUsersTimelineScenes = {
     basics : {
-        [_u.basics.serviceDetectsSigningIn]: { user: UserProperties; };
+        serviceDetectsSigningIn: { user: UserProperties; };
     };
     alternatives: Empty;
     goals : {
-        [_u.goals.startObservingUsersTimeline]: { timelineObservable: Observable<ChangedConduct[]> };
+        startObservingUsersTimeline: { timelineObservable: Observable<ChangedConduct[]> };
     };
 };
 
@@ -33,10 +29,10 @@ export class ObservingUsersTimelineScenario extends MyBaseScenario<ObservingUser
 
     next(to: MutableContext<ObservingUsersTimelineScenes>): Promise<Context<ObservingUsersTimelineScenes>> {
         switch (to.scene) {
-        case _u.basics.serviceDetectsSigningIn: {
+        case this.keys.basics.serviceDetectsSigningIn: {
             // TODO: 引数が適当なので、適切なものに変更する
             const timelineObservable = Conduct.getObservavle(to.user.id);
-            return this.just(this.goals[_u.goals.startObservingUsersTimeline]({ timelineObservable }));
+            return this.just(this.goals.startObservingUsersTimeline({ timelineObservable }));
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);

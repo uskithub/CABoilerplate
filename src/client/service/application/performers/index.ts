@@ -10,11 +10,10 @@ import { createTimelinePerformer } from "./timeline";
 import { Nobody } from "robustive-ts";
 import { watch, WatchStopHandle } from "vue";
 import { Log } from "@/shared/service/domain/analytics/log";
-import { Usecases, UsecaseLog, Requirements, UsecasesOf } from "@/shared/service/application/usecases";
-import { Subscription } from "rxjs";
+import { Usecases, UsecaseLog, Requirements, UsecasesOf, R } from "@/shared/service/application/usecases";
 import { createProjectManagementPerformer, ProjectManagementStore } from "./projectManagement";
 import { RouteLocationRaw, Router } from "vue-router";
-import path from "path";
+import { Subscription } from "rxjs";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -108,7 +107,7 @@ export function createDispatcher(router: Router): Dispatcher {
             _shared.executingUsecase = { id: usecase.id, executing: { domain: usecase.domain, usecase: usecase.name }, startAt: new Date() };
     
             // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
-            if (usecase.domain === "application" && usecase.name === "boot") {
+            if (usecase.domain === R.keys.application && usecase.name === R.application.keys.boot) {
                 return performers.application.dispatch(usecase, _actor, dispatcher)
                     .finally(() => dispatcher.commonCompletionProcess(null));
             }
@@ -136,13 +135,13 @@ export function createDispatcher(router: Router): Dispatcher {
             return Promise.resolve()
                 .then(() => {
                     switch (usecase.domain) {
-                    case "authentication": {
+                    case R.keys.authentication: {
                         return performers.authentication.dispatch(usecase, _actor, dispatcher);
                     }
-                    case "projectManagement": {
+                    case R.keys.projectManagement: {
                         return performers.projectManagement.dispatch(usecase, _actor, dispatcher);
                     }
-                    case "timeline": {
+                    case R.keys.timeline: {
                         return performers.timeline.dispatch(usecase, _actor, dispatcher);
                     }
                     default: {

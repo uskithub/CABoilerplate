@@ -6,13 +6,11 @@
 import { inject, reactive, watch } from "vue";
 import type { Dispatcher, SharedStore } from "../../../application/performers";
 import { DISPATCHER_KEY } from "../../../application/performers";
-import { U } from "@/shared/service/application/usecases";
+import { R } from "@/shared/service/application/usecases";
 
 import { useRoute } from "vue-router";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
-import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { type Account } from "@/shared/service/domain/authentication/user";
-import type { Actor } from "@/shared/service/application/actors";
 import { whenNoLongerNull } from "@/client/system/common";
 
 const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
@@ -41,7 +39,7 @@ watch(route, (newVal: RouteLocationNormalizedLoaded) => {
 });
 
 whenNoLongerNull(() => stores.shared.actor.user, (user: Account) => {
-    dispatch(U.projectManagement.observingProject.basics[AuthorizedUser.usecases.observingProject.basics.userSelectsAProject]({ user, projectId: state.projectId }));
+    dispatch(R.projectManagement.observingProject.basics.userSelectsAProject({ user, projectId: state.projectId }));
 });
 
 </script>

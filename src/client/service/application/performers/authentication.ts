@@ -9,9 +9,8 @@ import { InteractResultType, Nobody as NobodyActor } from "robustive-ts";
 import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 
 import { Actor } from "@/shared/service/application/actors";
-import { Nobody } from "@/shared/service/application/actors/nobody";
 import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
-import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
+import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { dictionary as t } from "@/client/main";
 import { fa } from "vuetify/lib/iconsets/fa-svg.mjs";
 import { Account } from "@/shared/service/domain/authentication/user";
@@ -44,9 +43,11 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
     });
 
     const _store = store as Mutable<AuthenticationStore>;
+
+    const d = R.authentication;
     
     const signUp = (usecase: Usecase<"authentication", "signUp">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
-        const goals = Nobody.usecases.signUp.goals;
+        const goals = d.signUp.keys.goals;
         const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)
@@ -126,7 +127,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
     };
     
     const signIn = (usecase: Usecase<"authentication", "signIn">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
-        const goals = Nobody.usecases.signIn.goals;
+        const goals = d.signIn.keys.goals;
         const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)
@@ -190,7 +191,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
     };
     
     const signOut = (usecase: Usecase<"authentication", "signOut">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
-        const goals = AuthorizedUser.usecases.signOut.goals;
+        const goals = d.signOut.keys.goals;
         const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)

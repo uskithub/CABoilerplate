@@ -1,4 +1,4 @@
-import { Usecase, UsecasesOf } from "@/shared/service/application/usecases";
+import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { Dispatcher, Mutable, Performer, Store } from ".";
 import { Actor } from "@/shared/service/application/actors";
 import { Observable, Subscription } from "rxjs";
@@ -23,8 +23,10 @@ export function createTimelinePerformer(): TimelinePerformer {
 
     const _store = store as Mutable<TimelineStore>;
 
+    const d = R.timeline;
+
     const observingUsersTimeline = (usecase: Usecase<"timeline", "observingUsersTimeline">, actor: Actor, dispatcher: Dispatcher): Promise<Subscription | void> => {
-        const goals = Service.usecases.observingUsersTimeline.goals;
+        const goals = d.observingUsersTimeline.keys.goals;
         return usecase
             .interactedBy(actor)
             .then(result => {

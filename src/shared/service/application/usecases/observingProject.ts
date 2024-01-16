@@ -1,26 +1,23 @@
 import ProjectModel from "@domain/entities/project";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
-import { AuthorizedUser } from "../../actors/authorizedUser";
-import { MyBaseScenario } from "../common";
+import { MyBaseScenario } from "./common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { map } from "rxjs";
 import { Task } from "@/shared/service/domain/entities/task";
-
-const _u = AuthorizedUser.usecases.observingProject;
 
 /**
  * usecase: ユーザのプロジェクトを観測する
  */
 export type ObservingProjectScenes = {
     basics : {
-        [_u.basics.userSelectsAProject]: { user: UserProperties; projectId: string; };
-        [_u.basics.serviceStartsObservingProjectThatMeetConditions]: { user: UserProperties; projectId: string; };
+        userSelectsAProject: { user: UserProperties; projectId: string; };
+        serviceStartsObservingProjectThatMeetConditions: { user: UserProperties; projectId: string; };
     };
     alternatives: Empty;
     goals : {
-        [_u.goals.servicePresentsProjectView]: { project: Task;};
-        [_u.goals.onUpdatProjectThenServiceUpdatesProjectView]: { project: Task;};
+        servicePresentsProjectView: { project: Task;};
+        onUpdatProjectThenServiceUpdatesProjectView: { project: Task;};
     };
 };
 
@@ -34,10 +31,10 @@ export class ObservingProjectScenario extends MyBaseScenario<ObservingProjectSce
 
     next(to: MutableContext<ObservingProjectScenes>): Promise<Context<ObservingProjectScenes>> {
         switch (to.scene) {
-        case _u.basics.userSelectsAProject: {
-            return this.just(this.basics[_u.basics.serviceStartsObservingProjectThatMeetConditions]({ user: to.user, projectId: to.projectId }));
+        case this.keys.basics.userSelectsAProject: {
+            return this.just(this.basics.serviceStartsObservingProjectThatMeetConditions({ user: to.user, projectId: to.projectId }));
         }
-        case _u.basics.serviceStartsObservingProjectThatMeetConditions: {
+        case this.keys.basics.serviceStartsObservingProjectThatMeetConditions: {
             return this.startObservingProjectThatMeetConditions(to.user, to.projectId);
         }
         default: {
@@ -53,9 +50,9 @@ export class ObservingProjectScenario extends MyBaseScenario<ObservingProjectSce
                 map(task => {
                     if (isFirst) {
                         isFirst = false;
-                        return this.goals[_u.goals.servicePresentsProjectView]({ project: task });
+                        return this.goals.servicePresentsProjectView({ project: task });
                     } else {
-                        return this.goals[_u.goals.onUpdatProjectThenServiceUpdatesProjectView]({ project: task });
+                        return this.goals.onUpdatProjectThenServiceUpdatesProjectView({ project: task });
                     }
                 })
             );
