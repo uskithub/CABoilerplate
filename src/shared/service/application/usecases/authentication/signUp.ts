@@ -1,6 +1,6 @@
 import { User, type SignUpValidationResult, type Account, UserProperties, RoleType } from "@/shared/service/domain/authentication/user";
 import { Organization, OrganizationProperties } from "@/shared/service/domain/authentication/organization";
-import { MyBaseScenario } from "../common";
+import { MyBaseScenario } from "../../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { firstValueFrom, map, retry } from "rxjs";

@@ -1,21 +1,21 @@
+import TaskModel from "@domain/entities/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
-import { ChangedConduct } from "@/shared/service/domain/interfaces/backend";
-import { Conduct } from "@/shared/service/domain/timeline/conduct";
-import { MyBaseScenario } from "../common";
+import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
+import { MyBaseScenario } from "../../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { Observable } from "rxjs";
 
 /**
- * usecase: ユーザのプロジェクトを観測する
+ * usecase: ユーザのタスクを観測する
  */
-export type ObservingUsersTimelineScenes = {
+export type ObservingUsersTasksScenes = {
     basics : {
         serviceDetectsSigningIn: { user: UserProperties; };
     };
     alternatives: Empty;
     goals : {
-        startObservingUsersTimeline: { timelineObservable: Observable<ChangedConduct[]> };
+        serviceStartsObservingUsersTasks: { observable: Observable<ChangedTask[]> };
     };
 };
 
@@ -25,14 +25,13 @@ export type ObservingUsersTimelineScenes = {
  *
  * ※ シナリオの実装なので、分岐ロジックのみとし、ドメイン知識は持ち込まないこと
  */
-export class ObservingUsersTimelineScenario extends MyBaseScenario<ObservingUsersTimelineScenes> {
+export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTasksScenes> {
 
-    next(to: MutableContext<ObservingUsersTimelineScenes>): Promise<Context<ObservingUsersTimelineScenes>> {
+    next(to: MutableContext<ObservingUsersTasksScenes>): Promise<Context<ObservingUsersTasksScenes>> {
         switch (to.scene) {
         case this.keys.basics.serviceDetectsSigningIn: {
-            // TODO: 引数が適当なので、適切なものに変更する
-            const timelineObservable = Conduct.getObservavle(to.user.id);
-            return this.just(this.goals.startObservingUsersTimeline({ timelineObservable }));
+            const observable = TaskModel.observeUsersTasks(to.user.id);
+            return this.just(this.goals.serviceStartsObservingUsersTasks({ observable }));
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);

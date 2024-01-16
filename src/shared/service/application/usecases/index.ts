@@ -1,14 +1,16 @@
-import { BootScenario } from "./boot";
-import { SignInScenario } from "./signIn";
-import { SignUpScenario } from "./signUp";
+import { BootScenario } from "./application/boot";
 
-import { SignOutScenario } from "./signOut";
+import { SignInScenario } from "./authentication/signIn";
+import { SignUpScenario } from "./authentication/signUp";
+import { SignOutScenario } from "./authentication/signOut";
 
+import { ObservingProjectScenario } from "./projectManagement/observingProject";
+import { ObservingUsersTasksScenario } from "./projectManagement/observingUsersTasks";
+import { ObservingUsersProjectsScenario } from "./projectManagement/observingUsersProjects";
 import { GetWarrantyListScenario } from "./getWarrantyList";
-import { ObservingProjectScenario } from "./observingProject";
-import { ObservingUsersTasksScenario } from "./observingUsersTasks";
-import { ObservingUsersProjectsScenario } from "./observingUsersProjects";
-import { ObservingUsersTimelineScenario } from "./observingUsersTimeline";
+
+import { ObservingUsersTimelineScenario } from "./timeline/observingUsersTimeline";
+
 import { AllUsecases, AllUsecasesOverDomain, Robustive, Usecase as _Usecase } from "robustive-ts";
 
 export const requirements = {

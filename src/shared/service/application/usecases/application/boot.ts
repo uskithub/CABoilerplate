@@ -1,7 +1,7 @@
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import { Application } from "@/shared/service/domain/application/application";
 import { User, Account, UserProperties } from "@/shared/service/domain/authentication/user";
-import { MyBaseScenario } from "../common";
+import { MyBaseScenario } from "../../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
 import { Observable, firstValueFrom, map } from "rxjs";
