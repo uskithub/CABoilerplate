@@ -1,6 +1,6 @@
 import ProjectModel from "@domain/entities/project";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
-import { Task } from "@/shared/service/domain/entities/task";
+import { Task } from "@/shared/service/domain/projectManagement/task";
 import { MyBaseScenario } from "../../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";

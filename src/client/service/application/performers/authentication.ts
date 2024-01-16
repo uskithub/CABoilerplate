@@ -105,7 +105,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     console.error("SERVICE ERROR:", context.error);
                     break;
                 }
-                case goals.onFailureInCreateUserDataThenServicePresentsError: {
+                case goals.onFailureInCreatingUserDataThenServicePresentsError: {
                     console.error("SERVICE ERROR:", context.error);
                     break;
                 }

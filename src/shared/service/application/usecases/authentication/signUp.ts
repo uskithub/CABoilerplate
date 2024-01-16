@@ -12,9 +12,10 @@ export type SignUpScenes = {
     basics : {
         userStartsSignUpProcess: { id: string | null; password: string | null; };
         serviceValidateInputs: { id: string | null; password: string | null; };
-        onSuccessInValidatingThenServicePublishNewAccount: { id: string; password: string; };
-        onSuccessPublishNewAccountThenServiceCreateUserData: { account: Account; };
-        onSuccessPublishNewAccountThenServiceGetsOrganizationOfDomain: { account: Account; };
+        onSuccessInValidatingThenServicePublishesNewAccount: { id: string; password: string; };
+        onSuccessInPublishingNewAccountThenServiceCreatesUserData: { account: Account; };
+        onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain: { account: Account; };
+        onSuccessInCreatingUserDataThenServiceCreatesInitialTask: { userProperties: UserProperties; };
     };
     alternatives: {
         userStartsSignUpProcessWithGoogleOAuth: Empty;
@@ -23,12 +24,13 @@ export type SignUpScenes = {
         userSelectToBeAdministrator: { domain: string | null; account: Account | null };
         serviceCreatesNewOrganization: { domain: string; account: Account };
         userSelectNotToBeAdministrator: Empty;
-        onSuccessCreateNewOrganizationThenThenServiceCreateUserData : { organizationProperties: OrganizationProperties; account: Account; };
+        onSuccessInCreatingNewOrganizationThenThenServiceCreatesUserData : { organizationProperties: OrganizationProperties; account: Account; };
     };
     goals : {
-        onSuccessInCreateUserDataThenServicePresentsHomeView: { userProperties: UserProperties; };
+        onSuccessInCreatingInitialTaskThenServicePresentsHomeView: { userProperties: UserProperties; };
         onFailureInValidatingThenServicePresentsError: { result: SignUpValidationResult; };
-        onFailureInCreateUserDataThenServicePresentsError: { error: Error; };
+        onFailureInCreatingUserDataThenServicePresentsError: { error: Error; };
+        onFailureInCreatingInitialTaskThenServicePresentsError: { error: Error; };
         onFailureInPublishingThenServicePresentsError: { error: Error; };
         serviceDoNothing: Empty;
         servicePresentsSignInView: Empty;
@@ -46,14 +48,17 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         case this.keys.basics.serviceValidateInputs: {
             return this.validate(to.id, to.password);
         }
-        case this.keys.basics.onSuccessInValidatingThenServicePublishNewAccount: {
+        case this.keys.basics.onSuccessInValidatingThenServicePublishesNewAccount: {
             return this.publishNewAccount(to.id, to.password);
         }
-        case this.keys.basics.onSuccessPublishNewAccountThenServiceGetsOrganizationOfDomain: {
+        case this.keys.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain: {
             return this.getOrganization(to.account);
         }
-        case this.keys.basics.onSuccessPublishNewAccountThenServiceCreateUserData: {
-            return this.createUser(to.account);
+        case this.keys.basics.onSuccessInCreatingUserDataThenServiceCreatesInitialTask: {
+            return this.createTask(to.userProperties);
+        }
+        case this.keys.basics.onSuccessInPublishingNewAccountThenServiceCreatesUserData: {
+            // return this.createUser(to.account);
         }
         case this.keys.alternatives.userStartsSignUpProcessWithGoogleOAuth: {
             return this.just(this.alternatives.serviceRedirectsToGoogleOAuth());
@@ -74,7 +79,7 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         case this.keys.alternatives.serviceCreatesNewOrganization: {
             return this.createNewOrganization(to.domain, to.account);
         }
-        case this.keys.alternatives.onSuccessCreateNewOrganizationThenThenServiceCreateUserData: {
+        case this.keys.alternatives.onSuccessInCreatingNewOrganizationThenThenServiceCreatesUserData: {
             // TODO: Dateがclassだからうまいこといっていない
             return this.createUserAsOrganizationOwner(to.account, to.organizationProperties);
         }
@@ -87,7 +92,7 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
     private validate(id: string | null, password: string | null): Promise<Context<SignUpScenes>> {
         const result = User.validate(id, password);
         if (result === true && id !== null && password != null) {
-            return this.just(this.basics.onSuccessInValidatingThenServicePublishNewAccount({ id, password }));
+            return this.just(this.basics.onSuccessInValidatingThenServicePublishesNewAccount({ id, password }));
         } else {
             return this.just(this.goals.onFailureInValidatingThenServicePresentsError({ result }));
         }
@@ -99,7 +104,7 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
                 .createAccount(id, password)
                 .pipe(
                     map((account: Account) => {
-                        return this.basics.onSuccessPublishNewAccountThenServiceCreateUserData({ account });
+                        return this.basics.onSuccessInPublishingNewAccountThenServiceCreatesUserData({ account });
                     })
                 )
         );
@@ -120,14 +125,24 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
             return this.just(this.goals.serviceDoNothing());
         }
     }
+    
+    private createTask(userProperties: UserProperties): Promise<Context<SignUpScenes>> {
+        return new User(account).create()
+            .then((userProperties) => {
+                return this.goals.onSuccessInCreatingInitialTaskThenServicePresentsHomeView({ userProperties });
+            })
+            .catch((error: Error) => {
+                return this.goals.onFailureInCreatingInitialTaskThenServicePresentsError({ error });
+            });
+    }
 
     private createUser(account: Account): Promise<Context<SignUpScenes>> {
         return new User(account).create()
             .then((userProperties) => {
-                return this.goals.onSuccessInCreateUserDataThenServicePresentsHomeView({ userProperties });
+                return this.basics.onSuccessInCreatingUserDataThenServiceCreatesInitialTask({ userProperties });
             })
             .catch((error: Error) => {
-                return this.goals.onFailureInCreateUserDataThenServicePresentsError({ error });
+                return this.goals.onFailureInCreatingUserDataThenServicePresentsError({ error });
             });
     }
 
@@ -139,10 +154,10 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         
         return new User(account).create(organizationAndRols)
             .then((userProperties) => {
-                return this.goals.onSuccessInCreateUserDataThenServicePresentsHomeView({ userProperties });
+                return this.basics.onSuccessInCreateUserDataThenServiceCreatesInitialTask({ userProperties });
             })
             .catch((error: Error) => {
-                return this.goals.onFailureInCreateUserDataThenServicePresentsError({ error });
+                return this.goals.onFailureInCreatingUserDataThenServicePresentsError({ error });
             });
     }
 
@@ -158,7 +173,7 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         return Organization
             .create(domain, account)    
             .then((organizationProperties: OrganizationProperties) => {
-                return this.alternatives.onSuccessCreateNewOrganizationThenThenServiceCreateUserData({ organizationProperties, account }); 
+                return this.alternatives.onSuccessInCreatingNewOrganizationThenThenServiceCreatesUserData({ organizationProperties, account }); 
             });
     }
 }

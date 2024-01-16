@@ -8,7 +8,7 @@ import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator
 import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Actor } from "@/shared/service/application/actors";
 import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
-import { Task } from "@/shared/service/domain/entities/task";
+import { Task } from "@/shared/service/domain/projectManagement/task";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
 import { InteractResultType } from "robustive-ts";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
@@ -66,7 +66,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                                 const actor = new AuthenticatedUser(account);
                                 dispatcher.change(actor);
                                 _shared.signInStatus = SignInStatuses.signingIn({ account });
-                                dispatcher.dispatch(R.authentication.signUp.basics.onSuccessPublishNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
+                                dispatcher.dispatch(R.authentication.signUp.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
                                     .catch(error => console.error(error));
                             } else {
                                 const actor = new AuthorizedUser(userProperties);
@@ -91,7 +91,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                 }
                 // case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {
                 //     _shared.signInStatus = SignInStatuses.signOut();
-                //     return dispatcher.dispatch(R.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessPublishNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
+                //     return dispatcher.dispatch(R.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessInPublishingNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
                 //         .then(() => { return; });
                 // }
                 }

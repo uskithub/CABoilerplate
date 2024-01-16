@@ -1,6 +1,7 @@
 import { Observable } from "rxjs";
 import dependencies from "../dependencies";
 import { ChangedTask } from "../interfaces/backend";
+import { Entity } from "@/shared/system/interfaces/architecture";
 
 export interface Nodable {
     id: number;
@@ -89,6 +90,49 @@ export interface Task {
     templateId?: string;
     lastTimeWorkedAt?: Date;
     createdAt: Date;
+}
+
+export type TaskProperties = {
+    id: string;
+    type: TaskType;
+    status: TaskStatus;
+
+    title: string;
+    purpose: string|null;
+    goal: string|null;
+    instractions: string|null;
+
+    author: string;            // タスクを作ったユーザ
+    owner: string;             // タスクのオーナー（作成時はauthor）
+    assignees: Array<string>;  // タスクをアサインされたメンバ（オーナーは含まない）
+    members: Array<string>;    // タスクの全メンバ（owner、assigneesは必ず包含。作成時はauthorも含むが外すことが可能）
+    involved: Array<string>;   // このタスクの全関係者（author, member）
+
+    ancestorIds: string|null;
+    _children: Array<string>;
+    children: Array<Task>;
+
+    startedAt: Date|null;
+    deadline: Date|null;
+
+    logs: Array<Log>;
+
+    templateId?: string;
+    lastTimeWorkedAt?: Date;
+    createdAt: Date;
+};
+
+const initialTask = {
+    type: TaskType.milestone
+
+};
+
+export class Task implements Entity<TaskProperties> {
+    constructor() {}
+
+    static create(): Promise<TaskProperties> {
+        return dependencies.backend.tasks.create();
+    }
 }
 
 export default {

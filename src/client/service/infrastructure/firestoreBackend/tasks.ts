@@ -1,7 +1,7 @@
 import { ChangedTask, TaskFunctions } from "@/shared/service/domain/interfaces/backend";
 import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./entities/tasks";
 import { CollectionType } from ".";
-import { Log, Task } from "@/shared/service/domain/entities/task";
+import { Log, Task } from "@/shared/service/domain/projectManagement/task";
 
 import { collection, Firestore, onSnapshot, where, query } from "firebase/firestore";
 import { Observable } from "rxjs";

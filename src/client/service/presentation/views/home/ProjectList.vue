@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // service
-import type { Task } from "@/shared/service/domain/entities/task";
+import type { Task } from "@/shared/service/domain/projectManagement/task";
 import { TaskTreenode } from "../../models/taskTreenode";
-import { TaskType } from "@/shared/service/domain/entities/task";
-import TaskModel from "@/shared/service/domain/entities/task";
+import { TaskType } from "@/shared/service/domain/projectManagement/task";
+import TaskModel from "@/shared/service/domain/projectManagement/task";
 
 // view
 import { tree, findNodeById } from "vue3-tree";

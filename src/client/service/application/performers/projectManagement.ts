@@ -12,7 +12,7 @@ import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { InteractResultType } from "robustive-ts";
 import { Service } from "@/shared/service/application/actors/service";
 import { ChangedTask, ItemChangeType } from "@/shared/service/domain/interfaces/backend";
-import { Task } from "@/shared/service/domain/entities/task";
+import { Task } from "@/shared/service/domain/projectManagement/task";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
 
 type ImmutableTask = Readonly<Task>;
