@@ -102,7 +102,7 @@ export function createDispatcher(router: Router): Dispatcher {
             const _shared = shared as Mutable<SharedStore>;
             const _actor = actor || shared.actor;
     
-            console.info(`[DISPATCH] ${ usecase.domain }.${ usecase.name } (${ usecase.id })` );
+            console.info(`[DISPATCH] ${ usecase.domain }.${ usecase.name }.${ usecase.course }.${ usecase.scene } (${ usecase.id })` );
             _shared.executingUsecase = { id: usecase.id, executing: { domain: usecase.domain, usecase: usecase.name }, startAt: new Date() };
     
             // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();

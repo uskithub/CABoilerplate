@@ -3,7 +3,8 @@ import { Organization, OrganizationProperties } from "@/shared/service/domain/au
 import { MyBaseScenario } from "../../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { firstValueFrom, map, retry } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
+import { Task, TaskProperties } from "@/shared/service/domain/projectManagement/task";
 
 /**
  * usecase: サインアップする
@@ -27,7 +28,7 @@ export type SignUpScenes = {
         onSuccessInCreatingNewOrganizationThenThenServiceCreatesUserData : { organizationProperties: OrganizationProperties; account: Account; };
     };
     goals : {
-        onSuccessInCreatingInitialTaskThenServicePresentsHomeView: { userProperties: UserProperties; };
+        onSuccessInCreatingInitialTaskThenServicePresentsHomeView: { userProperties: UserProperties; taskProperties: TaskProperties; };
         onFailureInValidatingThenServicePresentsError: { result: SignUpValidationResult; };
         onFailureInCreatingUserDataThenServicePresentsError: { error: Error; };
         onFailureInCreatingInitialTaskThenServicePresentsError: { error: Error; };
@@ -127,9 +128,9 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
     }
     
     private createTask(userProperties: UserProperties): Promise<Context<SignUpScenes>> {
-        return new User(account).create()
-            .then((userProperties) => {
-                return this.goals.onSuccessInCreatingInitialTaskThenServicePresentsHomeView({ userProperties });
+        return Task.createInitialTasks(userProperties.id)
+            .then((taskProperties) => {
+                return this.goals.onSuccessInCreatingInitialTaskThenServicePresentsHomeView({ userProperties, taskProperties });
             })
             .catch((error: Error) => {
                 return this.goals.onFailureInCreatingInitialTaskThenServicePresentsError({ error });
@@ -154,7 +155,7 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         
         return new User(account).create(organizationAndRols)
             .then((userProperties) => {
-                return this.basics.onSuccessInCreateUserDataThenServiceCreatesInitialTask({ userProperties });
+                return this.basics.onSuccessInCreatingUserDataThenServiceCreatesInitialTask({ userProperties });
             })
             .catch((error: Error) => {
                 return this.goals.onFailureInCreatingUserDataThenServicePresentsError({ error });

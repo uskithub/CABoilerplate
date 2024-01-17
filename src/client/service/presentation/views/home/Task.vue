@@ -1,9 +1,8 @@
 <script setup lang="ts">
 // service
-import type { Task } from "@/shared/service/domain/projectManagement/task";
 import { TaskTreenode } from "../../models/taskTreenode";
-import { TaskType } from "@/shared/service/domain/projectManagement/task";
-import TaskModel from "@/shared/service/domain/projectManagement/task";
+import { Task, TaskType } from "@/shared/service/domain/projectManagement/task";
+import type { TaskProperties } from "@/shared/service/domain/projectManagement/task";
 
 // view
 import { tree, findNodeById } from "vue3-tree";
@@ -38,14 +37,14 @@ const state = reactive<{
     swtTree: TaskTreenode;
     isEditing: boolean;
 }>({
-    donedleTree: new TaskTreenode(donedleTree as Task)
+    donedleTree: new TaskTreenode(donedleTree as TaskProperties)
     // TODO: TaskTreenodeでの表示。JSON.stringifyを使ったdeepCopyではgetterはコピーされないのでsubtreesが見つからないで落ちる
     // , swtTree: new TaskTreenode(taskTree as Task)
-    , swtTree: new TaskTreenode(swtTree as Task)
+    , swtTree: new TaskTreenode(swtTree as TaskProperties)
     , isEditing: false
 });
 
-watch(stores.application.userTasks, (newVal: Task[]) => {
+watch(stores.application.userTasks, (newVal: TaskProperties[]) => {
     const tree = new TaskTreenode(null, newVal);
     console.log("tree", tree);
     state.donedleTree = tree;
@@ -238,7 +237,7 @@ v-container
                 v-col(cols="12" sm="4")
                   v-select(
                     v-model="slotProps.node.type"
-                    :items="TaskModel.getAvailableTaskTypes(slotProps.node, slotProps.parent)"
+                    :items="Task.getAvailableTaskTypes(slotProps.node, slotProps.parent)"
                     label="TaskType"
                     required
                   )

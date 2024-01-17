@@ -20,7 +20,6 @@ import { DISPATCHER_KEY, createDispatcher } from "./service/application/performe
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { R } from "@/shared/service/application/usecases";
 import { Subscription } from "rxjs";
-import { Nobody } from "@/shared/service/application/actors/nobody";
 import { FirebasePresence } from "./service/infrastructure/firebasePresence";
 import { Service } from "@/shared/service/application/actors/service";
 import { UserProperties } from "@/shared/service/domain/authentication/user";

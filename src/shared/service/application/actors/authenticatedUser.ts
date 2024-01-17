@@ -10,6 +10,9 @@ export class AuthenticatedUser extends MyBaseActor<Account> {
         if (domain === R.keys.authentication && usecase === R.authentication.keys.signOut) {
             return true;
         }
+        if (domain === R.keys.authentication && usecase === R.authentication.keys.signUp) {
+            return true;
+        }
         return false;
     }
 }

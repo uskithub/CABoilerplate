@@ -1,4 +1,3 @@
-import TaskModel from "@domain/projectManagement/task";
 import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
 import { MyBaseScenario } from "../../common";

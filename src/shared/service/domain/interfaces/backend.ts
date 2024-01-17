@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
-import { Task } from "../projectManagement/task";
+import { Task, TaskProperties } from "../projectManagement/task";
 import { Account, OrganizationAndRole, UserProperties } from "../authentication/user";
 import { OrganizationProperties } from "../authentication/organization";
 import { ConductProperties } from "../timeline/conduct";
@@ -26,8 +26,8 @@ export type ChangedItems<T> = {
     removed: { id: string; };
 };
 
-export const ChangedTask = new SwiftEnum<ChangedItems<Task>>();
-export type ChangedTask = SwiftEnumCases<ChangedItems<Task>>;
+export const ChangedTask = new SwiftEnum<ChangedItems<TaskProperties>>();
+export type ChangedTask = SwiftEnumCases<ChangedItems<TaskProperties>>;
 
 export type UserFunctions = {
     get: (userId: string) => Promise<UserProperties | null>;
@@ -60,7 +60,7 @@ export type TaskFunctions = {
      * ユーザのタスクを取得します。
      * TODO: これの実装から
      */
-    create: (task: Task) => Promise<Task>;
+    create: (task: TaskProperties) => Promise<TaskProperties>;
 };
 
 export type ProjectFunctions = {

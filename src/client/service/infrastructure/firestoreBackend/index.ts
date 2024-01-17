@@ -60,10 +60,10 @@ export class FirestoreBackend implements Backend {
     constructor(db: Firestore) {
         this.#db = db;
         this.#unsubscribers = new Array<() => void>();
-        this.users = createUserFunctions(db);
-        this.conducts = createConductFunctions(db, this.#unsubscribers);
-        this.organizations = createOrganizationFunctions(db);
-        this.tasks = createTaskFunctions(db, this.#unsubscribers);
-        this.projects = createProjectFunctions(db, this.#unsubscribers);
+        this.users = createUserFunctions(this.#db);
+        this.conducts = createConductFunctions(this.#db, this.#unsubscribers);
+        this.organizations = createOrganizationFunctions(this.#db);
+        this.tasks = createTaskFunctions(this.#db, this.#unsubscribers);
+        this.projects = createProjectFunctions(this.#db, this.#unsubscribers);
     }
 }

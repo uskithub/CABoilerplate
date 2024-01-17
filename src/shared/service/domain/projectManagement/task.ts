@@ -62,7 +62,7 @@ export interface Log {
 }
 
 // アプリケーションで使用するデータ(参照を追加)
-export interface Task {
+export interface _Task {
     id: string;
     type: TaskType;
     status: TaskStatus;
@@ -87,13 +87,13 @@ export interface Task {
 
     logs: Array<Log>;
 
-    templateId?: string;
-    lastTimeWorkedAt?: Date;
+    templateId?: string | undefined;
+    lastTimeWorkedAt?: Date | undefined;
     createdAt: Date;
 }
 
 export type TaskProperties = {
-    id: string;
+    id: string | null;
     type: TaskType;
     status: TaskStatus;
 
@@ -109,17 +109,16 @@ export type TaskProperties = {
     involved: Array<string>;   // このタスクの全関係者（author, member）
 
     ancestorIds: string | null;
-    _children: Array<string>;
-    children: Array<Task>;
+    children: Array<TaskProperties>; // 子がない場合は明確に空配列を入れる
 
     startedAt: Date | null;
     deadline: Date | null;
 
-    logs: Array<Log>;
+    // logs: Array<Log>;
 
     templateId?: string;
     lastTimeWorkedAt?: Date;
-    createdAt: Date;
+    createdAt: Date | null;
 };
 
 const initialTask = {
@@ -136,36 +135,19 @@ const initialTask = {
     // , involved: Array<string>()   // このタスクの全関係者（author, member）
 
     , ancestorIds: null
-    // , _children: Array<string>;
-    // , children: Array<Task>
+    , children: new Array<TaskProperties>()
 
     // , startedAt: Date|null;
     // , deadline: Date|null;
-    // , logs: Array<Log>;
+    // , logs: new Array<Log>();
     // , templateId?: string;
     // , lastTimeWorkedAt?: Date;
-    // , createdAt: Date;
+    , createdAt: null
 };
 
 export class Task implements Entity<TaskProperties> {
-    constructor() { }
 
-    static createInitialTasks(userId: string): Promise<TaskProperties> {
-        const task = {
-            ...initialTask
-            , author: userId
-            , owner: userId
-            , assignees: [userId]
-            , members: [userId]
-            , involved: [userId]
-        };
-
-        return dependencies.backend.tasks.create(task);
-    }
-}
-
-export default {
-    getAvailableTaskTypes: (task: Task, parent: Task): TaskType[] => {
+    static getAvailableTaskTypes(task: TaskProperties, parent: TaskProperties): TaskType[] {
         switch (parent.type) {
             case TaskType.todo, TaskType.issue:
                 return [
@@ -188,7 +170,46 @@ export default {
                 ];
         }
     }
-    , observeUsersTasks: (userId: string): Observable<ChangedTask[]> => {
-        return dependencies.backend.tasks.observe(userId);
+
+    static createInitialTasks(userId: string): Promise<TaskProperties> {
+        const task = {
+            ...initialTask
+            , author: userId
+            , owner: userId
+            , assignees: [userId]
+            , members: [userId]
+            , involved: [userId]
+        } as TaskProperties;
+
+        return dependencies.backend.tasks.create(task);
     }
-};
+}
+
+// export default {
+//     getAvailableTaskTypes: (task: Task, parent: Task): TaskType[] => {
+//         switch (parent.type) {
+//             case TaskType.todo, TaskType.issue:
+//                 return [
+//                     TaskType.todo
+//                 ];
+//             case TaskType.requirement:
+//                 return [
+//                     TaskType.issue
+//                     , TaskType.todo
+//                 ];
+//             default:
+//                 // case TaskType.milestone:
+//                 // case TaskType.publicProject, TaskType.publicSubproject, TaskType.privateProject, TaskType.privateSubproject:
+//                 // case TaskType.publicNpo, TaskType.publicEdu, TaskType.publicOrganizationSubscribing, TaskType.publicOrganization:
+//                 return [
+//                     TaskType.milestone
+//                     , TaskType.requirement
+//                     , TaskType.issue
+//                     , TaskType.todo
+//                 ];
+//         }
+//     }
+//     , observeUsersTasks: (userId: string): Observable<ChangedTask[]> => {
+//         return dependencies.backend.tasks.observe(userId);
+//     }
+// };

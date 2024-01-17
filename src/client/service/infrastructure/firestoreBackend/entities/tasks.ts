@@ -265,35 +265,6 @@ export function decodeTypeAndStatus(value: LayerStatusType): [ TaskType, TaskSta
     return [ type, status ];
 }
 
-
-export interface FSTask {
-    id: string;
-    typeStatus: LayerStatusType;
-
-    title: string;
-    purpose: string|null;
-    goal: string|null;
-    instractions: string|null;
-
-    author: string;
-    owner: string;
-    assignees: Array<string>;
-    members: Array<string>;
-    involved: Array<string>;
-
-    ancestorIds: string|null;
-    children: Array<string>;
-
-    invitationIds?: Array<string>;
-    invitations?: Array<FSInvitation>;
-
-    startedAt: Timestamp|null;
-    deadline?: Timestamp|null;
-
-    lastTimeWorkedAt?: Timestamp|FieldValue;
-    createdAt: Timestamp|FieldValue;
-}
-
 export interface FSInvitation {
     id: string;
     taskId: string;

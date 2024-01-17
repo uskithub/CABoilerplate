@@ -119,7 +119,8 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                 });
             }
         });
-    }; 
+    };
+    
     return {
         getObservable: (userId: string): Observable<UserProperties | null> => {
             return new Observable(subscriber => {
