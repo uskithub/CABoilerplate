@@ -26,6 +26,12 @@ export type CollectionType = typeof CollectionType[keyof typeof CollectionType];
 
 export const MAX_ID = "zzzzzzzzzzzzzzzzzzzz"; // "1" < "Z" < "z"
 
+const randomBytes = (length: number): Uint8Array => {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return array;
+};
+
 /**
  * https://github.com/googleapis/nodejs-firestore/blob/main/dev/src/util.ts#L57
  */

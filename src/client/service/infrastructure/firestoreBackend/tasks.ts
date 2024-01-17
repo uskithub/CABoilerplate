@@ -11,9 +11,9 @@ interface FSTask {
     typeStatus: LayerStatusType;
 
     title: string;
-    purpose: string|null;
-    goal: string|null;
-    instractions: string|null;
+    purpose: string | null;
+    goal: string | null;
+    instractions: string | null;
 
     author: string;
     owner: string;
@@ -311,14 +311,14 @@ const taskConverter: FirestoreDataConverter<TaskProperties> = {
             , involved: modelObject.involved
             , ancestorIds: modelObject.ancestorIds
             , children: modelObject.children.map(child => child.id)
-            , startedAt: modelObject.startedAt
-            , deadline: modelObject.deadline ? Timestamp.fromDate(modelObject.deadline) : undefined
-            , lastTimeWorkedAt: modelObject.lastTimeWorkedAt ? Timestamp.fromDate(modelObject.lastTimeWorkedAt) : undefined
+            , startedAt: modelObject.startedAt ? Timestamp.fromDate(modelObject.startedAt) : null
+            , deadline: modelObject.deadline ? Timestamp.fromDate(modelObject.deadline) : null
+            , lastTimeWorkedAt: modelObject.lastTimeWorkedAt ? Timestamp.fromDate(modelObject.lastTimeWorkedAt) : null
             , createdAt: modelObject.createdAt ? Timestamp.fromDate(modelObject.createdAt) : serverTimestamp()
         };
     }
     , fromFirestore: (snapshot: QueryDocumentSnapshot<DocumentData>, options?: SnapshotOptions | undefined): TaskProperties => {
-        const id  = snapshot.id;
+        const id = snapshot.id;
         const data = snapshot.data(options) as FSTask;
         const [type, status] = decodeTypeAndStatus(data.typeStatus);
         return {

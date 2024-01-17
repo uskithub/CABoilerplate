@@ -10,30 +10,30 @@ import { Task, TaskProperties } from "@/shared/service/domain/projectManagement/
  * usecase: サインアップする
  */
 export type SignUpScenes = {
-    basics : {
+    basics: {
         userStartsSignUpProcess: { id: string | null; password: string | null; };
         serviceValidateInputs: { id: string | null; password: string | null; };
         onSuccessInValidatingThenServicePublishesNewAccount: { id: string; password: string; };
-        onSuccessInPublishingNewAccountThenServiceCreatesUserData: { account: Account; };
         onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain: { account: Account; };
+        domainOrganizationExistsThenServiceCreatesUserData: { account: Account; };
         onSuccessInCreatingUserDataThenServiceCreatesInitialTask: { userProperties: UserProperties; };
     };
     alternatives: {
+        domainIsUnkownThenServiceCreatesUserData: { account: Account; };
         userStartsSignUpProcessWithGoogleOAuth: Empty;
         serviceRedirectsToGoogleOAuth: Empty;
         userTapsSignInButton: Empty;
         userSelectToBeAdministrator: { domain: string | null; account: Account | null };
         serviceCreatesNewOrganization: { domain: string; account: Account };
         userSelectNotToBeAdministrator: Empty;
-        onSuccessInCreatingNewOrganizationThenThenServiceCreatesUserData : { organizationProperties: OrganizationProperties; account: Account; };
+        onSuccessInCreatingNewOrganizationThenThenServiceCreatesUserData: { organizationProperties: OrganizationProperties; account: Account; };
     };
-    goals : {
+    goals: {
         onSuccessInCreatingInitialTaskThenServicePresentsHomeView: { userProperties: UserProperties; taskProperties: TaskProperties; };
         onFailureInValidatingThenServicePresentsError: { result: SignUpValidationResult; };
         onFailureInCreatingUserDataThenServicePresentsError: { error: Error; };
         onFailureInCreatingInitialTaskThenServicePresentsError: { error: Error; };
         onFailureInPublishingThenServicePresentsError: { error: Error; };
-        serviceDoNothing: Empty;
         servicePresentsSignInView: Empty;
         domainOrganizationNotExistsThenServicePresentsAdministratorRegistrationDialog: { domain: string; account: Account; };
     };
@@ -55,11 +55,14 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         case this.keys.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain: {
             return this.getOrganization(to.account);
         }
+        case this.keys.basics.domainOrganizationExistsThenServiceCreatesUserData: {
+            return this.createUser(to.account);
+        }
         case this.keys.basics.onSuccessInCreatingUserDataThenServiceCreatesInitialTask: {
             return this.createTask(to.userProperties);
         }
-        case this.keys.basics.onSuccessInPublishingNewAccountThenServiceCreatesUserData: {
-            // return this.createUser(to.account);
+        case this.keys.alternatives.domainIsUnkownThenServiceCreatesUserData: {
+            return this.createUser(to.account);
         }
         case this.keys.alternatives.userStartsSignUpProcessWithGoogleOAuth: {
             return this.just(this.alternatives.serviceRedirectsToGoogleOAuth());
@@ -105,7 +108,7 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
                 .createAccount(id, password)
                 .pipe(
                     map((account: Account) => {
-                        return this.basics.onSuccessInPublishingNewAccountThenServiceCreatesUserData({ account });
+                        return this.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain({ account });
                     })
                 )
         );
@@ -117,16 +120,16 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
             return Organization.get(domain)
                 .then(organizationProperties => {
                     if (organizationProperties) {
-                        return this.goals.serviceDoNothing();
+                        return this.basics.domainOrganizationExistsThenServiceCreatesUserData({ account });
                     } else {
                         return this.goals.domainOrganizationNotExistsThenServicePresentsAdministratorRegistrationDialog({ domain, account });
                     }
                 });
         } else {
-            return this.just(this.goals.serviceDoNothing());
+            return this.just(this.alternatives.domainIsUnkownThenServiceCreatesUserData({ account }));
         }
     }
-    
+
     private createTask(userProperties: UserProperties): Promise<Context<SignUpScenes>> {
         return Task.createInitialTasks(userProperties.id)
             .then((taskProperties) => {
