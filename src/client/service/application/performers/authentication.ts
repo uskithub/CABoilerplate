@@ -60,7 +60,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 const context = result.lastSceneContext;
 
                 switch (context.scene) {
-                case goals.onSuccessInCreateUserDataThenServicePresentsHomeView: {
+                case goals.onSuccessInCreatingInitialTaskThenServicePresentsHomeView: {
                     const userProperties = context.userProperties;
                     const actor = new AuthorizedUser(userProperties);
                     dispatcher.change(actor);
@@ -107,9 +107,6 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 }
                 case goals.onFailureInCreatingUserDataThenServicePresentsError: {
                     console.error("SERVICE ERROR:", context.error);
-                    break;
-                }
-                case goals.serviceDoNothing: {
                     break;
                 }
                 case goals.servicePresentsSignInView: {
