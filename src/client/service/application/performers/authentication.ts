@@ -7,7 +7,7 @@ import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUs
 import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { dictionary as t } from "@/client/main";
 import { fa } from "vuetify/lib/iconsets/fa-svg.mjs";
-import { Account } from "@/shared/service/domain/authentication/user";
+import { Account, UserProperties } from "@/shared/service/domain/authentication/user";
 
 // system
 import { reactive } from "vue";
@@ -61,7 +61,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
 
                 switch (context.scene) {
                 case goals.onSuccessInCreatingInitialTaskThenServicePresentsHomeView: {
-                    const userProperties = context.userProperties;
+                    const userProperties = context.userProperties as unknown as UserProperties;
                     const actor = new AuthorizedUser(userProperties);
                     dispatcher.change(actor);
                     _shared.signInStatus = SignInStatuses.signIn({ userProperties });
@@ -107,6 +107,10 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 }
                 case goals.onFailureInCreatingUserDataThenServicePresentsError: {
                     console.error("SERVICE ERROR:", context.error);
+                    break;
+                }
+                case goals.serviceDoNothing: {
+                    // just wait for redirecting to google oauth
                     break;
                 }
                 case goals.servicePresentsSignInView: {

@@ -3,7 +3,7 @@ import { Organization, OrganizationProperties } from "@/shared/service/domain/au
 import { MyBaseScenario } from "../../common";
 
 import type { Context, Empty, MutableContext } from "robustive-ts";
-import { firstValueFrom, map } from "rxjs";
+import { EmptyError, firstValueFrom, map } from "rxjs";
 import { Task, TaskProperties } from "@/shared/service/domain/projectManagement/task";
 
 /**
@@ -34,6 +34,7 @@ export type SignUpScenes = {
         onFailureInCreatingUserDataThenServicePresentsError: { error: Error; };
         onFailureInCreatingInitialTaskThenServicePresentsError: { error: Error; };
         onFailureInPublishingThenServicePresentsError: { error: Error; };
+        serviceDoNothing: Empty;
         servicePresentsSignInView: Empty;
         domainOrganizationNotExistsThenServicePresentsAdministratorRegistrationDialog: { domain: string; account: Account; };
     };

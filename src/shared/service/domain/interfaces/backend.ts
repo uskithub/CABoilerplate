@@ -30,7 +30,6 @@ export const ChangedTask = new SwiftEnum<ChangedItems<TaskProperties>>();
 export type ChangedTask = SwiftEnumCases<ChangedItems<TaskProperties>>;
 
 export type UserFunctions = {
-    get: (userId: string) => Promise<UserProperties | null>;
     create: (user: Account, organizationAndRole?: OrganizationAndRole | undefined) => Promise<UserProperties>;
     getObservable: (userId: string) => Observable<UserProperties | null>;
     // update: () => Promise<void>;

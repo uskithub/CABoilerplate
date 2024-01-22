@@ -70,6 +70,7 @@ export function createProjectFunctions(db: Firestore, unsubscribers: Array<() =>
                             .catch((error) => subscriber.error(error));
                     });
                 unsubscribers.push(unsubscribe);
+                return () => unsubscribe();
             });
         }
         

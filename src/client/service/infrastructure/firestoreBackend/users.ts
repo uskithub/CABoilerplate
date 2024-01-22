@@ -150,20 +150,7 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                         subscriber.error(error);
                     });
                 unsubscribes.push(unsubscribe);
-            });
-        }
-        , get: (userId: string): Promise<UserProperties | null> => {
-            return new Promise<UserProperties | null>((resolve, reject) => {
-                const unsubscribe = onSnapshot(
-                    doc(userCollectionRef, userId)
-                    , (snapshot: DocumentSnapshot<UserProperties>) => {
-                        if (snapshot.exists()) {
-                            resolve(snapshot.data());
-                        } else {
-                            resolve(null);
-                        }
-                    });
-                unsubscribes.push(unsubscribe);
+                return () => unsubscribe();
             });
         }
         , create: (account: Account, organizationAndRole?: OrganizationAndRole | undefined): Promise<UserProperties> => {

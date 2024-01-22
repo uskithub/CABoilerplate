@@ -375,6 +375,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                     });
             
                 unsubscribers.push(unsubscribe);
+                return () => unsubscribe();
             });
         }
 

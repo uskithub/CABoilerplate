@@ -60,19 +60,25 @@ export function createApplicationPerformer(): ApplicationPerformer {
                 case goals.servicePresentsHomeView: {
                     const observable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
                     const account = result.lastSceneContext.account;
+                    let isAlreadyDispatched = false;
                     const subscription = observable.subscribe({
                         next: (userProperties) => {
+                            console.log("きてるんだけどなー", userProperties)
                             if (userProperties === null) {
                                 const actor = new AuthenticatedUser(account);
                                 dispatcher.change(actor);
                                 _shared.signInStatus = SignInStatuses.signingIn({ account });
-                                dispatcher.dispatch(R.authentication.signUp.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
-                                    .catch(error => console.error(error));
+                                if (!isAlreadyDispatched) { // ログイン中のPCがある場合、ユーザ情報を削除したことをトリガーにこの動作が発生してしまうので、一度だけ実行するようにする
+                                    dispatcher.dispatch(R.authentication.signUp.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
+                                        .catch(error => console.error(error));
+                                    isAlreadyDispatched = true;
+                                }
                             } else {
                                 const actor = new AuthorizedUser(userProperties);
                                 dispatcher.change(actor);
                                 _shared.signInStatus = SignInStatuses.signIn({ userProperties });
                                 _shared.isLoading = false;
+                                dispatcher.routingTo("/");
                             }
                         }
                         , error: (e) => console.error(e)
@@ -80,8 +86,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                             console.info("complete");
                             subscription?.unsubscribe();
                         }
-                    });
-                    dispatcher.routingTo("/");
+                    });                    
                     break;
                 }
                 case goals.sessionNotExistsThenServicePresentsSignInView: {

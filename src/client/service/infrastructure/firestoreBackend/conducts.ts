@@ -97,6 +97,7 @@ export function createConductFunctions(db: Firestore, unsubscribers: Array<() =>
                         subscriber.next(changedItems);
                     });
                 unsubscribers.push(unsubscribe);
+                return () => unsubscribe();
             });
         }
          
