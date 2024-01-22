@@ -16,7 +16,7 @@ import { FirestoreBackend } from "./service/infrastructure/firestoreBackend";
 
 import { DICTIONARY_KEY, i18n } from "@/shared/system/localizations";
 import { FirebaseAnalytics } from "./service/infrastructure/firebaseAnalytics/firebaseAnalytics";
-import { DISPATCHER_KEY, createDispatcher } from "./service/application/performers";
+import { DISPATCHER_KEY, Mutable, SharedStore, createDispatcher } from "./service/application/performers";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { R } from "@/shared/service/application/usecases";
 import { Subscription } from "rxjs";
@@ -43,10 +43,31 @@ loadVuetify(app);
 router
     .isReady() // 直リン対策で初めのPathを取得するために待つ
     .finally(() => {
-        const dispatcher = createDispatcher(router);
+        const initialPath = router.currentRoute.value.path;
+        const dispatcher = createDispatcher(initialPath);
         const { stores, dispatch } = dispatcher;
         app.provide(DISPATCHER_KEY, dispatcher);
         app.provide(DICTIONARY_KEY, dictionary);
+
+        /* Setup for Routing */
+        watch(() => stores.shared.currentRouteLocation, (newValue, oldValue) => {
+            console.info("★☆★☆★ RouteLocation:", oldValue, "--->", newValue);
+            router.replace(newValue)
+                .finally(() => {
+                    const _shared = stores.shared as Mutable<SharedStore>;
+                    _shared.isLoading = false;
+                });
+        });
+    
+        // @see: https://router.vuejs.org/guide/advanced/navigation-guards.html#Navigation-Guards
+        router.beforeEach((to, from) => {
+            if (stores.shared.currentRouteLocation !== to.path && stores.shared.currentRouteLocation === from.path) {
+                console.warn("!!!!! RouteLocation was changed directly by the user, e.g. from the address bar.", from.path, "--->", to.path);
+                dispatcher.routingTo(to.path);
+                return false;
+            }
+            return true;
+        });
 
         let subscriptions: Subscription[] = [];
         watch(() => stores.shared.signInStatus, (newValue) => {
@@ -75,6 +96,7 @@ router
                 subscriptions = [];
             }
         });
+        
         if (stores.shared.signInStatus.case === SignInStatus.unknown) {
             dispatch(R.application.boot.basics.userOpensSite())
                 .catch(e => console.error(e));

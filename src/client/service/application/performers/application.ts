@@ -19,6 +19,7 @@ type ImmutableDrawerItems = Readonly<DrawerItem>;
 
 export interface ApplicationStore extends Store {
     readonly drawerItems: ImmutableDrawerItems[];
+    readonly userDataSubscription: Subscription | null;
 }
 
 export interface ApplicationPerformer extends Performer<"application", ApplicationStore> {
@@ -40,6 +41,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
             , DrawerItem.group({ title: "プロジェクト", children: Array<DrawerItem>() })
             // , DrawerItem.link({ title: "link3", href: "/link3" })
         ]
+        , userDataSubscription: null
     });
 
     const _store = store as Mutable<ApplicationStore>;
@@ -61,9 +63,9 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     const observable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
                     const account = result.lastSceneContext.account;
                     let isAlreadyDispatched = false;
+                    // ログアウトしてもそのままで、購読解除することはない
                     const subscription = observable.subscribe({
                         next: (userProperties) => {
-                            console.log("きてるんだけどなー", userProperties)
                             if (userProperties === null) {
                                 const actor = new AuthenticatedUser(account);
                                 dispatcher.change(actor);
@@ -86,7 +88,8 @@ export function createApplicationPerformer(): ApplicationPerformer {
                             console.info("complete");
                             subscription?.unsubscribe();
                         }
-                    });                    
+                    });
+                    _store.userDataSubscription = subscription;
                     break;
                 }
                 case goals.sessionNotExistsThenServicePresentsSignInView: {

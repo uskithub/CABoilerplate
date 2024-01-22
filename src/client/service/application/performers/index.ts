@@ -10,7 +10,7 @@ import { createProjectManagementPerformer, ProjectManagementStore } from "./proj
 
 // System
 import { InjectionKey, reactive, watch, WatchStopHandle } from "vue";
-import { RouteLocationRaw, Router } from "vue-router";
+import { RouteLocationRaw } from "vue-router";
 import { Subscription } from "rxjs";
 import { Nobody } from "@/shared/service/application/actors/nobody";
 
@@ -49,23 +49,13 @@ export type Dispatcher = {
     dispatch: (usecase: Usecases, actor?: Actor) => Promise<Subscription | void>;
 };
 
-export function createDispatcher(router: Router): Dispatcher {
-    const initialPath = router.currentRoute.value.path;
+export function createDispatcher(initialPath: string): Dispatcher {
     const shared = reactive<SharedStore>({
         actor: new Nobody()
         , executingUsecase: null
         , signInStatus: SignInStatuses.unknown()
         , currentRouteLocation: initialPath
         , isLoading: true
-    });
-
-    watch(() => shared.currentRouteLocation, (newValue, oldValue) => {
-        console.log("★☆★☆★ RouteLocation:", oldValue, "--->", newValue);
-        router.replace(newValue)
-            .finally(() => {
-                const _shared = shared as Mutable<SharedStore>;
-                _shared.isLoading = false;
-            });
     });
 
     const performers = {

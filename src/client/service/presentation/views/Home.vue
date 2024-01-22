@@ -9,6 +9,8 @@ import { inject, reactive, ref } from "vue";
 import type { Dispatcher } from "../../application/performers";
 import { DISPATCHER_KEY } from "../../application/performers";
 import "vue3-tree/style.css";
+import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
+import { R } from "@/shared/service/application/usecases";
 
 const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
 
@@ -23,6 +25,10 @@ const state = reactive<{
 }>({
     isDrawerOpen: true
 });
+
+if (stores.shared.signInStatus.case === SignInStatus.signOut) {
+    dispatch(R.application.boot.goals.sessionNotExistsThenServicePresentsSignInView());
+}
 
 </script>
 
