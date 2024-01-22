@@ -81,7 +81,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                             subscription?.unsubscribe();
                         }
                     });
-
+                    dispatcher.routingTo("/");
                     break;
                 }
                 case goals.sessionNotExistsThenServicePresentsSignInView: {
