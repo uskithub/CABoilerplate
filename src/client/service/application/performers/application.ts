@@ -63,9 +63,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     const userDataObservable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
                     const account = result.lastSceneContext.account;
 
-                    service.change(new AuthenticatedUser(account));
-                    _shared.signInStatus = SignInStatuses.signingIn({ account });
-
+                    service.change(SignInStatuses.signingIn({ account }));
                     service.dispatch(R.application.observingUserData.goals.servieStartsObserving({ account, userDataObservable }), service.serviceActor)
                     break;
                 }
@@ -105,6 +103,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                             } else {
                                 if (isFirstTime) {
                                     isFirstTime = false;
+                                    service.change(SignInStatuses.signIn({ userProperties }));
                                     service.dispatch(R.application.observingUserData.alternatives.serviceGetsDataForTheFirstTime({ user: userProperties }), service.serviceActor)
                                         .catch(error => console.error(error));
                                 } else {
@@ -124,9 +123,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                 }
                 case goals.serviceUpdatesUserData: {
                     const userProperties = result.lastSceneContext.user as unknown as UserProperties;
-                    service.change(new AuthorizedUser(userProperties));
-
-                    _shared.signInStatus = SignInStatuses.signIn({ userProperties });
+                    service.change(SignInStatuses.signIn({ userProperties }));
                     break;
                 }
                 case goals.servicePerformsObservingUsersTasksUsecase: {

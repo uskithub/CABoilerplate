@@ -205,8 +205,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 const context = result.lastSceneContext;
                 switch (context.scene) {
                 case goals.onSuccessThenServicePresentsSignInView:
-                    service.change(new Nobody());
-                    _shared.signInStatus = SignInStatuses.signOut();
+                    service.change(SignInStatuses.signOut());
                     break;
                 case goals.onFailureThenServicePresentsError:
                     console.error("SERVICE ERROR:", context.error);

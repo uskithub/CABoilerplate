@@ -50,7 +50,7 @@ export type Service = {
 
     serviceActor: ServiceActor;
 
-    change: (actor: Actor) => void;
+    change: (signInStatus: SignInStatus) => void;
     routingTo: (path: string) => void;
     commonCompletionProcess: (subscription: Subscription | null) => void;
     dispatch: (usecase: Usecases, actor?: Actor) => Promise<Subscription | void>;
@@ -84,10 +84,33 @@ export function createService(initialPath: string): Service {
             , projectManagement: performers.projectManagement.store
         }
         , serviceActor
-        , change: (actor: Actor) => {
+        , change: (signInStatus: SignInStatus) => {
+            const prevStatus = shared.signInStatus.case;
+            const prevActor = shared.actor.constructor.name;
+            
             const _shared = shared as Mutable<SharedStore>;
-            _shared.actor = actor;
-            console.log("actor changed: ", actor);
+            _shared.signInStatus = signInStatus;
+            
+            switch (signInStatus.case) {
+            case SignInStatus.signIn: {
+                _shared.actor = new AuthorizedUser(signInStatus.userProperties as unknown as UserProperties);
+                break;
+            }
+            case SignInStatus.signingIn: {
+                _shared.actor = new AuthenticatedUser(signInStatus.account);
+                break;
+            }
+            case SignInStatus.signOut: {
+                _shared.actor = new Nobody();
+                break;
+            }
+            case SignInStatus.unknown: {
+                _shared.actor = new Nobody();
+                break;
+            }
+            }
+
+            console.info(`SignInStatus changed: ${ prevStatus } ---> ${ signInStatus.case}, actor changed: ${ prevActor } --->`, _shared.actor);
         }
         , routingTo: (path: string) => {
             const _shared = shared as Mutable<SharedStore>;
@@ -163,18 +186,14 @@ export function createService(initialPath: string): Service {
             const subscription = userDataObservable.subscribe({
                 next: (userProperties) => {
                     if (userProperties === null) { // ユーザ情報がない場合
-                        const actor = new AuthenticatedUser(account);
-                        service.change(actor);
-                        _shared.signInStatus = SignInStatuses.signingIn({ account });
+                        service.change(SignInStatuses.signingIn({ account }));
                         if (!isAlreadyDispatched) { // ログイン中のPCがある場合、ユーザ情報を削除したことをトリガーにこの動作が発生してしまうので、一度だけ実行するようにする
                             service.dispatch(R.authentication.signUp.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
                                 .catch(error => console.error(error));
                             isAlreadyDispatched = true;
                         }
                     } else {
-                        const actor = new AuthorizedUser(userProperties);
-                        service.change(actor);
-                        _shared.signInStatus = SignInStatuses.signIn({ userProperties });
+                        service.change(SignInStatuses.signIn({ userProperties }));
                         _shared.isLoading = false;
                         service.routingTo("/");
                     }
