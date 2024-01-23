@@ -1,4 +1,5 @@
 import { BootScenario } from "./application/boot";
+import { ObservingUserDataScenario } from "./application/observingUserData";
 
 import { SignInScenario } from "./authentication/signIn";
 import { SignUpScenario } from "./authentication/signUp";
@@ -13,9 +14,11 @@ import { ObservingUsersTimelineScenario } from "./timeline/observingUsersTimelin
 
 import { AllUsecases, AllUsecasesOverDomain, Robustive, Usecase as _Usecase } from "robustive-ts";
 
+
 export const requirements = {
     application : {
         boot : BootScenario
+        , observingUserData: ObservingUserDataScenario
     }
     , authentication : {
         signIn : SignInScenario

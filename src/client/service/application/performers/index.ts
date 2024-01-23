@@ -2,6 +2,7 @@ import { ApplicationStore, createApplicationPerformer } from "./application";
 import { createAuthenticationPerformer } from "./authentication";
 import type { AuthenticationStore } from "./authentication";
 import { Actor } from "@/shared/service/application/actors";
+import { Service as ServiceActor } from "@/shared/service/application/actors/service";
 import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { createTimelinePerformer } from "./timeline";
 import { Log } from "@/shared/service/domain/analytics/log";
@@ -11,8 +12,11 @@ import { createProjectManagementPerformer, ProjectManagementStore } from "./proj
 // System
 import { InjectionKey, reactive, watch, WatchStopHandle } from "vue";
 import { RouteLocationRaw } from "vue-router";
-import { Subscription } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { Nobody } from "@/shared/service/application/actors/nobody";
+import { Account, UserProperties } from "@/shared/service/domain/authentication/user";
+import { AuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
+import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -43,10 +47,15 @@ export type Service = {
         authentication: AuthenticationStore;
         projectManagement: ProjectManagementStore;
     };
+
+    serviceActor: ServiceActor;
+
     change: (actor: Actor) => void;
     routingTo: (path: string) => void;
     commonCompletionProcess: (subscription: Subscription | null) => void;
     dispatch: (usecase: Usecases, actor?: Actor) => Promise<Subscription | void>;
+
+    observeUserData: (account: Account, userDataObservable: Observable<UserProperties | null>) => void;
 };
 
 export function createService(initialPath: string): Service {
@@ -57,6 +66,8 @@ export function createService(initialPath: string): Service {
         , currentRouteLocation: initialPath
         , isLoading: true
     });
+
+    const serviceActor = new ServiceActor();
 
     const performers = {
         application: createApplicationPerformer()
@@ -72,6 +83,7 @@ export function createService(initialPath: string): Service {
             , authentication: performers.authentication.store
             , projectManagement: performers.projectManagement.store
         }
+        , serviceActor
         , change: (actor: Actor) => {
             const _shared = shared as Mutable<SharedStore>;
             _shared.actor = actor;
@@ -124,6 +136,9 @@ export function createService(initialPath: string): Service {
             return Promise.resolve()
                 .then(() => {
                     switch (usecase.domain) {
+                    case R.keys.application: {
+                        return performers.application.dispatch(usecase, _actor, service);
+                    }
                     case R.keys.authentication: {
                         return performers.authentication.dispatch(usecase, _actor, service);
                     }
@@ -134,11 +149,42 @@ export function createService(initialPath: string): Service {
                         return performers.timeline.dispatch(usecase, _actor, service);
                     }
                     default: {
-                        console.warn("未実装ドメインのユースケースです: ", usecase);
+                        console.warn("Serivce.dispatchにて未定義ドメインのユースケースです: ", usecase);
                     }
                     }
                 })
                 .finally(() => service.commonCompletionProcess(null));
+        }
+        , observeUserData: (account: Account, userDataObservable: Observable<UserProperties | null>): void => {
+            const _shared = shared as Mutable<SharedStore>;
+            let isAlreadyDispatched = false;
+
+            // ログアウトしてもそのままで、購読解除することはない
+            const subscription = userDataObservable.subscribe({
+                next: (userProperties) => {
+                    if (userProperties === null) { // ユーザ情報がない場合
+                        const actor = new AuthenticatedUser(account);
+                        service.change(actor);
+                        _shared.signInStatus = SignInStatuses.signingIn({ account });
+                        if (!isAlreadyDispatched) { // ログイン中のPCがある場合、ユーザ情報を削除したことをトリガーにこの動作が発生してしまうので、一度だけ実行するようにする
+                            service.dispatch(R.authentication.signUp.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
+                                .catch(error => console.error(error));
+                            isAlreadyDispatched = true;
+                        }
+                    } else {
+                        const actor = new AuthorizedUser(userProperties);
+                        service.change(actor);
+                        _shared.signInStatus = SignInStatuses.signIn({ userProperties });
+                        _shared.isLoading = false;
+                        service.routingTo("/");
+                    }
+                }
+                , error: (e) => console.error(e)
+                , complete: () => {
+                    console.info("complete");
+                    subscription?.unsubscribe();
+                }
+            });
         }
     } as Service;
 

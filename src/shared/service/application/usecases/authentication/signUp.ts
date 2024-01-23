@@ -22,6 +22,7 @@ export type SignUpScenes = {
         domainIsUnkownThenServiceCreatesUserData: { account: Account; };
         userStartsSignUpProcessWithGoogleOAuth: Empty;
         serviceRedirectsToGoogleOAuth: Empty;
+        serviceGetsOrganizationOfDomain: { account: Account; };
         userTapsSignInButton: Empty;
         userSelectToBeAdministrator: { domain: string | null; account: Account | null };
         serviceCreatesNewOrganization: { domain: string; account: Account };
@@ -70,6 +71,9 @@ export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
         }
         case this.keys.alternatives.serviceRedirectsToGoogleOAuth: {
             return this.redirect();
+        }
+        case this.keys.alternatives.serviceGetsOrganizationOfDomain: {
+            return this.getOrganization(to.account);
         }
         case this.keys.alternatives.userTapsSignInButton: {
             return this.just(this.goals.servicePresentsSignInView());

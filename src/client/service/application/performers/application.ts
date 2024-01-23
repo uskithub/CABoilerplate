@@ -11,7 +11,7 @@ import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { Task } from "@/shared/service/domain/projectManagement/task";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
 import { InteractResultType } from "robustive-ts";
-import { UserProperties } from "@/shared/service/domain/authentication/user";
+import { Account, UserProperties } from "@/shared/service/domain/authentication/user";
 import { AuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
 import { dictionary as t } from "@/client/main";
 
@@ -60,27 +60,57 @@ export function createApplicationPerformer(): ApplicationPerformer {
 
                 switch (result.lastSceneContext.scene) {
                 case goals.servicePresentsHomeView: {
-                    const observable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
+                    const userDataObservable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
                     const account = result.lastSceneContext.account;
-                    let isAlreadyDispatched = false;
+
+                    service.change(new AuthenticatedUser(account));
+                    _shared.signInStatus = SignInStatuses.signingIn({ account });
+
+                    service.dispatch(R.application.observingUserData.goals.servieStartsObserving({ account, userDataObservable }), service.serviceActor)
+                    break;
+                }
+                case goals.sessionNotExistsThenServicePresentsSignInView: {
+                    _shared.signInStatus = SignInStatuses.signOut();
+                    service.routingTo("/signin");
+                    break;
+                }
+                }
+            });
+    };
+
+    const observingUserData = (usecase: Usecase<"application", "observingUserData">, actor: Actor, service: Service): Promise<void> => {
+        const goals = d.observingUserData.keys.goals;
+        const _shared = service.stores.shared as Mutable<SharedStore>;
+        return usecase
+            .interactedBy(actor)
+            .then(result => {
+                if (result.type !== InteractResultType.success) {
+                    return console.error("TODO", result);
+                }
+
+                switch (result.lastSceneContext.scene) {
+                case goals.servieStartsObserving: {
+                    const observable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
+                    const account = result.lastSceneContext.account as unknown as Account;
+                    let isFirstTime = true;
                     // ログアウトしてもそのままで、購読解除することはない
                     const subscription = observable.subscribe({
                         next: (userProperties) => {
-                            if (userProperties === null) {
-                                const actor = new AuthenticatedUser(account);
-                                service.change(actor);
-                                _shared.signInStatus = SignInStatuses.signingIn({ account });
-                                if (!isAlreadyDispatched) { // ログイン中のPCがある場合、ユーザ情報を削除したことをトリガーにこの動作が発生してしまうので、一度だけ実行するようにする
-                                    service.dispatch(R.authentication.signUp.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
+                            if (userProperties === null) { 
+                                if (isFirstTime) { // ログイン中のPCがある場合、ユーザ情報を削除したことをトリガーにこの動作が発生してしまうので、一度だけ実行するようにする
+                                    isFirstTime = false;
+                                    service.dispatch(R.application.observingUserData.alternatives.serviceGetsNullData({ account }), service.serviceActor)
                                         .catch(error => console.error(error));
-                                    isAlreadyDispatched = true;
                                 }
                             } else {
-                                const actor = new AuthorizedUser(userProperties);
-                                service.change(actor);
-                                _shared.signInStatus = SignInStatuses.signIn({ userProperties });
-                                _shared.isLoading = false;
-                                service.routingTo("/");
+                                if (isFirstTime) {
+                                    isFirstTime = false;
+                                    service.dispatch(R.application.observingUserData.alternatives.serviceGetsDataForTheFirstTime({ user: userProperties }), service.serviceActor)
+                                        .catch(error => console.error(error));
+                                } else {
+                                    service.dispatch(R.application.observingUserData.basics.serviceObservedUpdate({ user: userProperties }), service.serviceActor)
+                                        .catch(error => console.error(error));
+                                }
                             }
                         }
                         , error: (e) => console.error(e)
@@ -92,19 +122,27 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     _store.userDataSubscription = subscription;
                     break;
                 }
-                case goals.sessionNotExistsThenServicePresentsSignInView: {
-                    _shared.signInStatus = SignInStatuses.signOut();
-                    service.routingTo("/signin");
+                case goals.serviceUpdatesUserData: {
+                    const userProperties = result.lastSceneContext.user as unknown as UserProperties;
+                    service.change(new AuthorizedUser(userProperties));
+
+                    _shared.signInStatus = SignInStatuses.signIn({ userProperties });
                     break;
                 }
-                // case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {
-                //     _shared.signInStatus = SignInStatuses.signOut();
-                //     return service.dispatch(R.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessInPublishingNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
-                //         .then(() => { return; });
-                // }
+                case goals.servicePerformsObservingUsersTasksUsecase: {
+                    _shared.isLoading = false;
+                    service.routingTo("/");
+                    // TODO: dispatch observing tasks
+                    break;
+                }
+                case goals.servicePerformsSigningUpWithGoogleOAuthUsecase: {
+                    const account = result.lastSceneContext.account as unknown as Account;
+                    service.dispatch(R.authentication.signUp.alternatives.serviceGetsOrganizationOfDomain({ account }), actor)
+                        .then(() => { return; });
+                }
                 }
             });
-    };
+    }
     
     return {
         store
@@ -112,6 +150,9 @@ export function createApplicationPerformer(): ApplicationPerformer {
             switch (usecase.name) {
             case d.keys.boot: {
                 return boot(usecase, actor, service);
+            }
+            case d.keys.observingUserData: {
+                return observingUserData(usecase, actor, service);
             }
             }
         }

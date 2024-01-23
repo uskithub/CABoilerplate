@@ -7,7 +7,10 @@ export class Service extends MyBaseActor<null> {
     
     isAuthorizedTo(domain: DomainKeys, usecase: UsecaseKeys): boolean {
 
-        if (domain === R.keys.application && usecase === R.application.keys.boot) {
+        if (domain === R.keys.application 
+            && (usecase === R.application.keys.boot
+                || usecase === R.application.keys.observingUserData)
+        ) {
             return true;
         }
 
