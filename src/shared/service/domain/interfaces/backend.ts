@@ -4,6 +4,14 @@ import { Task, TaskProperties } from "../projectManagement/task";
 import { Account, OrganizationAndRole, UserProperties } from "../authentication/user";
 import { OrganizationProperties } from "../authentication/organization";
 import { ConductProperties } from "../timeline/conduct";
+import { ErrorContextFactory } from "@/shared/system/systemErrors";
+
+const BackendErrorDef = {
+    B001: "Permission Denied"
+    , SYSTEM : "Unhandled Error"
+} as const;
+
+export const BackendErrors = new ErrorContextFactory(BackendErrorDef);
 
 export const ItemChangeType = {
     added: "added"

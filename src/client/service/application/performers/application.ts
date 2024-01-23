@@ -14,6 +14,9 @@ import { InteractResultType } from "robustive-ts";
 import { Account, UserProperties } from "@/shared/service/domain/authentication/user";
 import { AuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
 import { dictionary as t } from "@/client/main";
+import { FirebaseError } from "firebase/app";
+import { ServiceError } from "@/shared/service/serviceErrors";
+import { BackendErrors } from "@/shared/service/domain/interfaces/backend";
 
 type ImmutableDrawerItems = Readonly<DrawerItem>;
 
@@ -64,7 +67,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     const account = result.lastSceneContext.account;
 
                     service.change(SignInStatuses.signingIn({ account }));
-                    service.dispatch(R.application.observingUserData.goals.servieStartsObserving({ account, userDataObservable }), service.serviceActor)
+                    service.dispatch(R.application.observingUserData.goals.servieStartsObserving({ account, userDataObservable }), service.serviceActor);
                     break;
                 }
                 case goals.sessionNotExistsThenServicePresentsSignInView: {
@@ -97,22 +100,26 @@ export function createApplicationPerformer(): ApplicationPerformer {
                             if (userProperties === null) { 
                                 if (isFirstTime) { // ログイン中のPCがある場合、ユーザ情報を削除したことをトリガーにこの動作が発生してしまうので、一度だけ実行するようにする
                                     isFirstTime = false;
-                                    service.dispatch(R.application.observingUserData.alternatives.serviceGetsNullData({ account }), service.serviceActor)
-                                        .catch(error => console.error(error));
+                                    service.dispatch(R.application.observingUserData.alternatives.serviceGetsNullData({ account }), service.serviceActor);
                                 }
                             } else {
                                 if (isFirstTime) {
                                     isFirstTime = false;
                                     service.change(SignInStatuses.signIn({ userProperties }));
-                                    service.dispatch(R.application.observingUserData.alternatives.serviceGetsDataForTheFirstTime({ user: userProperties }), service.serviceActor)
-                                        .catch(error => console.error(error));
+                                    service.dispatch(R.application.observingUserData.alternatives.serviceGetsDataForTheFirstTime({ user: userProperties }), service.serviceActor);
                                 } else {
-                                    service.dispatch(R.application.observingUserData.basics.serviceObservedUpdate({ user: userProperties }), service.serviceActor)
-                                        .catch(error => console.error(error));
+                                    service.dispatch(R.application.observingUserData.basics.serviceObservedUpdate({ user: userProperties }), service.serviceActor);
                                 }
                             }
                         }
-                        , error: (e) => console.error(e)
+                        , error: (e: Error) => {
+                            if (e instanceof ServiceError && e.code === BackendErrors.B001.code) {
+                                isFirstTime = true;
+                                // ログアウト処理の方でサインインステータスを変更するので、ここでは何もしない
+                            } else {
+                                console.error(e);
+                            }
+                        }
                         , complete: () => {
                             console.info("complete");
                             subscription?.unsubscribe();
@@ -134,8 +141,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                 }
                 case goals.servicePerformsSigningUpWithGoogleOAuthUsecase: {
                     const account = result.lastSceneContext.account as unknown as Account;
-                    service.dispatch(R.authentication.signUp.alternatives.serviceGetsOrganizationOfDomain({ account }), actor)
-                        .then(() => { return; });
+                    service.dispatch(R.authentication.signUp.alternatives.serviceGetsOrganizationOfDomain({ account }), actor);
                 }
                 }
             });

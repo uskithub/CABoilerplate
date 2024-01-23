@@ -1,8 +1,10 @@
-import { UserFunctions } from "@/shared/service/domain/interfaces/backend";
+import { BackendErrors, UserFunctions } from "@/shared/service/domain/interfaces/backend";
 import { collection, doc, Firestore, getDocs, onSnapshot, where, query, DocumentSnapshot, DocumentData, Unsubscribe, Timestamp, setDoc, FirestoreError, FirestoreDataConverter, QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 import { CollectionType, ID, MAX_ID } from ".";
 import { Account, OrganizationAndRole, RoleType, UserProperties } from "@/shared/service/domain/authentication/user";
 import { Observable } from "rxjs";
+import { ServiceError } from "@/shared/service/serviceErrors";
+import { SystemError } from "@/shared/system/systemErrors";
 
 interface FSUser {
     id: ID;  // where("id", "in", ["xxx", "yyy"]) で検索できるようにするためにフィールドにも持たせる
@@ -147,7 +149,11 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                     }
                     , (error: FirestoreError) => {
                         // TODO: ログアウトすると「Missing or insufficient permissions.」が発生する。
-                        subscriber.error(error);
+                        if (error.code === "permission-denied") {
+                            subscriber.error(new ServiceError(BackendErrors.B001, { cause: error }));
+                        } else {
+                            subscriber.error(new SystemError(BackendErrors.SYSTEM, { cause: error }));
+                        }
                     });
                 unsubscribes.push(unsubscribe);
                 return () => unsubscribe();

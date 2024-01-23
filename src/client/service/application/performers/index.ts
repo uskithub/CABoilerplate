@@ -54,8 +54,6 @@ export type Service = {
     routingTo: (path: string) => void;
     commonCompletionProcess: (subscription: Subscription | null) => void;
     dispatch: (usecase: Usecases, actor?: Actor) => Promise<Subscription | void>;
-
-    observeUserData: (account: Account, userDataObservable: Observable<UserProperties | null>) => void;
 };
 
 export function createService(initialPath: string): Service {
@@ -177,33 +175,6 @@ export function createService(initialPath: string): Service {
                     }
                 })
                 .finally(() => service.commonCompletionProcess(null));
-        }
-        , observeUserData: (account: Account, userDataObservable: Observable<UserProperties | null>): void => {
-            const _shared = shared as Mutable<SharedStore>;
-            let isAlreadyDispatched = false;
-
-            // ログアウトしてもそのままで、購読解除することはない
-            const subscription = userDataObservable.subscribe({
-                next: (userProperties) => {
-                    if (userProperties === null) { // ユーザ情報がない場合
-                        service.change(SignInStatuses.signingIn({ account }));
-                        if (!isAlreadyDispatched) { // ログイン中のPCがある場合、ユーザ情報を削除したことをトリガーにこの動作が発生してしまうので、一度だけ実行するようにする
-                            service.dispatch(R.authentication.signUp.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
-                                .catch(error => console.error(error));
-                            isAlreadyDispatched = true;
-                        }
-                    } else {
-                        service.change(SignInStatuses.signIn({ userProperties }));
-                        _shared.isLoading = false;
-                        service.routingTo("/");
-                    }
-                }
-                , error: (e) => console.error(e)
-                , complete: () => {
-                    console.info("complete");
-                    subscription?.unsubscribe();
-                }
-            });
         }
     } as Service;
 
