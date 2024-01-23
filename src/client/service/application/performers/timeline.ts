@@ -1,9 +1,8 @@
 import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
-import { Dispatcher, Mutable, Performer, Store } from ".";
+import { Service, Mutable, Performer, Store } from ".";
 import { Actor } from "@/shared/service/application/actors";
 import { Observable, Subscription } from "rxjs";
 import { reactive } from "vue";
-import { Service } from "@/shared/service/application/actors/service";
 import { InteractResultType } from "robustive-ts";
 import { ChangedConduct, ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 
@@ -13,7 +12,7 @@ export interface TimelineStore extends Store {
 
 export interface TimelinePerformer extends Performer<"timeline", TimelineStore> {
     readonly store: TimelineStore;
-    dispatch: (usecase: UsecasesOf<"timeline">, actor: Actor, dispatcher: Dispatcher) => Promise<Subscription | void>;
+    dispatch: (usecase: UsecasesOf<"timeline">, actor: Actor, service: Service) => Promise<Subscription | void>;
 }
 
 export function createTimelinePerformer(): TimelinePerformer {
@@ -25,7 +24,7 @@ export function createTimelinePerformer(): TimelinePerformer {
 
     const d = R.timeline;
 
-    const observingUsersTimeline = (usecase: Usecase<"timeline", "observingUsersTimeline">, actor: Actor, dispatcher: Dispatcher): Promise<Subscription | void> => {
+    const observingUsersTimeline = (usecase: Usecase<"timeline", "observingUsersTimeline">, actor: Actor, service: Service): Promise<Subscription | void> => {
         const goals = d.observingUsersTimeline.keys.goals;
         return usecase
             .interactedBy(actor)
@@ -71,10 +70,10 @@ export function createTimelinePerformer(): TimelinePerformer {
 
     return {
         store
-        , dispatch: (usecase: UsecasesOf<"timeline">, actor: Actor, dispatcher: Dispatcher): Promise<Subscription | void> => {
+        , dispatch: (usecase: UsecasesOf<"timeline">, actor: Actor, service: Service): Promise<Subscription | void> => {
             switch (usecase.name) {
             case "observingUsersTimeline": {
-                return observingUsersTimeline(usecase, actor, dispatcher);
+                return observingUsersTimeline(usecase, actor, service);
             }
             }
         }

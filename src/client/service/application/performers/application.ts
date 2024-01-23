@@ -2,7 +2,7 @@
 
 // system
 import { reactive } from "vue";
-import { Performer, Mutable, SharedStore, Store, Dispatcher } from ".";
+import { Performer, Mutable, SharedStore, Store, Service } from ".";
 import { Observable, Subscription } from "rxjs";
 import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
@@ -24,7 +24,7 @@ export interface ApplicationStore extends Store {
 
 export interface ApplicationPerformer extends Performer<"application", ApplicationStore> {
     readonly store: ApplicationStore;
-    dispatch: (usecase: UsecasesOf<"application">, actor: Actor, dispatcher: Dispatcher) => Promise<Subscription | void>;
+    dispatch: (usecase: UsecasesOf<"application">, actor: Actor, service: Service) => Promise<Subscription | void>;
 }
 
 export function createApplicationPerformer(): ApplicationPerformer {
@@ -48,9 +48,9 @@ export function createApplicationPerformer(): ApplicationPerformer {
 
     const d = R.application;
     
-    const boot = (usecase: Usecase<"application", "boot">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
+    const boot = (usecase: Usecase<"application", "boot">, actor: Actor, service: Service): Promise<void> => {
         const goals = d.boot.keys.goals;
-        const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
+        const _shared = service.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)
             .then(result => {
@@ -68,19 +68,19 @@ export function createApplicationPerformer(): ApplicationPerformer {
                         next: (userProperties) => {
                             if (userProperties === null) {
                                 const actor = new AuthenticatedUser(account);
-                                dispatcher.change(actor);
+                                service.change(actor);
                                 _shared.signInStatus = SignInStatuses.signingIn({ account });
                                 if (!isAlreadyDispatched) { // ログイン中のPCがある場合、ユーザ情報を削除したことをトリガーにこの動作が発生してしまうので、一度だけ実行するようにする
-                                    dispatcher.dispatch(R.authentication.signUp.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
+                                    service.dispatch(R.authentication.signUp.basics.onSuccessInPublishingNewAccountThenServiceGetsOrganizationOfDomain({ account }), actor)
                                         .catch(error => console.error(error));
                                     isAlreadyDispatched = true;
                                 }
                             } else {
                                 const actor = new AuthorizedUser(userProperties);
-                                dispatcher.change(actor);
+                                service.change(actor);
                                 _shared.signInStatus = SignInStatuses.signIn({ userProperties });
                                 _shared.isLoading = false;
-                                dispatcher.routingTo("/");
+                                service.routingTo("/");
                             }
                         }
                         , error: (e) => console.error(e)
@@ -94,12 +94,12 @@ export function createApplicationPerformer(): ApplicationPerformer {
                 }
                 case goals.sessionNotExistsThenServicePresentsSignInView: {
                     _shared.signInStatus = SignInStatuses.signOut();
-                    dispatcher.routingTo("/signin");
+                    service.routingTo("/signin");
                     break;
                 }
                 // case goals.userDataNotExistsThenServicePerformsSignUpWithGoogleOAuth: {
                 //     _shared.signInStatus = SignInStatuses.signOut();
-                //     return dispatcher.dispatch(R.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessInPublishingNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
+                //     return service.dispatch(R.authentication.signUp.basics[Nobody.usecases.signUp.basics.onSuccessInPublishingNewAccountThenServiceCreateUserData]({ account: result.lastSceneContext.account }), actor)
                 //         .then(() => { return; });
                 // }
                 }
@@ -108,10 +108,10 @@ export function createApplicationPerformer(): ApplicationPerformer {
     
     return {
         store
-        , dispatch: (usecase: UsecasesOf<"application">, actor: Actor, dispatcher: Dispatcher): Promise<Subscription | void> => {
+        , dispatch: (usecase: UsecasesOf<"application">, actor: Actor, service: Service): Promise<Subscription | void> => {
             switch (usecase.name) {
             case d.keys.boot: {
-                return boot(usecase, actor, dispatcher);
+                return boot(usecase, actor, service);
             }
             }
         }

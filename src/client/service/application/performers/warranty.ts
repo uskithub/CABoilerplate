@@ -3,7 +3,7 @@
 // system
 import { Dictionary, DICTIONARY_KEY } from "@/shared/system/localizations";
 import { inject, reactive } from "vue";
-import { Performer, Dispatcher, Mutable, SharedStore, Store } from ".";
+import { Performer, Service, Mutable, SharedStore, Store } from ".";
 import { useRouter } from "vue-router";
 import { Actor } from "@/shared/service/application/actors";
 import { Warranty } from "@/shared/service/domain/entities/warranty";
@@ -19,7 +19,7 @@ export interface WarrantyPerformer extends Performer<WarrantyStore> {
     get: (usecase: Usecase<"projectManagement", "getWarrantyList">, actor: Actor) => Promise<void>;
 }
 
-export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerformer {
+export function createWarrantyPerformer(service: Service): WarrantyPerformer {
     const t = inject(DICTIONARY_KEY) as Dictionary;
     const router = useRouter();
 
@@ -33,7 +33,7 @@ export function createWarrantyPerformer(dispatcher: Dispatcher): WarrantyPerform
         store
         , get: (usecase: Usecase<"projectManagement", "getWarrantyList">, actor: Actor) :  Promise<void> => {
             const goals = AuthorizedUser.usecases.getWarrantyList.goals;
-            const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
+            const _shared = service.stores.shared as Mutable<SharedStore>;
             return usecase
                 .interactedBy(actor)
                 .then(result => {

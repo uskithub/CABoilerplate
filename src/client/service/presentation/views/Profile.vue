@@ -2,13 +2,13 @@
 import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
 import { inject, reactive } from "vue";
-import type { Dispatcher } from "../../application/performers";
-import { DISPATCHER_KEY } from "../../application/performers";
+import type { Service } from "../../application/performers";
+import { SERVICE_KEY } from "../../application/performers";
 import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 
 const t = inject<Dictionary>(DICTIONARY_KEY)!;
-const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
+const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
 const state = reactive<{
 

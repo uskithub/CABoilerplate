@@ -4,8 +4,8 @@
 // view
 // system
 import { inject, reactive, watch } from "vue";
-import type { Dispatcher, SharedStore } from "../../../application/performers";
-import { DISPATCHER_KEY } from "../../../application/performers";
+import type { Service, SharedStore } from "../../../application/performers";
+import { SERVICE_KEY } from "../../../application/performers";
 import { R } from "@/shared/service/application/usecases";
 
 import { useRoute } from "vue-router";
@@ -13,7 +13,7 @@ import type { RouteLocationNormalizedLoaded } from "vue-router";
 import { type Account } from "@/shared/service/domain/authentication/user";
 import { whenNoLongerNull } from "@/client/system/common";
 
-const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
+const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
 const route = useRoute();
 const { projectId } = route.params;

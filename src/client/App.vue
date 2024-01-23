@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { inject } from "vue";
-import { DISPATCHER_KEY } from "./service/application/performers";
-import type { Dispatcher } from "./service/application/performers";
+import { SERVICE_KEY } from "./service/application/performers";
+import type { Service } from "./service/application/performers";
 
-const { stores } = inject<Dispatcher>(DISPATCHER_KEY)!;
+const { stores } = inject<Service>(SERVICE_KEY)!;
 
 </script>
 <template lang="pug">

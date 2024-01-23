@@ -22,7 +22,7 @@ export type Mutable<Type> = {
 export interface Store {}
 export interface Performer<D extends keyof Requirements, T extends Store> {
     readonly store: T;
-    dispatch: (usecase: UsecasesOf<D>, actor: Actor, dispatcher: Dispatcher) => Promise<Subscription | void>;
+    dispatch: (usecase: UsecasesOf<D>, actor: Actor, service: Service) => Promise<Subscription | void>;
 }
 
 type ImmutableActor = Readonly<Actor>;
@@ -36,7 +36,7 @@ export interface SharedStore extends Store {
     readonly isLoading: boolean;
 }
 
-export type Dispatcher = {
+export type Service = {
     stores: {
         shared: SharedStore;
         application: ApplicationStore;
@@ -49,7 +49,7 @@ export type Dispatcher = {
     dispatch: (usecase: Usecases, actor?: Actor) => Promise<Subscription | void>;
 };
 
-export function createDispatcher(initialPath: string): Dispatcher {
+export function createService(initialPath: string): Service {
     const shared = reactive<SharedStore>({
         actor: new Nobody()
         , executingUsecase: null
@@ -65,7 +65,7 @@ export function createDispatcher(initialPath: string): Dispatcher {
         , timeline: createTimelinePerformer()
     };
     
-    const dispatcher = {
+    const service = {
         stores: {
             shared
             , application: performers.application.store
@@ -97,8 +97,8 @@ export function createDispatcher(initialPath: string): Dispatcher {
     
             // new Log("dispatch", { context, actor: { actor: actor.constructor.name, user: actor.user } }).record();
             if (usecase.domain === R.keys.application && usecase.name === R.application.keys.boot) {
-                return performers.application.dispatch(usecase, _actor, dispatcher)
-                    .finally(() => dispatcher.commonCompletionProcess(null));
+                return performers.application.dispatch(usecase, _actor, service)
+                    .finally(() => service.commonCompletionProcess(null));
             }
     
             // 初回表示時対応
@@ -117,7 +117,7 @@ export function createDispatcher(initialPath: string): Dispatcher {
                 })
                     .then(() => {
                         stopHandle?.();
-                        return dispatcher.dispatch(usecase);
+                        return service.dispatch(usecase);
                     });
             }
             
@@ -125,24 +125,24 @@ export function createDispatcher(initialPath: string): Dispatcher {
                 .then(() => {
                     switch (usecase.domain) {
                     case R.keys.authentication: {
-                        return performers.authentication.dispatch(usecase, _actor, dispatcher);
+                        return performers.authentication.dispatch(usecase, _actor, service);
                     }
                     case R.keys.projectManagement: {
-                        return performers.projectManagement.dispatch(usecase, _actor, dispatcher);
+                        return performers.projectManagement.dispatch(usecase, _actor, service);
                     }
                     case R.keys.timeline: {
-                        return performers.timeline.dispatch(usecase, _actor, dispatcher);
+                        return performers.timeline.dispatch(usecase, _actor, service);
                     }
                     default: {
                         console.warn("未実装ドメインのユースケースです: ", usecase);
                     }
                     }
                 })
-                .finally(() => dispatcher.commonCompletionProcess(null));
+                .finally(() => service.commonCompletionProcess(null));
         }
-    } as Dispatcher;
+    } as Service;
 
-    return dispatcher;
+    return service;
 }
 
-export const DISPATCHER_KEY = Symbol("Dispatcher") as InjectionKey<Dispatcher>;
+export const SERVICE_KEY = Symbol("Service") as InjectionKey<Service>;

@@ -8,12 +8,12 @@ import type { Action, DataTableHeader } from "../../components/dataTable";
 
 // system
 import { inject, reactive, ref } from "vue";
-import type { Dispatcher } from "../../../application/performers";
-import { DISPATCHER_KEY } from "../../../application/performers";
+import type { Service } from "../../../application/performers";
+import { SERVICE_KEY } from "../../../application/performers";
 import { R } from "@/shared/service/application/usecases";
 
 
-const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
+const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
 dispatch(R.projectManagement.getWarrantyList.basics.userInitiatesWarrantyListing()); 
 

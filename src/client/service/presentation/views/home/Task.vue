@@ -8,8 +8,8 @@ import type { TaskProperties } from "@/shared/service/domain/projectManagement/t
 import { tree, findNodeById } from "vue3-tree";
 // system
 import { inject, reactive, watch } from "vue";
-import type { Dispatcher } from "../../../application/performers";
-import { DISPATCHER_KEY } from "../../../application/performers";
+import type { Service } from "../../../application/performers";
+import { SERVICE_KEY } from "../../../application/performers";
 import type { TreeEventHandlers } from "vue3-tree";
 import "vue3-tree/style.css";
 
@@ -19,7 +19,7 @@ import swtTree from "../../../../../../test/stubs/swt";
 import taskTree from "../../../../../../test/stubs/task";
 
 
-const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
+const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
 // custom directive for autofocus
 const vFocus = {

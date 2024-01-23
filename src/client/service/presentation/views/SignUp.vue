@@ -5,14 +5,14 @@
 import { computed, inject, reactive } from "vue";
 import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
-import { DISPATCHER_KEY } from "../../application/performers";
-import type { Dispatcher } from "../../application/performers";
+import { SERVICE_KEY } from "../../application/performers";
+import type { Service } from "../../application/performers";
 import { R } from "@/shared/service/application/usecases";
 import { isAuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
 import { isAuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 
 const t = inject<Dictionary>(DICTIONARY_KEY)!;
-const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
+const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
 const state = reactive<{
     email: string | null;

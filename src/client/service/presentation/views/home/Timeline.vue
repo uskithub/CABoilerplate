@@ -2,14 +2,14 @@
 import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
 import { inject, reactive, ref } from "vue";
-import type { Dispatcher } from "../../../application/performers";
-import { DISPATCHER_KEY } from "../../../application/performers";
+import type { Service } from "../../../application/performers";
+import { SERVICE_KEY } from "../../../application/performers";
 import { Role } from "@/shared/service/domain/chat/message";
 import type { MessageProperties } from "@/shared/service/domain/chat/message";
 import { R } from "@/shared/service/application/usecases";
 
 const t = inject<Dictionary>(DICTIONARY_KEY)!;
-const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
+const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
 const state = reactive<{
     inputText: string;

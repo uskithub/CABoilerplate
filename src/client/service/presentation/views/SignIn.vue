@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { DICTIONARY_KEY } from "@shared/system/localizations";
 import type { Dictionary } from "@shared/system/localizations";
-import type { Dispatcher } from "../../application/performers";
-import { DISPATCHER_KEY } from "../../application/performers";
+import type { Service } from "../../application/performers";
+import { SERVICE_KEY } from "../../application/performers";
 import { SignInStatus } from "@shared/service/domain/interfaces/authenticator";
 import { R } from "@/shared/service/application/usecases";
 
 import { computed, inject, reactive } from "vue";
 
 const t = inject<Dictionary>(DICTIONARY_KEY)!;
-const { stores, dispatch } = inject<Dispatcher>(DISPATCHER_KEY)!;
+const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
 const state = reactive<{
     email: string | null;

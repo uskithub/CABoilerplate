@@ -1,5 +1,5 @@
 // service
-import { Performer, Store, Mutable, SharedStore, Dispatcher } from ".";
+import { Performer, Store, Mutable, SharedStore, Service } from ".";
 import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 
 import { Actor } from "@/shared/service/application/actors";
@@ -29,7 +29,7 @@ export interface AuthenticationStore extends Store {
 
 export interface AuthenticationPerformer extends Performer<"authentication", AuthenticationStore> {
     readonly store: AuthenticationStore;
-    dispatch: (usecase: UsecasesOf<"authentication">, actor: Actor, dispatcher: Dispatcher) => Promise<Subscription | void>;
+    dispatch: (usecase: UsecasesOf<"authentication">, actor: Actor, service: Service) => Promise<Subscription | void>;
 }
 
 export function createAuthenticationPerformer(): AuthenticationPerformer {
@@ -48,9 +48,9 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
 
     const d = R.authentication;
     
-    const signUp = (usecase: Usecase<"authentication", "signUp">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
+    const signUp = (usecase: Usecase<"authentication", "signUp">, actor: Actor, service: Service): Promise<void> => {
         const goals = d.signUp.keys.goals;
-        const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
+        const _shared = service.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)
             .then(result => {
@@ -63,9 +63,9 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 case goals.onSuccessInCreatingInitialTaskThenServicePresentsHomeView: {
                     const userProperties = context.userProperties as unknown as UserProperties;
                     const actor = new AuthorizedUser(userProperties);
-                    dispatcher.change(actor);
+                    service.change(actor);
                     _shared.signInStatus = SignInStatuses.signIn({ userProperties });
-                    dispatcher.routingTo("/");
+                    service.routingTo("/");
                     break;
                 }
                 case goals.onFailureInValidatingThenServicePresentsError: {
@@ -114,7 +114,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     break;
                 }
                 case goals.servicePresentsSignInView: {
-                    dispatcher.routingTo("/signin");
+                    service.routingTo("/signin");
                     break;
                 }
                 case goals.domainOrganizationNotExistsThenServicePresentsAdministratorRegistrationDialog: {
@@ -129,9 +129,9 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
             });
     };
     
-    const signIn = (usecase: Usecase<"authentication", "signIn">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
+    const signIn = (usecase: Usecase<"authentication", "signIn">, actor: Actor, service: Service): Promise<void> => {
         const goals = d.signIn.keys.goals;
-        const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
+        const _shared = service.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)
             .then(result => {
@@ -141,7 +141,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 const context = result.lastSceneContext;
                 switch (context.scene) {
                 case goals.onSuccessInSigningInThenServicePresentsHomeView:
-                    dispatcher.routingTo("/");
+                    service.routingTo("/");
                     break;
 
                 case goals.onFailureInValidatingThenServicePresentsError: {
@@ -183,7 +183,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                     break;
                 }
                 case goals.servicePresentsSignUpView: {
-                    dispatcher.routingTo("/signup");
+                    service.routingTo("/signup");
                     break;
                 }
                 }
@@ -193,9 +193,9 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
             });
     };
     
-    const signOut = (usecase: Usecase<"authentication", "signOut">, actor: Actor, dispatcher: Dispatcher): Promise<void> => {
+    const signOut = (usecase: Usecase<"authentication", "signOut">, actor: Actor, service: Service): Promise<void> => {
         const goals = d.signOut.keys.goals;
-        const _shared = dispatcher.stores.shared as Mutable<SharedStore>;
+        const _shared = service.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)
             .then(result => {
@@ -205,14 +205,14 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 const context = result.lastSceneContext;
                 switch (context.scene) {
                 case goals.onSuccessThenServicePresentsSignInView:
-                    dispatcher.change(new Nobody());
+                    service.change(new Nobody());
                     _shared.signInStatus = SignInStatuses.signOut();
                     break;
                 case goals.onFailureThenServicePresentsError:
                     console.error("SERVICE ERROR:", context.error);
                     break;
                 case goals.servicePresentsHomeView:
-                    dispatcher.routingTo("/");
+                    service.routingTo("/");
                     break;
                 }
             });
@@ -220,16 +220,16 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
 
     return {
         store
-        , dispatch: (usecase: UsecasesOf<"authentication">, actor: Actor, dispatcher: Dispatcher): Promise<Subscription | void> => {
+        , dispatch: (usecase: UsecasesOf<"authentication">, actor: Actor, service: Service): Promise<Subscription | void> => {
             switch (usecase.name) {
             case "signUp": {
-                return signUp(usecase, actor, dispatcher);
+                return signUp(usecase, actor, service);
             }
             case "signIn": {
-                return signIn(usecase, actor, dispatcher);
+                return signIn(usecase, actor, service);
             }
             case "signOut": {
-                return signOut(usecase, actor, dispatcher);
+                return signOut(usecase, actor, service);
             }
             }
         }
