@@ -96,4 +96,14 @@ v-navigation-drawer(
         color="primary"
         rounded="xl"
       )
+  v-bottom-sheet
+    template(v-slot:activator="{ props }")
+      v-btn(v-bind="props" text="設計思想")
+    v-card(
+      title="設計思想メモ"
+    )
+      v-card-text 組織がゆるくなる時代、個人は複数の組織にパートタイムでジョインすることが当たり前になった。そこで問題となるのが個人のタスク管理。
+      v-card-text 1. タスクはプロジェクトや組織を超えてマネジメントされるべき。
+      v-card-text 2. タスクはできるだけ多くのコンテキストを見える化できるべき。
+      v-card-text 3. コンテキストは情報量を落とさずにできるだけ要約されるべき。
 </template>
