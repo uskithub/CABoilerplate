@@ -134,15 +134,18 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     service.change(SignInStatuses.signIn({ userProperties }));
                     break;
                 }
-                case goals.servicePerformsObservingUsersTasksUsecase: {
+                case goals.servicePerformsObservingUsersTasksUsecase: {                    
+                    const userProperties = result.lastSceneContext.user;
+                    service.dispatch(R.taskManagement.observingUsersTasks.basics.serviceGetsUsersTasksObservable({ user: userProperties }), service.serviceActor);
+
                     _shared.isLoading = false;
                     service.routingTo("/");
-                    // TODO: dispatch observing tasks
                     break;
                 }
                 case goals.servicePerformsSigningUpWithGoogleOAuthUsecase: {
                     const account = result.lastSceneContext.account;
                     service.dispatch(R.authentication.signUp.alternatives.serviceGetsOrganizationOfDomain({ account }), actor);
+                    break;
                 }
                 }
             });

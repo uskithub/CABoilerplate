@@ -4,12 +4,14 @@ import { MyBaseScenario } from "../../common";
 
 import type { Context, Empty } from "robustive-ts";
 import { Observable } from "rxjs";
+import { Task } from "@/shared/service/domain/taskManagement/task";
 
 /**
  * usecase: ユーザのタスクを観測する
  */
 export type ObservingUsersTasksScenes = {
     basics : {
+        serviceGetsUsersTasksObservable: { user: UserProperties; };
         serviceDetectsSigningIn: { user: UserProperties; };
     };
     alternatives: Empty;
@@ -28,13 +30,17 @@ export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTa
 
     next(to: Context<ObservingUsersTasksScenes>): Promise<Context<ObservingUsersTasksScenes>> {
         switch (to.scene) {
-        case this.keys.basics.serviceDetectsSigningIn: {
-            const observable = TaskModel.observeUsersTasks(to.user.id);
-            return this.just(this.goals.serviceStartsObservingUsersTasks({ observable }));
+        case this.keys.basics.serviceGetsUsersTasksObservable: {
+            return this.getUsersTasksObservable(to.user);
         }
         default: {
             throw new Error(`not implemented: ${ to.scene }`);
         }
         }
+    }
+
+    private getUsersTasksObservable(user: UserProperties): Promise<Context<ObservingUsersTasksScenes>> {
+        const observable = new Task(user).observable;
+        return this.just(this.goals.servicePresentsHomeView({ account, userDataObservable: observable }));
     }
 }
