@@ -116,6 +116,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                             if (e instanceof ServiceError && e.code === BackendErrors.B001.code) {
                                 isFirstTime = true;
                                 // ログアウト処理の方でサインインステータスを変更するので、ここでは何もしない
+                                console.warn(e);
                             } else {
                                 console.error(e);
                             }

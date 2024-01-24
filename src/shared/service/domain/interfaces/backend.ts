@@ -7,11 +7,11 @@ import { ConductProperties } from "../timeline/conduct";
 import { ErrorContextFactory } from "@/shared/system/systemErrors";
 
 const BackendErrorDef = {
-    B001: "Permission Denied"
+    BKE0001: "Permission Denied"
     , SYSTEM : "Unhandled Error"
 } as const;
 
-export const BackendErrors = new ErrorContextFactory(BackendErrorDef);
+export const BackendErrors = new ErrorContextFactory("Backend", BackendErrorDef);
 
 export const ItemChangeType = {
     added: "added"

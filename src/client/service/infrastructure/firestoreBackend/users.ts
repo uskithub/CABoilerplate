@@ -150,7 +150,7 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                     , (error: FirestoreError) => {
                         // TODO: ログアウトすると「Missing or insufficient permissions.」が発生する。
                         if (error.code === "permission-denied") {
-                            subscriber.error(new ServiceError(BackendErrors.B001, { cause: error }));
+                            subscriber.error(new ServiceError(BackendErrors.BKE0001, { cause: error }));
                         } else {
                             subscriber.error(new SystemError(BackendErrors.SYSTEM, { cause: error }));
                         }

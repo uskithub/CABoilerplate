@@ -7,7 +7,7 @@ export class ServiceError extends Error {
     #context: ErrorContext;
     
     constructor(context: ErrorContext, options?: ErrorOptions) {
-        super(`${ context.code }: ${ context.message } `, options);
+        super(`[${ context.component }_${ context.code }] ${ context.message } `, options);
         this.#context = context;
 
         // Set the prototype explicitly for making "instanceof" available.
