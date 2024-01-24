@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
-import { Task, TaskProperties } from "../projectManagement/task";
+import { Task, TaskProperties } from "../taskManagement/task";
 import { Account, OrganizationAndRole, UserProperties } from "../authentication/user";
 import { OrganizationProperties } from "../authentication/organization";
 import { ConductProperties } from "../timeline/conduct";

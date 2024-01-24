@@ -8,7 +8,7 @@ import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator
 import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Actor } from "@/shared/service/application/actors";
 import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
-import { Task } from "@/shared/service/domain/projectManagement/task";
+import { Task } from "@/shared/service/domain/taskManagement/task";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
 import { InteractResultType } from "robustive-ts";
 import { Account, UserProperties } from "@/shared/service/domain/authentication/user";
@@ -149,8 +149,8 @@ export function createApplicationPerformer(): ApplicationPerformer {
     }
     
     return {
-        store: store,
-        dispatch: (usecase: UsecasesOf<"application">, actor: Actor, service: Service): Promise<Subscription | void> => {
+        store
+        , dispatch: (usecase: UsecasesOf<"application">, actor: Actor, service: Service): Promise<Subscription | void> => {
             switch (usecase.name) {
                 case d.keys.boot: {
                     return boot(usecase, actor, service);

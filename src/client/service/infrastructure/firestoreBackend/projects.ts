@@ -1,7 +1,7 @@
 import { ChangedTask, ItemChangeType, ProjectFunctions } from "@/shared/service/domain/interfaces/backend";
 import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./entities/tasks";
 import { CollectionType } from ".";
-import { Log, Task } from "@/shared/service/domain/projectManagement/task";
+import { Log, Task } from "@/shared/service/domain/taskManagement/task";
 
 
 import { addDoc, collection, collectionGroup, doc, DocumentChangeType, Firestore, getDocs, onSnapshot, orderBy, where, query, DocumentSnapshot, DocumentData, Unsubscribe } from "firebase/firestore";

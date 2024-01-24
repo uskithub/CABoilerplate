@@ -7,7 +7,7 @@ import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces
 import { createTimelinePerformer } from "./timeline";
 import { Log } from "@/shared/service/domain/analytics/log";
 import { Usecases, UsecaseLog, Requirements, UsecasesOf, R } from "@/shared/service/application/usecases";
-import { createProjectManagementPerformer, ProjectManagementStore } from "./projectManagement";
+import { createTaskManagementPerformer, TaskManagementStore } from "./taskManagement";
 
 // System
 import { InjectionKey, reactive, watch, WatchStopHandle } from "vue";
@@ -45,7 +45,7 @@ export type Service = {
         shared: SharedStore;
         application: ApplicationStore;
         authentication: AuthenticationStore;
-        projectManagement: ProjectManagementStore;
+        taskManagement: TaskManagementStore;
     };
 
     serviceActor: ServiceActor;
@@ -70,7 +70,7 @@ export function createService(initialPath: string): Service {
     const performers = {
         application: createApplicationPerformer()
         , authentication: createAuthenticationPerformer()
-        , projectManagement: createProjectManagementPerformer()
+        , taskManagement: createTaskManagementPerformer()
         , timeline: createTimelinePerformer()
     };
     
@@ -79,7 +79,7 @@ export function createService(initialPath: string): Service {
             shared
             , application: performers.application.store
             , authentication: performers.authentication.store
-            , projectManagement: performers.projectManagement.store
+            , taskManagement: performers.taskManagement.store
         }
         , serviceActor
         , change: (signInStatus: SignInStatus) => {
@@ -163,8 +163,8 @@ export function createService(initialPath: string): Service {
                     case R.keys.authentication: {
                         return performers.authentication.dispatch(usecase, _actor, service);
                     }
-                    case R.keys.projectManagement: {
-                        return performers.projectManagement.dispatch(usecase, _actor, service);
+                    case R.keys.taskManagement: {
+                        return performers.taskManagement.dispatch(usecase, _actor, service);
                     }
                     case R.keys.timeline: {
                         return performers.timeline.dispatch(usecase, _actor, service);

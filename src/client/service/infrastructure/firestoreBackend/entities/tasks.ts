@@ -1,4 +1,4 @@
-import { Log, Task, TaskStatus, TaskType } from "@/shared/service/domain/projectManagement/task";
+import { Log, Task, TaskStatus, TaskType } from "@/shared/service/domain/taskManagement/task";
 import { FieldValue, Timestamp } from "firebase/firestore";
 
 export const LayerStatusTypeValues = {

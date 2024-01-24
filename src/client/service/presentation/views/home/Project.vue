@@ -39,7 +39,7 @@ watch(route, (newVal: RouteLocationNormalizedLoaded) => {
 });
 
 whenNoLongerNull(() => stores.shared.actor.user, (user: Account) => {
-    dispatch(R.projectManagement.observingProject.basics.userSelectsAProject({ user, projectId: state.projectId }));
+    dispatch(R.taskManagement.observingProject.basics.userSelectsAProject({ user, projectId: state.projectId }));
 });
 
 </script>

@@ -14,9 +14,9 @@ export class Service extends MyBaseActor<null> {
             return true;
         }
 
-        if (domain === R.keys.projectManagement 
-            && (usecase === R.projectManagement.keys.observingUsersProjects
-                || usecase === R.projectManagement.keys.observingUsersTasks)
+        if (domain === R.keys.taskManagement 
+            && (usecase === R.taskManagement.keys.observingUsersProjects
+                || usecase === R.taskManagement.keys.observingUsersTasks)
         ) {
             return true;
         }

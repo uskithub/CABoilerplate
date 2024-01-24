@@ -15,7 +15,7 @@ import { R } from "@/shared/service/application/usecases";
 
 const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
-dispatch(R.projectManagement.getWarrantyList.basics.userInitiatesWarrantyListing()); 
+dispatch(R.taskManagement.getWarrantyList.basics.userInitiatesWarrantyListing()); 
 
 // const state = reactive<{
 //   isDrawerOpen: boolean;

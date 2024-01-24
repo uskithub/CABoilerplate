@@ -1,7 +1,7 @@
 import { ChangedTask, TaskFunctions } from "@/shared/service/domain/interfaces/backend";
 import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./entities/tasks";
 import { CollectionType, autoId } from ".";
-import { Log, Task, TaskProperties, TaskStatus, TaskType } from "@/shared/service/domain/projectManagement/task";
+import { Log, Task, TaskProperties, TaskStatus, TaskType } from "@/shared/service/domain/taskManagement/task";
 
 import { collection, Firestore, onSnapshot, where, query, writeBatch, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, Timestamp, FieldValue, SnapshotOptions, DocumentReference, setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { Observable } from "rxjs";

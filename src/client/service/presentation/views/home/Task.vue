@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // service
 import { TaskTreenode } from "../../models/taskTreenode";
-import { Task, TaskType } from "@/shared/service/domain/projectManagement/task";
-import type { TaskProperties } from "@/shared/service/domain/projectManagement/task";
+import { Task, TaskType } from "@/shared/service/domain/taskManagement/task";
+import type { TaskProperties } from "@/shared/service/domain/taskManagement/task";
 
 // view
 import { tree, findNodeById } from "vue3-tree";

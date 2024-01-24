@@ -4,7 +4,7 @@ import { MyBaseScenario } from "../../common";
 
 import type { Context, Empty } from "robustive-ts";
 import { firstValueFrom, map } from "rxjs";
-import { Task, TaskProperties } from "@/shared/service/domain/projectManagement/task";
+import { Task, TaskProperties } from "@/shared/service/domain/taskManagement/task";
 
 /**
  * usecase: サインアップする

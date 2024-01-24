@@ -11,31 +11,31 @@ import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUs
 import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { InteractResultType } from "robustive-ts";
 import { ChangedTask, ItemChangeType } from "@/shared/service/domain/interfaces/backend";
-import { Task } from "@/shared/service/domain/projectManagement/task";
+import { Task } from "@/shared/service/domain/taskManagement/task";
 import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
 
 type ImmutableTask = Readonly<Task>;
-export interface ProjectManagementStore extends Store {
+export interface TaskManagementStore extends Store {
     readonly userTasks: ImmutableTask[];
     readonly userProjects: ImmutableTask[];
 }
 
-export interface ProjectManagementPerformer extends Performer<"projectManagement", ProjectManagementStore> {
-    readonly store: ProjectManagementStore;
-    dispatch: (usecase: UsecasesOf<"projectManagement">, actor: Actor, service: Service) => Promise<Subscription | void>;
+export interface TaskManagementPerformer extends Performer<"taskManagement", TaskManagementStore> {
+    readonly store: TaskManagementStore;
+    dispatch: (usecase: UsecasesOf<"taskManagement">, actor: Actor, service: Service) => Promise<Subscription | void>;
 }
 
-export function createProjectManagementPerformer(): ProjectManagementPerformer {
-    const store = reactive<ProjectManagementStore>({
+export function createTaskManagementPerformer(): TaskManagementPerformer {
+    const store = reactive<TaskManagementStore>({
         userTasks: []
         , userProjects: []
     });
 
-    const _store = store as Mutable<ProjectManagementStore>;
+    const _store = store as Mutable<TaskManagementStore>;
 
-    const d = R.projectManagement;
+    const d = R.taskManagement;
 
-    const observingUsersTasks = (usecase: Usecase<"projectManagement", "observingUsersTasks">, actor: Actor, service: Service): Promise<Subscription | void> => {
+    const observingUsersTasks = (usecase: Usecase<"taskManagement", "observingUsersTasks">, actor: Actor, service: Service): Promise<Subscription | void> => {
         const goals = d.observingUsersTasks.keys.goals;
         return usecase
             .interactedBy(actor)
@@ -92,7 +92,7 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
             });
     };
 
-    const observingUsersProjects = (usecase: Usecase<"projectManagement", "observingUsersProjects">, actor: Actor, service: Service): Promise<Subscription | void> =>  {
+    const observingUsersProjects = (usecase: Usecase<"taskManagement", "observingUsersProjects">, actor: Actor, service: Service): Promise<Subscription | void> =>  {
         const goals = d.observingUsersProjects.keys.goals;
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -159,7 +159,7 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
 
     return {
         store
-        , dispatch: (usecase: UsecasesOf<"projectManagement">, actor: Actor, service: Service): Promise<Subscription | void> => {
+        , dispatch: (usecase: UsecasesOf<"taskManagement">, actor: Actor, service: Service): Promise<Subscription | void> => {
             switch (usecase.name) {
             case "observingUsersTasks": {
                 return observingUsersTasks(usecase, actor, service);
@@ -170,7 +170,7 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
             }
         }
         // TODO ここの実装から
-        , observingProject: (usecase: Usecase<"projectManagement", "observingProject">, actor: Actor) : Promise<void> => {
+        , observingProject: (usecase: Usecase<"taskManagement", "observingProject">, actor: Actor) : Promise<void> => {
             const goals = d.observingProject.keys.goals;
             // const _shared = service.stores.shared as Mutable<SharedStore>;
             return usecase

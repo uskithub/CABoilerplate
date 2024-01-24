@@ -5,9 +5,9 @@ import { SignInScenario } from "./authentication/signIn";
 import { SignUpScenario } from "./authentication/signUp";
 import { SignOutScenario } from "./authentication/signOut";
 
-import { ObservingProjectScenario } from "./projectManagement/observingProject";
-import { ObservingUsersTasksScenario } from "./projectManagement/observingUsersTasks";
-import { ObservingUsersProjectsScenario } from "./projectManagement/observingUsersProjects";
+import { ObservingProjectScenario } from "./taskManagement/observingProject";
+import { ObservingUsersTasksScenario } from "./taskManagement/observingUsersTasks";
+import { ObservingUsersProjectsScenario } from "./taskManagement/observingUsersProjects";
 import { GetWarrantyListScenario } from "./getWarrantyList";
 
 import { ObservingUsersTimelineScenario } from "./timeline/observingUsersTimeline";
@@ -28,7 +28,7 @@ export const requirements = {
     , timeline : {
         observingUsersTimeline : ObservingUsersTimelineScenario
     }
-    , projectManagement : {
+    , taskManagement : {
         observingProject : ObservingProjectScenario
         , getWarrantyList : GetWarrantyListScenario
         /* service actor */

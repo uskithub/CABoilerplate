@@ -74,13 +74,13 @@ router
             if (newValue.case === SignInStatus.signIn) {
                 const userProperties = newValue.userProperties;
                 const serviceActor = new Service();
-                // dispatch(R.projectManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }), serviceActor)
+                // dispatch(R.taskManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }), serviceActor)
                 //     .then(subscription => {
                 //         if (subscription) subscriptions.push(subscription);
                 //     })
                 //     .catch(e => console.error(e));
         
-                // dispatch(R.projectManagement.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }), serviceActor)
+                // dispatch(R.taskManagement.observingUsersProjects.basics[Service.usecases.observingUsersProjects.basics.serviceDetectsSigningIn]({ user }), serviceActor)
                 //     .then(subscription => {
                 //         if (subscription) subscriptions.push(subscription);
                 //     })

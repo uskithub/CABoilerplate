@@ -1,5 +1,5 @@
-import type { TaskProperties } from "@/shared/service/domain/projectManagement/task";
-import { TaskStatus, TaskType } from "@/shared/service/domain/projectManagement/task";
+import type { TaskProperties } from "@/shared/service/domain/taskManagement/task";
+import { TaskStatus, TaskType } from "@/shared/service/domain/taskManagement/task";
 import type { Treenode } from "vue3-tree";
 
 export class TaskTreenode implements Treenode<TaskProperties> {
