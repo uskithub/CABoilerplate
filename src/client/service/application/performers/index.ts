@@ -91,7 +91,7 @@ export function createService(initialPath: string): Service {
             
             switch (signInStatus.case) {
             case SignInStatus.signIn: {
-                _shared.actor = new AuthorizedUser(signInStatus.userProperties as unknown as UserProperties);
+                _shared.actor = new AuthorizedUser(signInStatus.userProperties);
                 break;
             }
             case SignInStatus.signingIn: {

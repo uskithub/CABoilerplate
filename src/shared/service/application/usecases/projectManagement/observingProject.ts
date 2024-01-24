@@ -3,7 +3,7 @@ import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { Task } from "@/shared/service/domain/projectManagement/task";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty, MutableContext } from "robustive-ts";
+import type { Context, Empty } from "robustive-ts";
 import { map } from "rxjs";
 
 /**
@@ -29,7 +29,7 @@ export type ObservingProjectScenes = {
  */
 export class ObservingProjectScenario extends MyBaseScenario<ObservingProjectScenes> {
 
-    next(to: MutableContext<ObservingProjectScenes>): Promise<Context<ObservingProjectScenes>> {
+    next(to: Context<ObservingProjectScenes>): Promise<Context<ObservingProjectScenes>> {
         switch (to.scene) {
         case this.keys.basics.userSelectsAProject: {
             return this.just(this.basics.serviceStartsObservingProjectThatMeetConditions({ user: to.user, projectId: to.projectId }));

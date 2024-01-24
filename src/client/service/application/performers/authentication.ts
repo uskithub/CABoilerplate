@@ -61,10 +61,8 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
 
                 switch (context.scene) {
                 case goals.onSuccessInCreatingInitialTaskThenServicePresentsHomeView: {
-                    const userProperties = context.userProperties as unknown as UserProperties;
-                    const actor = new AuthorizedUser(userProperties);
-                    service.change(actor);
-                    _shared.signInStatus = SignInStatuses.signIn({ userProperties });
+                    const userProperties = context.userProperties;
+                    service.change(SignInStatuses.signIn({ userProperties }));
                     service.routingTo("/");
                     break;
                 }

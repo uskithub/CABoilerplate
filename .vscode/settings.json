@@ -17,7 +17,7 @@
   // "[vue]": {
   //   "editor.defaultFormatter": "Vue.volar",
   // },
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "volar.format.initialIndent": {
     "html": true,
     "typescript": false

@@ -63,7 +63,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
 
                 switch (result.lastSceneContext.scene) {
                 case goals.servicePresentsHomeView: {
-                    const userDataObservable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
+                    const userDataObservable = result.lastSceneContext.userDataObservable;
                     const account = result.lastSceneContext.account;
 
                     service.change(SignInStatuses.signingIn({ account }));
@@ -91,8 +91,8 @@ export function createApplicationPerformer(): ApplicationPerformer {
 
                 switch (result.lastSceneContext.scene) {
                 case goals.servieStartsObserving: {
-                    const observable = result.lastSceneContext.userDataObservable as unknown as Observable<UserProperties | null>;
-                    const account = result.lastSceneContext.account as unknown as Account;
+                    const observable = result.lastSceneContext.userDataObservable;
+                    const account = result.lastSceneContext.account;
                     let isFirstTime = true;
                     // ログアウトしてもそのままで、購読解除することはない
                     const subscription = observable.subscribe({
@@ -113,7 +113,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                             }
                         }
                         , error: (e: Error) => {
-                            if (e instanceof ServiceError && e.code === BackendErrors.B001.code) {
+                            if (e instanceof ServiceError && e.code === BackendErrors.BKE0001.code) {
                                 isFirstTime = true;
                                 // ログアウト処理の方でサインインステータスを変更するので、ここでは何もしない
                                 console.warn(e);
@@ -130,7 +130,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     break;
                 }
                 case goals.serviceUpdatesUserData: {
-                    const userProperties = result.lastSceneContext.user as unknown as UserProperties;
+                    const userProperties = result.lastSceneContext.user;
                     service.change(SignInStatuses.signIn({ userProperties }));
                     break;
                 }
@@ -141,7 +141,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     break;
                 }
                 case goals.servicePerformsSigningUpWithGoogleOAuthUsecase: {
-                    const account = result.lastSceneContext.account as unknown as Account;
+                    const account = result.lastSceneContext.account;
                     service.dispatch(R.authentication.signUp.alternatives.serviceGetsOrganizationOfDomain({ account }), actor);
                 }
                 }
@@ -149,15 +149,15 @@ export function createApplicationPerformer(): ApplicationPerformer {
     }
     
     return {
-        store
-        , dispatch: (usecase: UsecasesOf<"application">, actor: Actor, service: Service): Promise<Subscription | void> => {
+        store: store,
+        dispatch: (usecase: UsecasesOf<"application">, actor: Actor, service: Service): Promise<Subscription | void> => {
             switch (usecase.name) {
-            case d.keys.boot: {
-                return boot(usecase, actor, service);
-            }
-            case d.keys.observingUserData: {
-                return observingUserData(usecase, actor, service);
-            }
+                case d.keys.boot: {
+                    return boot(usecase, actor, service);
+                }
+                case d.keys.observingUserData: {
+                    return observingUserData(usecase, actor, service);
+                }
             }
         }
     };

@@ -1,7 +1,7 @@
 import { User } from "@/shared/service/domain/authentication/user";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty, MutableContext } from "robustive-ts";
+import type { Context, Empty } from "robustive-ts";
 import { catchError, firstValueFrom, map } from "rxjs";
 
 /**
@@ -24,7 +24,7 @@ export type SignOutScenes = {
 
 export class SignOutScenario extends MyBaseScenario<SignOutScenes> {
 
-    next(to: MutableContext<SignOutScenes>): Promise<Context<SignOutScenes>> {
+    next(to: Context<SignOutScenes>): Promise<Context<SignOutScenes>> {
         switch (to.scene) {
         case this.keys.basics.userStartsSignOutProcess: {
             return this.just(this.basics.serviceClosesSession());

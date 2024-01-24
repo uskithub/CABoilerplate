@@ -44,7 +44,7 @@ export function createProjectManagementPerformer(): ProjectManagementPerformer {
                     return console.error("TODO", result);
                 }
                 console.log("Started observing user's tasks...");
-                const observable = result.lastSceneContext.observable as unknown as Observable<ChangedTask[]>; // 一度 DeepReadonly しているからか、型が壊れてしまう
+                const observable = result.lastSceneContext.observable;
                 return observable
                     .subscribe({
                         next: changedTasks => {

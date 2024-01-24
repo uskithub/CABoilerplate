@@ -3,7 +3,7 @@ import { ChangedConduct } from "@/shared/service/domain/interfaces/backend";
 import { Conduct } from "@/shared/service/domain/timeline/conduct";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty, MutableContext } from "robustive-ts";
+import type { Context, Empty } from "robustive-ts";
 import { Observable } from "rxjs";
 
 /**
@@ -27,7 +27,7 @@ export type ObservingUsersTimelineScenes = {
  */
 export class ObservingUsersTimelineScenario extends MyBaseScenario<ObservingUsersTimelineScenes> {
 
-    next(to: MutableContext<ObservingUsersTimelineScenes>): Promise<Context<ObservingUsersTimelineScenes>> {
+    next(to: Context<ObservingUsersTimelineScenes>): Promise<Context<ObservingUsersTimelineScenes>> {
         switch (to.scene) {
         case this.keys.basics.serviceDetectsSigningIn: {
             // TODO: 引数が適当なので、適切なものに変更する

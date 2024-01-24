@@ -1,14 +1,14 @@
 import { Application } from "../domain/application/application";
 import { DomainKeys, UsecaseKeys } from "./usecases";
 
-import { BaseActor, BaseScenario, Context, DomainRequirements, IActor, InteractResult, MutableContext, Scenes } from "robustive-ts";
+import { BaseActor, BaseScenario, Context, DomainRequirements, IActor, InteractResult, Scenes } from "robustive-ts";
 
 export abstract class MyBaseActor<User> extends BaseActor<User> {
     abstract isAuthorizedTo(domain: DomainKeys, usecase: UsecaseKeys): boolean;
 }
 
 export abstract class MyBaseScenario<Z extends Scenes> extends BaseScenario<Z> {
-    abstract next(to: MutableContext<Z>): Promise<Context<Z>>;
+    abstract next(to: Context<Z>): Promise<Context<Z>>;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     authorize<A extends IActor<any>, R extends DomainRequirements, D extends Extract<keyof R, string>, U extends Extract<keyof R[D], string>>(actor: A, domain: D, usecase: U): boolean {

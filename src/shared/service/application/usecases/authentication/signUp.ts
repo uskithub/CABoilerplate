@@ -2,8 +2,8 @@ import { User, type SignUpValidationResult, type Account, UserProperties, RoleTy
 import { Organization, OrganizationProperties } from "@/shared/service/domain/authentication/organization";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty, MutableContext } from "robustive-ts";
-import { EmptyError, firstValueFrom, map } from "rxjs";
+import type { Context, Empty } from "robustive-ts";
+import { firstValueFrom, map } from "rxjs";
 import { Task, TaskProperties } from "@/shared/service/domain/projectManagement/task";
 
 /**
@@ -43,7 +43,7 @@ export type SignUpScenes = {
 
 export class SignUpScenario extends MyBaseScenario<SignUpScenes> {
 
-    next(to: MutableContext<SignUpScenes>): Promise<Context<SignUpScenes>> {
+    next(to: Context<SignUpScenes>): Promise<Context<SignUpScenes>> {
         switch (to.scene) {
         case this.keys.basics.userStartsSignUpProcess: {
             return this.just(this.basics.serviceValidateInputs({ id: to.id, password: to.password }));

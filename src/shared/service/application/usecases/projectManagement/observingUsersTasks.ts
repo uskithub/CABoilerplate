@@ -2,7 +2,7 @@ import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty, MutableContext } from "robustive-ts";
+import type { Context, Empty } from "robustive-ts";
 import { Observable } from "rxjs";
 
 /**
@@ -26,7 +26,7 @@ export type ObservingUsersTasksScenes = {
  */
 export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTasksScenes> {
 
-    next(to: MutableContext<ObservingUsersTasksScenes>): Promise<Context<ObservingUsersTasksScenes>> {
+    next(to: Context<ObservingUsersTasksScenes>): Promise<Context<ObservingUsersTasksScenes>> {
         switch (to.scene) {
         case this.keys.basics.serviceDetectsSigningIn: {
             const observable = TaskModel.observeUsersTasks(to.user.id);

@@ -3,7 +3,7 @@ import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty, MutableContext } from "robustive-ts";
+import type { Context, Empty } from "robustive-ts";
 import { Observable } from "rxjs";
 
 /**
@@ -27,7 +27,7 @@ export type ObservingUsersProjectsScenes = {
  */
 export class ObservingUsersProjectsScenario extends MyBaseScenario<ObservingUsersProjectsScenes> {
 
-    next(to: MutableContext<ObservingUsersProjectsScenes>): Promise<Context<ObservingUsersProjectsScenes>> {
+    next(to: Context<ObservingUsersProjectsScenes>): Promise<Context<ObservingUsersProjectsScenes>> {
         switch (to.scene) {
         case this.keys.basics.serviceDetectsSigningIn: {
             const observable = ProjectModel.observeUsersProjects(to.user.id);

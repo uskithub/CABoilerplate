@@ -35,7 +35,7 @@ export function createTimelinePerformer(): TimelinePerformer {
 
                 switch (result.lastSceneContext.scene) {
                 case goals.startObservingUsersTimeline: {
-                    const observable = result.lastSceneContext.timelineObservable as unknown as Observable<ChangedConduct[]>;
+                    const observable = result.lastSceneContext.timelineObservable;
                     const subscription = observable.subscribe({
                         next: changedConducts => {
                             changedConducts.forEach(changedConduct => {

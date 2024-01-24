@@ -3,7 +3,7 @@ import { Application } from "@/shared/service/domain/application/application";
 import { User, Account, UserProperties } from "@/shared/service/domain/authentication/user";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty, MutableContext } from "robustive-ts";
+import type { Context, Empty } from "robustive-ts";
 import { Observable, firstValueFrom, map } from "rxjs";
 
 /**
@@ -31,7 +31,7 @@ export type BootScenes = {
  */
 export class BootScenario extends MyBaseScenario<BootScenes> {
 
-    next(to: MutableContext<BootScenes>): Promise<Context<BootScenes>> {
+    next(to: Context<BootScenes>): Promise<Context<BootScenes>> {
         switch (to.scene) {
         case this.keys.basics.userOpensSite: {
             return this.just(this.basics.serviceChecksSession());

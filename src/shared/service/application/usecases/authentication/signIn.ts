@@ -2,7 +2,7 @@
 import { SignInValidationResult, User, Account } from "@/shared/service/domain/authentication/user";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty, MutableContext } from "robustive-ts";
+import type { Context, Empty } from "robustive-ts";
 import { catchError, firstValueFrom, map } from "rxjs";
 
 
@@ -29,7 +29,7 @@ export type SignInScenes = {
 
 export class SignInScenario extends MyBaseScenario<SignInScenes> {
 
-    next(to: MutableContext<SignInScenes>): Promise<Context<SignInScenes>> {
+    next(to: Context<SignInScenes>): Promise<Context<SignInScenes>> {
         switch (to.scene) {
         case this.keys.basics.userStartsSignInProcess: {
             return this.just(this.basics.serviceValidateInputs({ id: to.id, password: to.password }));

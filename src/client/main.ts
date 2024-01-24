@@ -72,7 +72,7 @@ router
         let subscriptions: Subscription[] = [];
         watch(() => stores.shared.signInStatus, (newValue) => {
             if (newValue.case === SignInStatus.signIn) {
-                const userProperties = newValue.userProperties as unknown as UserProperties;
+                const userProperties = newValue.userProperties;
                 const serviceActor = new Service();
                 // dispatch(R.projectManagement.observingUsersTasks.basics[Service.usecases.observingUsersTasks.basics.serviceDetectsSigningIn]({ user }), serviceActor)
                 //     .then(subscription => {

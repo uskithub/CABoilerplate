@@ -1,7 +1,7 @@
 import WarrantyModel, { Warranty } from "@domain/entities/warranty";
 import { MyBaseScenario } from "../common";
 
-import type { Context, Empty, MutableContext } from "robustive-ts";
+import type { Context, Empty } from "robustive-ts";
 import { firstValueFrom, map } from "rxjs";
 
 /**
@@ -21,7 +21,7 @@ export type GetWarrantyListScenes = {
 
 export class GetWarrantyListScenario extends MyBaseScenario<GetWarrantyListScenes> {
 
-    next(to: MutableContext<GetWarrantyListScenes>): Promise<Context<GetWarrantyListScenes>> {
+    next(to: Context<GetWarrantyListScenes>): Promise<Context<GetWarrantyListScenes>> {
         switch (to.scene) {
         case this.keys.basics.userInitiatesWarrantyListing: {
             return this.just(this.basics.serviceSelectsWarrantiesThatMeetConditions());
