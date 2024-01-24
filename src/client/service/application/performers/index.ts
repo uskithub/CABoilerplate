@@ -8,15 +8,15 @@ import { createTimelinePerformer } from "./timeline";
 import { Log } from "@/shared/service/domain/analytics/log";
 import { Usecases, UsecaseLog, Requirements, UsecasesOf, R } from "@/shared/service/application/usecases";
 import { createTaskManagementPerformer, TaskManagementStore } from "./taskManagement";
+import { Nobody } from "@/shared/service/application/actors/nobody";
+import { AuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
+import { AuthorizedUser, isAuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
+
 
 // System
 import { InjectionKey, reactive, watch, WatchStopHandle } from "vue";
 import { RouteLocationRaw } from "vue-router";
-import { Observable, Subscription } from "rxjs";
-import { Nobody } from "@/shared/service/application/actors/nobody";
-import { Account, UserProperties } from "@/shared/service/domain/authentication/user";
-import { AuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
-import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
+import { Subscription } from "rxjs";
 
 export type Mutable<Type> = {
     -readonly [Property in keyof Type]: Type[Property];
@@ -84,7 +84,8 @@ export function createService(initialPath: string): Service {
         , serviceActor
         , change: (signInStatus: SignInStatus) => {
             const prevStatus = shared.signInStatus.case;
-            const prevActor = shared.actor.constructor.name;
+            const prevActor = shared.actor;
+            const prevActorName = prevActor.constructor.name;
             
             const _shared = shared as Mutable<SharedStore>;
             _shared.signInStatus = signInStatus;
@@ -99,6 +100,9 @@ export function createService(initialPath: string): Service {
                 break;
             }
             case SignInStatus.signOut: {
+                if (isAuthorizedUser(prevActor)) {
+                    prevActor.unsubscribe();
+                }
                 _shared.actor = new Nobody();
                 break;
             }
@@ -108,7 +112,7 @@ export function createService(initialPath: string): Service {
             }
             }
 
-            console.info(`SignInStatus changed: ${ prevStatus } ---> ${ signInStatus.case}, actor changed: ${ prevActor } --->`, _shared.actor);
+            console.info(`SignInStatus changed: ${ prevStatus } ---> ${ signInStatus.case}, actor changed: ${ prevActorName } --->`, _shared.actor);
         }
         , routingTo: (path: string) => {
             const _shared = shared as Mutable<SharedStore>;

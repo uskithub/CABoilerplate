@@ -4,6 +4,7 @@ import { Entity } from "@/shared/system/interfaces/architecture";
 import { Observable } from "rxjs";
 import { UserCredential as _UserCredential } from "firebase/auth";
 import { Role } from "../chat/message";
+import { ChangedTask } from "../interfaces/backend";
 
 export type UserCredential = _UserCredential;
 
@@ -81,9 +82,10 @@ export class User implements Entity<UserProperties> {
     static requiredScope: string[] = ["https://www.googleapis.com/auth/contacts.readonly"];
 
     constructor(account: Account)
+    constructor(usreProperties: UserProperties)
     constructor(userCredential: UserCredential)
 
-    constructor(arg: Account | UserCredential) {
+    constructor(arg: Account | UserProperties | UserCredential) {
         if (isUserCredential(arg)) {
             this.account = {
                 id: arg.user.uid
@@ -151,6 +153,10 @@ export class User implements Entity<UserProperties> {
 
     get observable(): Observable<UserProperties | null> { // read-only property with getter function (this is not the same thing as a “function-property”)
         return dependencies.backend.users.getObservable(this.account.id);
+    }
+
+    get tasksObservable(): Observable<ChangedTask[]> {
+        return dependencies.backend.tasks.observe(this.account.id);
     }
 
     create(organizationAndRole?: OrganizationAndRole | undefined): Promise<UserProperties> {

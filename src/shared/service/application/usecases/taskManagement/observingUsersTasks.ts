@@ -1,4 +1,4 @@
-import { UserProperties } from "@/shared/service/domain/authentication/user";
+import { User, UserProperties } from "@/shared/service/domain/authentication/user";
 import { ChangedTask } from "@/shared/service/domain/interfaces/backend";
 import { MyBaseScenario } from "../../common";
 
@@ -40,7 +40,7 @@ export class ObservingUsersTasksScenario extends MyBaseScenario<ObservingUsersTa
     }
 
     private getUsersTasksObservable(user: UserProperties): Promise<Context<ObservingUsersTasksScenes>> {
-        const observable = new Task(user).observable;
-        return this.just(this.goals.servicePresentsHomeView({ account, userDataObservable: observable }));
+        const observable = new User(user).tasksObservable;
+        return this.just(this.goals.serviceStartsObservingUsersTasks({ observable }));
     }
 }

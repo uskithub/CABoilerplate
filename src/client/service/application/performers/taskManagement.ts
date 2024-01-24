@@ -1,20 +1,20 @@
 // service
+import { Performer, Service, Mutable, Store } from ".";
+
+import { Actor } from "@/shared/service/application/actors";
+import { isAuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
+import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
+import { ChangedTask, ItemChangeType } from "@/shared/service/domain/interfaces/backend";
+import { Task, TaskProperties } from "@/shared/service/domain/taskManagement/task";
+import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
+
 
 // system
 import { reactive } from "vue";
-import { Performer, Service, Mutable, SharedStore, Store } from ".";
-import { useRouter } from "vue-router";
-import { Observable, Subscription } from "rxjs";
-import { Actor } from "@/shared/service/application/actors";
-import { MessageProperties } from "@/shared/service/domain/chat/message";
-import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
-import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { InteractResultType } from "robustive-ts";
-import { ChangedTask, ItemChangeType } from "@/shared/service/domain/interfaces/backend";
-import { Task } from "@/shared/service/domain/taskManagement/task";
-import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
+import { Observable, Subscription } from "rxjs";
 
-type ImmutableTask = Readonly<Task>;
+type ImmutableTask = Readonly<TaskProperties>;
 export interface TaskManagementStore extends Store {
     readonly userTasks: ImmutableTask[];
     readonly userProjects: ImmutableTask[];
@@ -40,13 +40,15 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
         return usecase
             .interactedBy(actor)
             .then(result => {
-                if (result.type !== InteractResultType.success || result.lastSceneContext.scene !== goals.serviceStartsObservingUsersTasks) {
+                if (result.type !== InteractResultType.success) {
                     return console.error("TODO", result);
                 }
-                console.log("Started observing user's tasks...");
-                const observable = result.lastSceneContext.observable;
-                return observable
-                    .subscribe({
+
+                switch (result.lastSceneContext.scene) {
+                case goals.serviceStartsObservingUsersTasks: {
+                    const observable = result.lastSceneContext.observable;
+                    // ログアウト時には、subscriptionを解除する
+                    const subscription = observable.subscribe({
                         next: changedTasks => {
                             const mutableUserTasks = _store.userTasks;
                             changedTasks.forEach((changedTask) => {
@@ -59,7 +61,7 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                                             break;
                                         }
                                     }
-                                    mutableUserTasks.unshift(changedTask.item as Task);
+                                    mutableUserTasks.unshift(changedTask.item);
                                     break;
                                 }
                                 case ItemChangeType.modified: {
@@ -69,7 +71,7 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                                 // }
                                     for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
                                         if (mutableUserTasks[i].id === changedTask.id) {
-                                            mutableUserTasks.splice(i, 1, changedTask.item as Task);
+                                            mutableUserTasks.splice(i, 1, changedTask.item);
                                             break;
                                         }
                                     }
@@ -89,6 +91,17 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                         }
                         , error: err => console.error("Observer got an error: " + err)
                     });
+
+                    const currentActor = service.stores.shared.actor;
+                    if (isAuthorizedUser(currentActor)) {
+                        // 以下のエラーが発生する
+                        // Uncaught (in promise) TypeError: Cannot read private member #subscriptions from an object whose class did not declare it
+                        //  at Proxy.addSubscription (authorizedUser.ts:23:14)
+                        //  at taskManagement.ts:97:38
+                        currentActor.addSubscription(subscription);
+                    }
+                }
+                }
             });
     };
 

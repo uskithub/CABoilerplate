@@ -3,18 +3,14 @@ import { Performer, Store, Mutable, SharedStore, Service } from ".";
 import { SignInStatus, SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
 
 import { Actor } from "@/shared/service/application/actors";
-import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
 import { dictionary as t } from "@/client/main";
-import { fa } from "vuetify/lib/iconsets/fa-svg.mjs";
-import { Account, UserProperties } from "@/shared/service/domain/authentication/user";
+import { Account } from "@/shared/service/domain/authentication/user";
 
 // system
 import { reactive } from "vue";
 import { Subscription } from "rxjs";
 import { InteractResultType } from "robustive-ts";
-import { Nobody } from "@/shared/service/application/actors/nobody";
-
 
 
 export interface AuthenticationStore extends Store {
@@ -129,7 +125,6 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
     
     const signIn = (usecase: Usecase<"authentication", "signIn">, actor: Actor, service: Service): Promise<void> => {
         const goals = d.signIn.keys.goals;
-        const _shared = service.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)
             .then(result => {
@@ -193,7 +188,6 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
     
     const signOut = (usecase: Usecase<"authentication", "signOut">, actor: Actor, service: Service): Promise<void> => {
         const goals = d.signOut.keys.goals;
-        const _shared = service.stores.shared as Mutable<SharedStore>;
         return usecase
             .interactedBy(actor)
             .then(result => {
@@ -204,6 +198,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 switch (context.scene) {
                 case goals.onSuccessThenServicePresentsSignInView:
                     service.change(SignInStatuses.signOut());
+                    service.routingTo("/signin");
                     break;
                 case goals.onFailureThenServicePresentsError:
                     console.error("SERVICE ERROR:", context.error);
