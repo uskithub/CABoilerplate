@@ -8,11 +8,12 @@ import Task from "@views/home/Task.vue";
 // import ProjectList from "@views/home/ProjectList.vue";
 import Project from "@views/home/Project.vue";
 import Warranty from "@views/home/Warranty.vue";
+import MyTasks from "@views/home/MyTasks.vue";
 
 export const routes = [
     {
         path: "/", component: Home, children: [
-            { path: "", component: Timeline }
+            { path: "", component: MyTasks }
             , { path: "/tasks", component: Task }
             // , { path: "/projects", component: ProjectList }
             // 以下で string | string[] を string に変換できると思ったけど、使う方では型が変わらなかった

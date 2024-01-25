@@ -16,8 +16,8 @@ import { Observable, Subscription } from "rxjs";
 
 type ImmutableTask = Readonly<TaskProperties>;
 export interface TaskManagementStore extends Store {
-    readonly userTasks: ImmutableTask[];
-    readonly userProjects: ImmutableTask[];
+    readonly usersTasks: ImmutableTask[];
+    readonly usersProjects: ImmutableTask[];
 }
 
 export interface TaskManagementPerformer extends Performer<"taskManagement", TaskManagementStore> {
@@ -27,8 +27,8 @@ export interface TaskManagementPerformer extends Performer<"taskManagement", Tas
 
 export function createTaskManagementPerformer(): TaskManagementPerformer {
     const store = reactive<TaskManagementStore>({
-        userTasks: []
-        , userProjects: []
+        usersTasks: []
+        , usersProjects: []
     });
 
     const _store = store as Mutable<TaskManagementStore>;
@@ -50,18 +50,19 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                     // ログアウト時には、subscriptionを解除する
                     const subscription = observable.subscribe({
                         next: changedTasks => {
-                            const mutableUserTasks = _store.userTasks;
+                            const mutableUsersTasks = _store.usersTasks;
                             changedTasks.forEach((changedTask) => {
+                                console.log("@@@@ changedTask", changedTask);
                                 switch (changedTask.case) {
                                 case ItemChangeType.added: {
                                     // hot reloadで増えてしまうので、同じものを予め削除しておく
-                                    for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                        if (mutableUserTasks[i].id === changedTask.id) {
-                                            mutableUserTasks.splice(i, 0);
+                                    for (let i = 0, imax = mutableUsersTasks.length; i < imax; i++) {
+                                        if (mutableUsersTasks[i].id === changedTask.id) {
+                                            mutableUsersTasks.splice(i, 0);
                                             break;
                                         }
                                     }
-                                    mutableUserTasks.unshift(changedTask.item);
+                                    mutableUsersTasks.unshift(changedTask.item);
                                     break;
                                 }
                                 case ItemChangeType.modified: {
@@ -69,18 +70,19 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                                 // if (self.#stores.currentUser._doingTask && self.#stores.currentUser._doingTask.id === changedTask.id) {
                                 //     self.#stores.currentUser._doingTask = changedTask.item;
                                 // }
-                                    for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                        if (mutableUserTasks[i].id === changedTask.id) {
-                                            mutableUserTasks.splice(i, 1, changedTask.item);
+                                    for (let i = 0, imax = mutableUsersTasks.length; i < imax; i++) {
+                                        if (mutableUsersTasks[i].id === changedTask.id) {
+                                            mutableUsersTasks.splice(i, 1, changedTask.item);
+                                            console.log("@@@", i, changedTask.item);
                                             break;
                                         }
                                     }
                                     break;
                                 }
                                 case ItemChangeType.removed: {
-                                    for (let i = 0, imax = mutableUserTasks.length; i < imax; i++) {
-                                        if (mutableUserTasks[i].id === changedTask.id) {
-                                            mutableUserTasks.splice(i, 0);
+                                    for (let i = 0, imax = mutableUsersTasks.length; i < imax; i++) {
+                                        if (mutableUsersTasks[i].id === changedTask.id) {
+                                            mutableUsersTasks.splice(i, 0);
                                             break;
                                         }
                                     }
@@ -94,10 +96,6 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
 
                     const currentActor = service.stores.shared.actor;
                     if (isAuthorizedUser(currentActor)) {
-                        // 以下のエラーが発生する
-                        // Uncaught (in promise) TypeError: Cannot read private member #subscriptions from an object whose class did not declare it
-                        //  at Proxy.addSubscription (authorizedUser.ts:23:14)
-                        //  at taskManagement.ts:97:38
                         currentActor.addSubscription(subscription);
                     }
                 }
@@ -121,7 +119,7 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                 return observable
                     .subscribe({
                         next: changedTasks => {
-                            const mutableUserProjects = _store.userProjects;
+                            const mutableUserProjects = _store.usersProjects;
                             changedTasks.forEach((changedTask) => {
                                 switch (changedTask.case) {
                                 case ItemChangeType.added: {

@@ -17,6 +17,7 @@ import "vue3-tree/style.css";
 import donedleTree from "../../../../../../test/stubs/donedle";
 import swtTree from "../../../../../../test/stubs/swt";
 import taskTree from "../../../../../../test/stubs/task";
+import { Syncable } from "@/client/system/common";
 
 
 const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
@@ -33,21 +34,17 @@ const vFocus = {
 // });
 
 const state = reactive<{
+    usersTasks: Syncable<TaskProperties[]>;
     donedleTree: TaskTreenode;
     swtTree: TaskTreenode;
     isEditing: boolean;
 }>({
-    donedleTree: new TaskTreenode(donedleTree as TaskProperties)
+    usersTasks: new Syncable(stores.taskManagement.usersTasks)
+    , donedleTree: new TaskTreenode(donedleTree as TaskProperties)
     // TODO: TaskTreenodeでの表示。JSON.stringifyを使ったdeepCopyではgetterはコピーされないのでsubtreesが見つからないで落ちる
     // , swtTree: new TaskTreenode(taskTree as Task)
     , swtTree: new TaskTreenode(swtTree as TaskProperties)
     , isEditing: false
-});
-
-watch(stores.application.userTasks, (newVal: TaskProperties[]) => {
-    const tree = new TaskTreenode(null, newVal);
-    console.log("tree", tree);
-    state.donedleTree = tree;
 });
 
 const handlers: TreeEventHandlers<TaskTreenode> = {

@@ -6,7 +6,10 @@ import { DomainKeys, R, UsecaseKeys } from "../usecases";
 import { Subscription } from "rxjs";
 
 export class AuthorizedUser extends MyBaseActor<UserProperties> {
-    #subscriptions: Subscription[] = [];
+    // ハードプライベート（#subscriptions）にすると、reactiveに入れたときにエラーになるようなので、privateにしておく// 以下のエラーが発生する
+    // Uncaught (in promise) TypeError: Cannot read private member #subscriptions from an object whose class did not declare it
+    //  at Proxy.addSubscription (authorizedUser.ts:23:14)
+    private subscriptions: Subscription[] = [];
     
     isAuthorizedTo(domain: DomainKeys, usecase: UsecaseKeys): boolean {
         if (domain === R.keys.authentication && usecase === R.authentication.keys.signOut) {
@@ -20,14 +23,14 @@ export class AuthorizedUser extends MyBaseActor<UserProperties> {
      * @param subscription 
      */
     addSubscription(subscription: Subscription): void { 
-        this.#subscriptions.push(subscription); 
+        this.subscriptions.push(subscription); 
     }
 
     /**
      * 保持しているすべての Subscription を unsubscribe します。
      */
     unsubscribe(): void {
-        this.#subscriptions.forEach(s => s.unsubscribe());
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 }
 
