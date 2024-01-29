@@ -18,7 +18,8 @@ export type SyncState = typeof SyncState[keyof typeof SyncState];
  * targetValueはStore変数。reflectを呼び出してfirestoreに変更を反映し、Storeが更新されると、watchが反応して _value を更新する（Synced状態になる）。
  */
 export class Syncable<T extends object> {
-    state: SyncState = SyncState.synced; // privateにするとreactiveが反応しない
+    private _state: SyncState = SyncState.synced;
+    private _lastUpdatedAt: Date | null = null;
     private _value: T;
     
     constructor(storedProperty: T) {
@@ -45,6 +46,19 @@ export class Syncable<T extends object> {
         if (this.state === SyncState.synced) {
             this.state = SyncState.editing;
         }
+    }
+
+    get state(): SyncState {
+        return this._state;
+    }
+
+    private set state(newState: SyncState) {
+        this._state = newState;
+        this._lastUpdatedAt = new Date();
+    }
+
+    get lastUpdatedAt(): Date | null {
+        return this._lastUpdatedAt;
     }
 
     reflect(f: () => Promise<void>): Promise<void> {
