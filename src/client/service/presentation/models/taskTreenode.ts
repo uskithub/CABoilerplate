@@ -6,37 +6,8 @@ export class TaskTreenode implements Treenode<TaskProperties> {
     private _task: TaskProperties;
     isFolding: boolean;
 
-    constructor(task: TaskProperties);
-    constructor(title: string, children: TaskProperties[]);
-
-    constructor(task: TaskProperties|string, children?: TaskProperties[]) {
-        if (task) {
-            this._task = task;
-        } else if (children) {
-            this._task = {
-                id: "root"
-                , type: TaskType.privateProject
-                , status: TaskStatus.open
-                , title: "my tasks"
-                , purpose: null
-                , goal: null
-                , instractions: null
-                , author: "set-current-user-id"
-                , owner: "set-current-user-id"
-                , assignees: []
-                , members: ["set-current-user-id"]
-                , involved: ["set-current-user-id"]
-                , ancestorIds: null
-                // , _children: children.map(t => t.id)
-                , children: children
-                , startedAt: null
-                , deadline: null
-                , logs: []
-                , createdAt: new Date()
-            };
-        } else {
-            throw new Error("TaskTreenode constructor must be called with either task or children.");
-        }
+    constructor(task: TaskProperties) {
+        this._task = task;
         this.isFolding = false;
     }
 

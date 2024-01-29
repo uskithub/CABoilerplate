@@ -14,6 +14,7 @@ import { Syncable } from "@/client/system/common";
 import { inject, reactive } from "vue";
 import type { TreeEventHandlers } from "vue3-tree";
 import "vue3-tree/style.css";
+import { computed } from "vue";
 
 const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
@@ -28,13 +29,18 @@ const state = reactive<{
     usersTasks: new Syncable(stores.taskManagement.usersTasks)
 });
 
+const treenodes = computed((): TaskTreenode[] => {
+    return state.usersTasks.value.map((task: TaskProperties) => {
+        return new TaskTreenode(task);
+    });
+});
 
 </script>
 
 <template lang="pug">
 v-container
-  template(v-for="task in state.usersTasks.value", :key="task.id")
-    div {{ task.title }}
+  template(v-for="tasknode in treenodes", :key="tasknode.id")
+    tree(:node="tasknode")
   
 </template>
 

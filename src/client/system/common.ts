@@ -13,13 +13,17 @@ export const SyncState = {
 
 export type SyncState = typeof SyncState[keyof typeof SyncState];
 
+/**
+ * firebaseとの同期を意識したクラス
+ * targetValueはStore変数。reflectを呼び出してfirestoreに変更を反映し、Storeが更新されると、watchが反応して _value を更新する（Synced状態になる）。
+ */
 export class Syncable<T extends object> {
     state: SyncState = SyncState.synced; // privateにするとreactiveが反応しない
     private _value: T;
     
-    constructor(targetValue: T) {
-        this._value = targetValue;
-        watch(targetValue, (newValue) => {
+    constructor(storedProperty: T) {
+        this._value = storedProperty;
+        watch(storedProperty, (newValue) => {
             console.log("### Syncable", this.state, newValue);
             if (this.state === SyncState.synced) {
                 this._value = newValue;
