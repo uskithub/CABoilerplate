@@ -13,11 +13,19 @@ export const SyncState = {
 
 export type SyncState = typeof SyncState[keyof typeof SyncState];
 
+export interface Syncronizable<T extends object> {
+    readonly state: SyncState;
+    readonly lastUpdatedAt: Date | null;
+    value: T;
+
+    reflect(f: () => Promise<void>): Promise<void>
+}
+
 /**
  * firebaseとの同期を意識したクラス
  * targetValueはStore変数。reflectを呼び出してfirestoreに変更を反映し、Storeが更新されると、watchが反応して _value を更新する（Synced状態になる）。
  */
-export class Syncable<T extends object> {
+export class Syncable<T extends object> implements Syncronizable<T> {
     private _state: SyncState = SyncState.synced;
     private _lastUpdatedAt: Date | null = null;
     private _value: T;

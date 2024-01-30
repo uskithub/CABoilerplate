@@ -15,6 +15,7 @@ import { inject, reactive } from "vue";
 import type { TreeEventHandlers } from "vue3-tree";
 import "vue3-tree/style.css";
 import { computed } from "vue";
+import { watch } from "vue";
 
 const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
@@ -24,15 +25,20 @@ const vFocus = {
 };
 
 const state = reactive<{
-    usersTasks: Syncable<TaskProperties[]>;
+    usersTasks: Syncable<TaskProperties>[];
 }>({
-    usersTasks: new Syncable(stores.taskManagement.usersTasks)
+    usersTasks: stores.taskManagement.usersTasks.map(t => new Syncable(t))
+}) as {
+    usersTasks: Syncable<TaskProperties>[];
+};
+
+watch(stores.taskManagement.usersTasks, (newVal, oldVal) => {
+    console.log("usersTasks changed", newVal, oldVal);
+    state.usersTasks = newVal.map(t => new Syncable(t));
 });
 
 const treenodes = computed((): TaskTreenode[] => {
-    return state.usersTasks.value.map((task: TaskProperties) => {
-        return new TaskTreenode(task);
-    });
+    return state.usersTasks.map((t: Syncable<TaskProperties>) => new TaskTreenode(t.value));
 });
 
 </script>
@@ -40,7 +46,10 @@ const treenodes = computed((): TaskTreenode[] => {
 <template lang="pug">
 v-container
   template(v-for="tasknode in treenodes", :key="tasknode.id")
-    tree(:node="tasknode")
+    tree(
+      :node="tasknode"
+      @update-name="(id: string, newValue: string) => { tasknode.name = newValue; }"
+    )
   
 </template>
 

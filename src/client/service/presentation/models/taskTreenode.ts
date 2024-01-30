@@ -1,15 +1,11 @@
 import type { TaskProperties } from "@/shared/service/domain/taskManagement/task";
 import { TaskStatus, TaskType } from "@/shared/service/domain/taskManagement/task";
-import { findNodeById, type Treenode } from "vue3-tree";
+import { Syncronizable, SyncState } from "@/client/system/common";
+import { findNodeById, BaseUpdatableTreenode } from "vue3-tree";
 
-export class TaskTreenode implements Treenode<TaskProperties> {
+export class TaskTreenode extends BaseUpdatableTreenode<TaskProperties> {
     private _task: TaskProperties;
-    isFolding: boolean;
-
-    constructor(task: TaskProperties) {
-        this._task = task;
-        this.isFolding = false;
-    }
+    private _subtrees: this[];
 
     get id(): string { return this._task.id || ""; }
 
@@ -25,36 +21,44 @@ export class TaskTreenode implements Treenode<TaskProperties> {
     }
     get isDraggable(): boolean { return true; }
 
+    constructor(task: TaskProperties) {
+        super();
+        this._task = task;
+        this._subtrees = task.children.map(c => new (this.constructor as any)(c));  
+        this.isFolding = false;
+    }
+
     update(newTask: TaskProperties) {
         this._task = newTask;
     }
 
-    // arrange(node: TaskTreenode, from: { id: string; node: TaskTreenode; }, to: { id: string; node: TaskTreenode; }, index: number) {
-    //     const _from = findNodeById(from.id, state.donedleTree);
-    //     const _to = findNodeById(to.id, state.donedleTree);
-    //     if (_from === null || _to === null) return;
-    //     // 元親から削除
-    //     _from.content.children = _from.content.children.filter((child) => child.id !== node.id);
-    //     // 新親に追加
-    //     _to.content.children.splice(index, 0, node.content);
-    //     _to.isFolding = false;
-    // }
-    
-    toggleFolding(id: string) {
-        const node = findNodeById<TaskTreenode>(id, state.donedleTree);
+    updateName(id: string, newName: string) {
+        const node = this.findNodeById(id);
         if (node === null) return;
-        node.isFolding = !node.isFolding;
+        node.name = newName;
     }
-    
-    // toggleEditing(id: string, isEditing: boolean) {
-    //     const node = findNodeById(id, state.swtTree);
-    //     if (node === null) return;
-    //     state.isEditing = isEditing;
-    // }
-    
-    // updateNode(newValue: TaskTreenode) {
-    //     const node = findNodeById(newValue.id, state.donedleTree);
-    //     if (node === null) return;
-    //     node.update(newValue.content);
-    // }
+
+    findNodeById(id: string, node: TaskProperties = this._task): TaskProperties | null {
+        if (node.id === id) { return node; }
+
+        for (const child of node.children) {
+            const found = this.findNodeById(id, child);
+            if (found) { return found; }
+        }
+        return null;
+    }
+
+    arrange(targetId : string, from: string, to: string, index: number) {
+        const node = this.findNodeById(targetId);
+        const exParent = this.findNodeById(from);
+        const newParent = this.findNodeById(to);
+        if (node === null || exParent === null || newParent === null) return;
+        // 元親から削除
+        exParent.children = exParent.children.filter((child: TaskProperties) => child.id !== targetId);
+        // 新親に追加
+        newParent.children.splice(index, 0, node);
+        // newParent.isFolding = false;
+        // サブツリーを再構築
+        this._subtrees = this.content.children.map(c => new (this.constructor as any)(c));
+    }
 }
