@@ -32,26 +32,20 @@ export class TaskTreenode extends BaseUpdatableTreenode<TaskProperties> {
         this._task = newTask;
     }
 
-    updateName(id: string, newName: string) {
-        const node = this.findNodeById(id);
-        if (node === null) return;
-        node.name = newName;
-    }
-
-    findNodeById(id: string, node: TaskProperties = this._task): TaskProperties | null {
+    findTaskById(id: string, node: TaskProperties = this._task): TaskProperties | null {
         if (node.id === id) { return node; }
 
         for (const child of node.children) {
-            const found = this.findNodeById(id, child);
+            const found = this.findTaskById(id, child);
             if (found) { return found; }
         }
         return null;
     }
 
     arrange(targetId : string, from: string, to: string, index: number) {
-        const node = this.findNodeById(targetId);
-        const exParent = this.findNodeById(from);
-        const newParent = this.findNodeById(to);
+        const node = this.findTaskById(targetId);
+        const exParent = this.findTaskById(from);
+        const newParent = this.findTaskById(to);
         if (node === null || exParent === null || newParent === null) return;
         // 元親から削除
         exParent.children = exParent.children.filter((child: TaskProperties) => child.id !== targetId);

@@ -93,7 +93,7 @@ export interface _Task {
 }
 
 export type TaskProperties = {
-    id: string | null;
+    id: string;
     type: TaskType;
     status: TaskStatus;
 
@@ -118,6 +118,7 @@ export type TaskProperties = {
 
     templateId?: string;
     lastTimeWorkedAt?: Date;
+    updatedAt?: Date;
     createdAt: Date | null;
 };
 
@@ -146,6 +147,19 @@ const initialTask = {
 };
 
 export class Task implements Entity<TaskProperties> {
+    private _properties: TaskProperties;
+
+    get properties(): TaskProperties {
+        return this._properties;
+    }
+
+    set properties(properties: TaskProperties) {
+        this._properties = properties;
+    }
+    
+    constructor(properties: TaskProperties) {
+        this._properties = properties;
+    }
 
     static getAvailableTaskTypes(task: TaskProperties, parent: TaskProperties): TaskType[] {
         switch (parent.type) {
@@ -182,6 +196,10 @@ export class Task implements Entity<TaskProperties> {
         } as TaskProperties;
 
         return dependencies.backend.tasks.create(task);
+    }
+
+    update(title: string) : Promise<void> {
+        return dependencies.backend.tasks.update(this.properties.id, title);
     }
 }
 

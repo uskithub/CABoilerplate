@@ -3,7 +3,7 @@ import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./ent
 import { CollectionType, autoId } from ".";
 import { Log, Task, TaskProperties, TaskStatus, TaskType } from "@/shared/service/domain/taskManagement/task";
 
-import { collection, Firestore, onSnapshot, where, query, writeBatch, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, Timestamp, FieldValue, SnapshotOptions, DocumentReference, setDoc, doc, serverTimestamp } from "firebase/firestore";
+import { collection, Firestore, onSnapshot, where, query, writeBatch, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, Timestamp, FieldValue, SnapshotOptions, DocumentReference, setDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { Observable } from "rxjs";
 
 type LayerStatusType = string;
@@ -31,6 +31,7 @@ interface FSTask {
     deadline?: Timestamp | undefined;
 
     lastTimeWorkedAt?: Timestamp | undefined;
+    updatedAt?: Timestamp | undefined;
     createdAt: Timestamp;
 }
 
@@ -314,6 +315,7 @@ const taskConverter: FirestoreDataConverter<TaskProperties> = {
             , startedAt: modelObject.startedAt ? Timestamp.fromDate(modelObject.startedAt) : null
             , deadline: modelObject.deadline ? Timestamp.fromDate(modelObject.deadline) : null
             , lastTimeWorkedAt: modelObject.lastTimeWorkedAt ? Timestamp.fromDate(modelObject.lastTimeWorkedAt) : null
+            , updatedAt: modelObject.updatedAt ? Timestamp.fromDate(modelObject.updatedAt) : null
             , createdAt: modelObject.createdAt ? Timestamp.fromDate(modelObject.createdAt) : serverTimestamp()
         };
     }
@@ -340,6 +342,7 @@ const taskConverter: FirestoreDataConverter<TaskProperties> = {
             , deadline: data.deadline ? data.deadline.toDate() : null
             // , logs: []
             , lastTimeWorkedAt: data.lastTimeWorkedAt ? data.lastTimeWorkedAt.toDate() : undefined
+            , updatedAt: data.updatedAt ? data.updatedAt.toDate() : undefined
             , createdAt: data.createdAt.toDate()
         };
     }
@@ -353,7 +356,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
          * @param userId
          * @returns
          */
-        observe: (userId: string): Observable<ChangedTask[]> => {
+        getObservable: (userId: string): Observable<ChangedTask[]> => {
             return new Observable(subscriber => {
                 const unsubscribe = onSnapshot(
                     query(
@@ -412,6 +415,15 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                 .then(() => {
                     console.log("done", task);
                     return task;
+                });
+        }
+
+        , update: (taskId: string, title: string): Promise<void> => {
+            return updateDoc(
+                doc(taskCollectionRef, taskId)
+                , {
+                    title
+                    , updatedAt: serverTimestamp() //  項目を２つ更新すると、２回、nextが発火するようだ
                 });
         }
     };

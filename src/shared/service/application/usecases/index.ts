@@ -13,7 +13,7 @@ import { GetWarrantyListScenario } from "./getWarrantyList";
 import { ObservingUsersTimelineScenario } from "./timeline/observingUsersTimeline";
 
 import { AllUsecases, AllUsecasesOverDomain, Robustive, Usecase as _Usecase } from "robustive-ts";
-
+import { UpdateTaskTitleScenario } from "./taskManagement/updateTaskTitle";
 
 export const requirements = {
     application : {
@@ -34,6 +34,7 @@ export const requirements = {
         /* service actor */
         , observingUsersTasks : ObservingUsersTasksScenario
         , observingUsersProjects : ObservingUsersProjectsScenario
+        , updateTaskTitle: UpdateTaskTitleScenario
     }
 };
 

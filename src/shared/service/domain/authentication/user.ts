@@ -156,7 +156,7 @@ export class User implements Entity<UserProperties> {
     }
 
     get tasksObservable(): Observable<ChangedTask[]> {
-        return dependencies.backend.tasks.observe(this.account.id);
+        return dependencies.backend.tasks.getObservable(this.account.id);
     }
 
     create(organizationAndRole?: OrganizationAndRole | undefined): Promise<UserProperties> {

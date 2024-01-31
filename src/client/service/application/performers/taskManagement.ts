@@ -168,6 +168,28 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
             });
     };
 
+    const updateTaskTitle = (usecase: Usecase<"taskManagement", "updateTaskTitle">, actor: Actor, service: Service): Promise<Subscription | void> =>  {
+        const goals = d.updateTaskTitle.keys.goals;
+        return usecase
+            .interactedBy(actor)
+            .then(result => {
+                if (result.type !== InteractResultType.success) {
+                    return console.error("TODO", result);
+                }
+
+                switch (result.lastSceneContext.scene) {
+                case goals.onSuccessInUpdating: {
+                    console.log("!!! onSuccessInUpdating");
+                    break;
+                }
+                case goals.taskDoesNotExist: {
+                    console.log("taskDoesNotExist", result.lastSceneContext.task);
+                    break;
+                }
+                }
+            });
+    };
+
     return {
         store
         , dispatch: (usecase: UsecasesOf<"taskManagement">, actor: Actor, service: Service): Promise<Subscription | void> => {
@@ -177,6 +199,9 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
             }
             case "observingUsersProjects": {
                 return observingUsersProjects(usecase, actor, service);
+            }
+            case "updateTaskTitle": {
+                return updateTaskTitle(usecase, actor, service);
             }
             }
         }

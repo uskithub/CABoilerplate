@@ -12,7 +12,8 @@ export class AuthorizedUser extends MyBaseActor<UserProperties> {
     private subscriptions: Subscription[] = [];
     
     isAuthorizedTo(domain: DomainKeys, usecase: UsecaseKeys): boolean {
-        if (domain === R.keys.authentication && usecase === R.authentication.keys.signOut) {
+        if (domain === R.keys.authentication && usecase === R.authentication.keys.signOut
+            || domain === R.keys.taskManagement && usecase === R.taskManagement.keys.updateTaskTitle) {
             return true;
         }
         return false;

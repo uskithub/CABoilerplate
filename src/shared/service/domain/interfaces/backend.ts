@@ -61,13 +61,14 @@ export type TaskFunctions = {
     /**
      * ユーザのタスクを観測し、変更を通知します。
      */
-    observe(userId: string): Observable<ChangedTask[]>;
+    getObservable(userId: string): Observable<ChangedTask[]>;
 
     /**
      * ユーザのタスクを取得します。
-     * TODO: これの実装から
      */
     create: (task: TaskProperties) => Promise<TaskProperties>;
+
+    update: (taskId: string, title: string) => Promise<void>;
 };
 
 export type ProjectFunctions = {

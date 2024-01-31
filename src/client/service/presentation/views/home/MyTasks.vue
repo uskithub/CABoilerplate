@@ -16,6 +16,7 @@ import type { TreeEventHandlers } from "vue3-tree";
 import "vue3-tree/style.css";
 import { computed } from "vue";
 import { watch } from "vue";
+import { R } from "@/shared/service/application/usecases";
 
 const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
@@ -25,30 +26,40 @@ const vFocus = {
 };
 
 const state = reactive<{
-    usersTasks: Syncable<TaskProperties>[];
+    treenodes: TaskTreenode[];
+    version: number;
 }>({
-    usersTasks: stores.taskManagement.usersTasks.map(t => new Syncable(t))
+    treenodes: stores.taskManagement.usersTasks.map(t => new TaskTreenode(t))
+    , version: 0
 }) as {
-    usersTasks: Syncable<TaskProperties>[];
+    treenodes: TaskTreenode[];
+    version: number;
 };
 
 watch(stores.taskManagement.usersTasks, (newVal, oldVal) => {
     console.log("usersTasks changed", newVal, oldVal);
-    state.usersTasks = newVal.map(t => new Syncable(t));
+    state.treenodes = newVal.map(t => new TaskTreenode(t));
+    state.version += 1;
 });
 
-const treenodes = computed((): TaskTreenode[] => {
-    return state.usersTasks.map((t: Syncable<TaskProperties>) => new TaskTreenode(t.value));
-});
+const onUpdateName = (root: TaskTreenode, id: string, newValue: string) => {
+    const task = root.findTaskById(id);
+    if (task === null) {
+        console.error("node not found", id);
+        return;
+    }
+    dispatch(R.taskManagement.updateTaskTitle.basics.userEntersNewTaskName({ task, newTitle: newValue }));
+};
 
 </script>
 
 <template lang="pug">
 v-container
-  template(v-for="tasknode in treenodes", :key="tasknode.id")
+  template(v-for="tasknode in state.treenodes", :key="tasknode.id")
     tree(
       :node="tasknode"
-      @update-name="(id: string, newValue: string) => { tasknode.name = newValue; }"
+      :version="state.version"
+      @update-name="(id: string, newValue: string) => onUpdateName(tasknode, id, newValue)"
     )
   
 </template>
