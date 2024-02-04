@@ -340,7 +340,7 @@ const taskConverter: FirestoreDataConverter<TaskProperties> = {
             , members: data.members
             , involved: data.involved
             , ancestorIds: data.ancestorIds
-            , children: []
+            , children: new Array<TaskProperties>(data.children.length)
             , childrenIds: data.children
             , startedAt: data.startedAt ? data.startedAt.toDate() : null
             , deadline: data.deadline ? data.deadline.toDate() : null
@@ -395,7 +395,6 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
              */
             const _recursive = (taskDraft: TaskDraftProperties, createdAt: Date = new Date(), ancestorIds: string | null = null): TaskProperties => {
                 const id = autoId();
-                const nextAncestorIds = (ancestorIds || "") + id;
 
                 const node = {
                     id
@@ -410,7 +409,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                     , assignees: taskDraft.assignees || []
                     , members: taskDraft.members || [userId]
                     , involved: taskDraft.involved || [userId]
-                    , ancestorIds: nextAncestorIds
+                    , ancestorIds
                     , children: new Array<TaskProperties>()
                     , childrenIds: new Array<string>()
                     , startedAt: taskDraft.startedAt || null
@@ -421,6 +420,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
 
                 // 子がある場合は先に子を処理する（IDを取得するため）
                 if (taskDraft.children && taskDraft.children.length > 0) {
+                    const nextAncestorIds = (ancestorIds || "") + id;
                     // 再帰処理
                     taskDraft.children.forEach(child => {
                         const childNode = _recursive(child, createdAt, nextAncestorIds);

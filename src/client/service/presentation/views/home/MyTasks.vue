@@ -20,54 +20,48 @@ import { R } from "@/shared/service/application/usecases";
 
 const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
 
+const TASK_ID_LENGTH = 20;
+
 // custom directive for autofocus
 const vFocus = {
     mounted: (el: HTMLElement) => el.focus()
 };
 
-// const organize = (tasks: TaskProperties[]): TaskTreenode[] => {
-//     const _recursive = (arr: TaskProperties[]) => {
-//         return arr.reduce((result, t) => {
-//             result.push(new TaskTreenode(t));
-//             const children = t.children.reduce((children, id) => {
-//                 const child = tasks.find(i => i.id === id);
-//                 if (child !== undefined) children.push(child);
-//                 return children;
-//             }, new Array<TaskTreenode>());
-//             if (children.length > 0) {
-//                 task.children = _recursive(children);
-//             } else {
-//                 task.children = [];
-//             }
-//             return result;
-//         }, new Array<TaskTreenode>());
-//     };
-//     return _recursive(tasks);
-// };
-// const recursive = (arr: Task[]) => {
-//         return arr.reduce((result, task) => {
-//             result.push(task);
-//             const children = task._children.reduce((children, id) => {
-//                 const child = state.tasks.find(t => t.id === id);
-//                 if (child !== undefined) children.push(child);
-//                 return children;
-//             }, new Array<Task>());
-//             if (children.length > 0) {
-//                 task.children = recursive(children);
-//             } else {
-//                 task.children = [];
-//             }
-//             return result;
-//         }, new Array<Task>());
-//     };
-//     return recursive(state.tasks.filter(t => t.isRoot));
-// };
+/**
+ * task配列（ancestorIdsでソートされている）をツリー構造に変換する
+ * @param tasks 
+ */
+const organize = (tasks: TaskProperties[]): TaskTreenode[] => {
+    const _taskIdMap = tasks.reduce((map, t) => {
+        map[t.id] = t;
+        return map;
+    }, {} as Record<string, TaskProperties>);
+
+    return tasks
+        .reduce((result, t) => {
+            if (t.ancestorIds) {
+                const parentId = t.ancestorIds.slice(-TASK_ID_LENGTH);
+                if (_taskIdMap[parentId] !== undefined) {
+                    const idx = _taskIdMap[parentId].childrenIds.findIndex(id => id === t.id);
+                    _taskIdMap[parentId].children[idx] = t;
+                } else {
+                    result.push(t);
+                }
+            } else {
+                result.push(t);
+            }
+            return result;
+        }, new Array<TaskProperties>())
+        .map(t => new TaskTreenode(t));
+};
+
+const treenodes = organize(stores.taskManagement.usersTasks);
 
 const state = reactive<{
     treenodes: TaskTreenode[];
     version: number;
 }>({
-    treenodes: stores.taskManagement.usersTasks.map(t => new TaskTreenode(t))
+    treenodes
     , version: 0
 }) as {
     treenodes: TaskTreenode[];
@@ -76,7 +70,7 @@ const state = reactive<{
 
 watch(stores.taskManagement.usersTasks, (newVal, oldVal) => {
     console.log("usersTasks changed", newVal, oldVal);
-    state.treenodes = newVal.map(t => new TaskTreenode(t));
+    state.treenodes = organize(newVal);
     state.version += 1;
 });
 

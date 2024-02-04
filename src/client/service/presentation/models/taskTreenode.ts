@@ -5,11 +5,10 @@ import { findNodeById, BaseUpdatableTreenode } from "vue3-tree";
 
 export class TaskTreenode extends BaseUpdatableTreenode<TaskProperties> {
     private _task: TaskProperties;
-    private _subtrees: this[];
 
     get id(): string { return this._task.id || ""; }
 
-    get name(): string { return this._task.ancestorIds || ""; }
+    get name(): string { return this._task.title; }
     set name(newName: string) { this._task.title = newName; }
 
     get styleClass(): object | null { return { [this._task.type]: true }; }
@@ -24,7 +23,6 @@ export class TaskTreenode extends BaseUpdatableTreenode<TaskProperties> {
     constructor(task: TaskProperties) {
         super();
         this._task = task;
-        this._subtrees = task.children.map(c => new (this.constructor as any)(c));  
         this.isFolding = false;
     }
 
