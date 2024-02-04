@@ -59,6 +59,7 @@ export function createAuthenticationPerformer(): AuthenticationPerformer {
                 case goals.onSuccessInCreatingInitialTaskThenServicePresentsHomeView: {
                     const userProperties = context.userProperties;
                     service.change(SignInStatuses.signIn({ userProperties }));
+                    service.dispatch(R.taskManagement.observingUsersTasks.basics.serviceGetsUsersTasksObservable({ user: userProperties }), service.serviceActor);
                     service.routingTo("/");
                     break;
                 }

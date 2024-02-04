@@ -134,7 +134,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                     service.change(SignInStatuses.signIn({ userProperties }));
                     break;
                 }
-                case goals.servicePerformsObservingUsersTasksUsecase: {                    
+                case goals.servicePresentsHomeView: {                    
                     const userProperties = result.lastSceneContext.user;
                     service.dispatch(R.taskManagement.observingUsersTasks.basics.serviceGetsUsersTasksObservable({ user: userProperties }), service.serviceActor);
 
@@ -144,7 +144,7 @@ export function createApplicationPerformer(): ApplicationPerformer {
                 }
                 case goals.servicePerformsSigningUpWithGoogleOAuthUsecase: {
                     const account = result.lastSceneContext.account;
-                    service.dispatch(R.authentication.signUp.alternatives.serviceGetsOrganizationOfDomain({ account }), actor);
+                    service.dispatch(R.authentication.signUp.alternatives.serviceGetsOrganizationOfDomain({ account }), service.stores.shared.actor);
                     break;
                 }
                 }

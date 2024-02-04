@@ -2,6 +2,7 @@ import { Observable } from "rxjs";
 import dependencies from "../dependencies";
 import { ChangedTask } from "../interfaces/backend";
 import { Entity } from "@/shared/system/interfaces/architecture";
+import { autoId } from "@/client/service/infrastructure/firestoreBackend";
 
 export interface Nodable {
     id: number;
@@ -61,36 +62,29 @@ export interface Log {
     finishedAt: Date | null;
 }
 
-// アプリケーションで使用するデータ(参照を追加)
-export interface _Task {
-    id: string;
+export type TaskDraftProperties = {
     type: TaskType;
     status: TaskStatus;
 
     title: string;
-    purpose: string | null;
-    goal: string | null;
-    instractions: string | null;
+    purpose?: string | undefined;
+    goal?: string | undefined;
+    instractions?: string | undefined;
 
-    author: string;            // タスクを作ったユーザ
-    owner: string;             // タスクのオーナー（作成時はauthor）
-    assignees: Array<string>;  // タスクをアサインされたメンバ（オーナーは含まない）
-    members: Array<string>;    // タスクの全メンバ（owner、assigneesは必ず包含。作成時はauthorも含むが外すことが可能）
-    involved: Array<string>;   // このタスクの全関係者（author, member）
+    author?: string | undefined;            // タスクを作ったユーザ
+    owner?: string | undefined;             // タスクのオーナー（作成時はauthor）
+    assignees?: Array<string> | undefined;  // タスクをアサインされたメンバ（オーナーは含まない）
+    members?: Array<string> | undefined;    // タスクの全メンバ（owner、assigneesは必ず包含。作成時はauthorも含むが外すことが可能）
+    involved?: Array<string> | undefined;   // このタスクの全関係者（author, member）
 
-    ancestorIds: string | null;
-    _children: Array<string>;
-    children: Array<Task>;
+    ancestorIds?: string | undefined;
+    children?: Array<TaskDraftProperties> | undefined; // 子がない場合は明確に空配列を入れる
 
-    startedAt: Date | null;
-    deadline: Date | null;
+    startedAt?: Date | undefined;
+    deadline?: Date | undefined;
 
-    logs: Array<Log>;
-
-    templateId?: string | undefined;
-    lastTimeWorkedAt?: Date | undefined;
-    createdAt: Date;
-}
+    templateId?: undefined;
+};
 
 export type TaskProperties = {
     id: string;
@@ -110,6 +104,7 @@ export type TaskProperties = {
 
     ancestorIds: string | null;
     children: Array<TaskProperties>; // 子がない場合は明確に空配列を入れる
+    childrenIds: Array<string>;      // Firestoreからの取得時、UserTasksなど、実態が取得できない場合があるため、IDのみを保持する
 
     startedAt: Date | null;
     deadline: Date | null;
@@ -145,6 +140,45 @@ const initialTask = {
     // , lastTimeWorkedAt?: Date;
     , createdAt: null
 };
+
+export class TaskDraft implements Entity<TaskDraftProperties> {
+    private _properties: TaskDraftProperties;
+    private _id: string;
+    private _userId: string;
+    
+    constructor(userId: string, properties: TaskDraftProperties) {
+        this._properties = properties;
+        this._id = autoId();
+        this._userId = userId;
+    }
+
+    toTaskProperties(): TaskProperties {
+        const children = this._properties.children?.map(child => new TaskDraft(this._userId, child).toTaskProperties()) || [];
+        return {
+            id: this._id
+            , type: this._properties.type
+            , status: this._properties.status
+            , title: this._properties.title
+            , purpose: this._properties.purpose || null
+            , goal: this._properties.goal || null
+            , instractions: this._properties.instractions || null
+            , author: this._properties.author || this._userId
+            , owner: this._properties.owner || this._userId
+            , assignees: this._properties.assignees || []
+            , members: this._properties.members || [this._userId]
+            , involved: this._properties.involved || [this._userId]
+            , ancestorIds: this._properties.ancestorIds || null
+            , children
+            , childrenIds: children.map(child => child.id)
+            , startedAt: this._properties.startedAt || null
+            , deadline: this._properties.deadline || null
+            , templateId: this._properties.templateId
+            , lastTimeWorkedAt: undefined
+            , updatedAt: undefined
+            , createdAt: null
+        };
+    }
+}
 
 export class Task implements Entity<TaskProperties> {
     private _properties: TaskProperties;
@@ -186,16 +220,76 @@ export class Task implements Entity<TaskProperties> {
     }
 
     static createInitialTasks(userId: string): Promise<TaskProperties> {
-        const task = {
-            ...initialTask
-            , author: userId
-            , owner: userId
-            , assignees: [userId]
-            , members: [userId]
-            , involved: [userId]
-        } as TaskProperties;
+        
+        const createTutorialTasks = (): TaskDraftProperties => {
+            return {
+                type: TaskType.milestone
+                , status: TaskStatus.open
+                , title: "チュートリアルを完了する"
+                , purpose: "Joynの使い方を理解する"
+                , goal: "サブタスクをすべて完了する"
+                , author: userId
+                , owner: userId
+                , assignees: [userId]
+                , members: [userId]
+                , involved: [userId]
+                , children: [
+                    {
+                        type: TaskType.requirement
+                        , status: TaskStatus.open
+                        , title: "ドラッグ＆ドロップでタスクを移動する"
+                        , purpose: "タスク移動の自由度を理解する"
+                        , goal: "タスクの組み換えを体験する"
+                        , author: userId
+                        , owner: userId
+                        , assignees: [userId]
+                        , members: [userId]
+                        , involved: [userId]
+                        , children: [
+                            {
+                                type: TaskType.todo
+                                , status: TaskStatus.open
+                                , title: "チュートリアルを完了する"
+                                , purpose: "Joynの使い方を理解する"
+                                , goal: "サブタスクをすべて完了する"
+                                , author: userId
+                                , owner: userId
+                                , assignees: [userId]
+                                , members: [userId]
+                                , involved: [userId]
+                            }
+                        ]
+                    }
+                    , {
+                        type: TaskType.requirement
+                        , status: TaskStatus.open
+                        , title: "チュートリアルを完了する"
+                        , purpose: "Joynの使い方を理解する"
+                        , goal: "サブタスクをすべて完了する"
+                        , author: userId
+                        , owner: userId
+                        , assignees: [userId]
+                        , members: [userId]
+                        , involved: [userId]
+                    }
+                    , {
+                        type: TaskType.requirement
+                        , status: TaskStatus.open
+                        , title: "チュートリアルを完了する"
+                        , purpose: "Joynの使い方を理解する"
+                        , goal: "サブタスクをすべて完了する"
+                        , author: userId
+                        , owner: userId
+                        , assignees: [userId]
+                        , members: [userId]
+                        , involved: [userId]
+                    }
 
-        return dependencies.backend.tasks.create(task);
+                ]
+            } as TaskDraftProperties;
+        };
+        
+        return dependencies.backend.tasks.create(createTutorialTasks(), userId);
     }
 
     update(title: string) : Promise<void> {
@@ -203,31 +297,3 @@ export class Task implements Entity<TaskProperties> {
     }
 }
 
-// export default {
-//     getAvailableTaskTypes: (task: Task, parent: Task): TaskType[] => {
-//         switch (parent.type) {
-//             case TaskType.todo, TaskType.issue:
-//                 return [
-//                     TaskType.todo
-//                 ];
-//             case TaskType.requirement:
-//                 return [
-//                     TaskType.issue
-//                     , TaskType.todo
-//                 ];
-//             default:
-//                 // case TaskType.milestone:
-//                 // case TaskType.publicProject, TaskType.publicSubproject, TaskType.privateProject, TaskType.privateSubproject:
-//                 // case TaskType.publicNpo, TaskType.publicEdu, TaskType.publicOrganizationSubscribing, TaskType.publicOrganization:
-//                 return [
-//                     TaskType.milestone
-//                     , TaskType.requirement
-//                     , TaskType.issue
-//                     , TaskType.todo
-//                 ];
-//         }
-//     }
-//     , observeUsersTasks: (userId: string): Observable<ChangedTask[]> => {
-//         return dependencies.backend.tasks.observe(userId);
-//     }
-// };

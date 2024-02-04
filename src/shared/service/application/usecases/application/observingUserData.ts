@@ -17,7 +17,7 @@ export type ObservingUserDataScenes = {
     goals: {
         servieStartsObserving: { account: Account; userDataObservable: Observable<UserProperties | null>; };
         serviceUpdatesUserData: { user: UserProperties; };
-        servicePerformsObservingUsersTasksUsecase: { user: UserProperties; };
+        servicePresentsHomeView: { user: UserProperties; };
         servicePerformsSigningUpWithGoogleOAuthUsecase: { account: Account; };
     };
 };
@@ -30,7 +30,7 @@ export class ObservingUserDataScenario extends MyBaseScenario<ObservingUserDataS
             return this.just(this.goals.serviceUpdatesUserData({ user: to.user }));
         }
         case this.keys.alternatives.serviceGetsDataForTheFirstTime: {
-            return this.just(this.goals.servicePerformsObservingUsersTasksUsecase({ user: to.user }));
+            return this.just(this.goals.servicePresentsHomeView({ user: to.user }));
         }
         case this.keys.alternatives.serviceGetsNullData: {
             return this.just(this.goals.servicePerformsSigningUpWithGoogleOAuthUsecase({ account: to.account }));

@@ -25,6 +25,44 @@ const vFocus = {
     mounted: (el: HTMLElement) => el.focus()
 };
 
+// const organize = (tasks: TaskProperties[]): TaskTreenode[] => {
+//     const _recursive = (arr: TaskProperties[]) => {
+//         return arr.reduce((result, t) => {
+//             result.push(new TaskTreenode(t));
+//             const children = t.children.reduce((children, id) => {
+//                 const child = tasks.find(i => i.id === id);
+//                 if (child !== undefined) children.push(child);
+//                 return children;
+//             }, new Array<TaskTreenode>());
+//             if (children.length > 0) {
+//                 task.children = _recursive(children);
+//             } else {
+//                 task.children = [];
+//             }
+//             return result;
+//         }, new Array<TaskTreenode>());
+//     };
+//     return _recursive(tasks);
+// };
+// const recursive = (arr: Task[]) => {
+//         return arr.reduce((result, task) => {
+//             result.push(task);
+//             const children = task._children.reduce((children, id) => {
+//                 const child = state.tasks.find(t => t.id === id);
+//                 if (child !== undefined) children.push(child);
+//                 return children;
+//             }, new Array<Task>());
+//             if (children.length > 0) {
+//                 task.children = recursive(children);
+//             } else {
+//                 task.children = [];
+//             }
+//             return result;
+//         }, new Array<Task>());
+//     };
+//     return recursive(state.tasks.filter(t => t.isRoot));
+// };
+
 const state = reactive<{
     treenodes: TaskTreenode[];
     version: number;

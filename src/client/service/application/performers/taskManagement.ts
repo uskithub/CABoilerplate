@@ -90,6 +90,12 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                                 }
                                 }
                             });
+                            // ソートしておく
+                            mutableUsersTasks.sort((a, b) => {
+                                if (a.ancestorIds === null) return -1;
+                                if (b.ancestorIds === null) return 1;
+                                return a.ancestorIds.localeCompare(b.ancestorIds);
+                            });
                         }
                         , error: err => console.error("Observer got an error: " + err)
                     });

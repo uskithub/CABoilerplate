@@ -1,9 +1,9 @@
 import { ChangedTask, TaskFunctions } from "@/shared/service/domain/interfaces/backend";
 import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./entities/tasks";
 import { CollectionType, autoId } from ".";
-import { Log, Task, TaskProperties, TaskStatus, TaskType } from "@/shared/service/domain/taskManagement/task";
+import { Log, Task, TaskDraft, TaskDraftProperties, TaskProperties, TaskStatus, TaskType } from "@/shared/service/domain/taskManagement/task";
 
-import { collection, Firestore, onSnapshot, where, query, writeBatch, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, Timestamp, FieldValue, SnapshotOptions, DocumentReference, setDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { collection, Firestore, onSnapshot, where, query, writeBatch, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, Timestamp, FieldValue, SnapshotOptions, DocumentReference, setDoc, doc, serverTimestamp, updateDoc, PartialWithFieldValue } from "firebase/firestore";
 import { Observable } from "rxjs";
 
 type LayerStatusType = string;
@@ -311,12 +311,15 @@ const taskConverter: FirestoreDataConverter<TaskProperties> = {
             , members: modelObject.members
             , involved: modelObject.involved
             , ancestorIds: modelObject.ancestorIds
-            , children: modelObject.children.map(child => child.id)
+            , children: modelObject.childrenIds ? modelObject.childrenIds : []
             , startedAt: modelObject.startedAt ? Timestamp.fromDate(modelObject.startedAt) : null
             , deadline: modelObject.deadline ? Timestamp.fromDate(modelObject.deadline) : null
-            , lastTimeWorkedAt: modelObject.lastTimeWorkedAt ? Timestamp.fromDate(modelObject.lastTimeWorkedAt) : null
-            , updatedAt: modelObject.updatedAt ? Timestamp.fromDate(modelObject.updatedAt) : null
-            , createdAt: modelObject.createdAt ? Timestamp.fromDate(modelObject.createdAt) : serverTimestamp()
+            , templateId: modelObject.templateId || null
+            // create時にしか toFirestore が呼ばれない（と思う）ので、更新でしか設定しない以下２つは不要
+            // , lastTimeWorkedAt: modelObject.lastTimeWorkedAt ? Timestamp.fromDate(modelObject.lastTimeWorkedAt) : null
+            // , updatedAt: modelObject.updatedAt ? Timestamp.fromDate(modelObject.updatedAt) : null
+            // 同様に createdAt は必ず serverTimestamp() でOK
+            , createdAt: serverTimestamp()
         };
     }
     , fromFirestore: (snapshot: QueryDocumentSnapshot<DocumentData>, options?: SnapshotOptions | undefined): TaskProperties => {
@@ -338,6 +341,7 @@ const taskConverter: FirestoreDataConverter<TaskProperties> = {
             , involved: data.involved
             , ancestorIds: data.ancestorIds
             , children: []
+            , childrenIds: data.children
             , startedAt: data.startedAt ? data.startedAt.toDate() : null
             , deadline: data.deadline ? data.deadline.toDate() : null
             // , logs: []
@@ -382,23 +386,47 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
             });
         }
 
-        , create: (task: TaskProperties): Promise<TaskProperties> => {
+        , create: (taskDraft: TaskDraftProperties, userId: string): Promise<TaskProperties> => {
             const batch = writeBatch(db);
 
             /**
              * ツリー構造のタスクをバッチ処理します。
              * @returns IDやcreatedAtを設定して返します。
              */
-            const _recursive = (node: TaskProperties, createdAt: Date = new Date(), ancestorIds: string | null = null): TaskProperties => {
+            const _recursive = (taskDraft: TaskDraftProperties, createdAt: Date = new Date(), ancestorIds: string | null = null): TaskProperties => {
                 const id = autoId();
                 const nextAncestorIds = (ancestorIds || "") + id;
-                node.id = id;
-                node.ancestorIds = ancestorIds;
+
+                const node = {
+                    id
+                    , type: taskDraft.type
+                    , status: taskDraft.status
+                    , title: taskDraft.title
+                    , purpose: taskDraft.purpose || null
+                    , goal: taskDraft.goal || null
+                    , instractions: taskDraft.instractions || null
+                    , author: taskDraft.author || userId
+                    , owner: taskDraft.owner || userId
+                    , assignees: taskDraft.assignees || []
+                    , members: taskDraft.members || [userId]
+                    , involved: taskDraft.involved || [userId]
+                    , ancestorIds: nextAncestorIds
+                    , children: new Array<TaskProperties>()
+                    , childrenIds: new Array<string>()
+                    , startedAt: taskDraft.startedAt || null
+                    , deadline: taskDraft.deadline || null
+                    , templateId: taskDraft.templateId
+                    , createdAt: null
+                } as TaskProperties;
 
                 // 子がある場合は先に子を処理する（IDを取得するため）
-                if (node.children.length > 0) {
+                if (taskDraft.children && taskDraft.children.length > 0) {
                     // 再帰処理
-                    node.children = node.children.map(child => _recursive(child, createdAt, nextAncestorIds));
+                    taskDraft.children.forEach(child => {
+                        const childNode = _recursive(child, createdAt, nextAncestorIds);
+                        node.children.push(childNode);
+                        node.childrenIds.push(childNode.id);
+                    });
                 }
                 
                 // 最後に親を追加する
@@ -408,7 +436,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                 return node;
             };
 
-            _recursive(task);
+            const task = _recursive(taskDraft);
 
             return batch
                 .commit()

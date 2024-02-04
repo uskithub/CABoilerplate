@@ -9,7 +9,7 @@ export class TaskTreenode extends BaseUpdatableTreenode<TaskProperties> {
 
     get id(): string { return this._task.id || ""; }
 
-    get name(): string { return this._task.title; }
+    get name(): string { return this._task.ancestorIds || ""; }
     set name(newName: string) { this._task.title = newName; }
 
     get styleClass(): object | null { return { [this._task.type]: true }; }
