@@ -86,8 +86,8 @@ const onUpdateName = (root: TaskTreenode, id: string, newValue: string) => {
 
 type IdAndNode = { id: string; node: TaskTreenode; };
 
-const onArrange = (root: TaskTreenode, targetId: string, from: string, to: string, index: number) => {
-    console.log("arrange", root, targetId, from, to, index);
+const onRearrange = (root: TaskTreenode, targetId: string, from: string, to: string, index: number) => {
+    console.log("rearrange", root, targetId, from, to, index);
     const target = taskIdMap[targetId];
     const currentParent = taskIdMap[from];
     const newParent = taskIdMap[to];
@@ -111,7 +111,7 @@ v-container
       :node="tasknode"
       :version="state.version"
       @update-name="(id: string, newValue: string) => onUpdateName(tasknode, id, newValue)"
-      @arrange="(targetId: string, from: string, to: string, index: number) => onArrange(tasknode, targetId, from, to, index)"
+      @rearrange="(targetId: string, from: string, to: string, index: number) => onRearrange(tasknode, targetId, from, to, index)"
     )
   
 </template>
