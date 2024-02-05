@@ -8,6 +8,7 @@ import { ErrorContextFactory } from "@/shared/system/systemErrors";
 
 const BackendErrorDef = {
     BKE0001: "Permission Denied"
+    , BKE0002: "CannotRearramge"
     , SYSTEM : "Unhandled Error"
 } as const;
 

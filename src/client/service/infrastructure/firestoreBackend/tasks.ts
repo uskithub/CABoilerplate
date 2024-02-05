@@ -1,10 +1,11 @@
-import { ChangedTask, TaskFunctions } from "@/shared/service/domain/interfaces/backend";
+import { BackendErrors, ChangedTask, TaskFunctions } from "@/shared/service/domain/interfaces/backend";
 import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./entities/tasks";
 import { CollectionType, autoId } from ".";
 import { Log, Task, TaskDraft, TaskDraftProperties, TaskProperties, TaskStatus, TaskType } from "@/shared/service/domain/taskManagement/task";
 
-import { collection, Firestore, onSnapshot, where, query, writeBatch, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, Timestamp, FieldValue, SnapshotOptions, DocumentReference, setDoc, doc, serverTimestamp, updateDoc, PartialWithFieldValue, getDocs } from "firebase/firestore";
+import { collection, Firestore, onSnapshot, where, query, writeBatch, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, Timestamp, FieldValue, SnapshotOptions, DocumentReference, setDoc, doc, serverTimestamp, updateDoc, PartialWithFieldValue, getDocs, FirestoreError, orderBy, startAt, endAt } from "firebase/firestore";
 import { Observable } from "rxjs";
+import { ServiceError } from "@/shared/service/serviceErrors";
 
 type LayerStatusType = string;
 interface FSTask {
@@ -454,13 +455,24 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                     , updatedAt: serverTimestamp() //  項目を２つ更新すると、２回、nextが発火するようだ
                 });
         }
-
         , 
         /**
          * 1. removing or modifying from current parent
          * 2. adding to new parent
          * 3. modifying target's ancestorIds
          * 4. modifying target's descendants' ancestorIds
+         * 
+         * rearrangeでtaskを再配置する際に、一緒に移動される子孫タスクの中には、ユーザが与り知らないものも含まれる。
+         * これらも一緒に移動できるようにする方法を考える。
+         * 
+         * ① 子孫タスクは、親タスクのinvolvedを必ず包含するようにする
+         *    → 再配置時には、task.involved = newParent.involved + task(author + owner+ assignees + members)
+         *      task.child.involved = task.involved + child(author + owner+ assignees + members) と更新する？？
+         *    → 非現実的
+         * 
+         * ② taskをpublic/privateの項目に分け、ancensorIdsはpublicとする。
+         * 
+         * 
          * @param taskId 
          * @param currentParent 
          * @param newParent
@@ -481,7 +493,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                 // END (skip 2,3)
                 return batch.commit()
                     .catch(error => {
-                        return Promise.reject( "taskの再配置に失敗しました。");
+                        return Promise.reject(new ServiceError(BackendErrors.BKE0002, { cause: error }));
                     });                
             }
 
@@ -498,8 +510,8 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
             if (task.childrenIds.length === 0) {
                 // END (skip 4)
                 return batch.commit()
-                    .catch(error => {
-                        return Promise.reject( "taskの再配置に失敗しました。");
+                    .catch((error: FirestoreError) => {
+                        return Promise.reject(new ServiceError(BackendErrors.BKE0002, { cause: error }));
                     });
             }
 
@@ -508,19 +520,31 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
             return getDocs(
                 query(
                     taskCollectionRef
-                    , where("ancestorIds", ">=", targetAncestorIds)
+                    // , where("involved", "array-contains", userId) <--- 現状のtaskとruleでは、これをやらないとpermission-deniedになる
+                    // ancestorIds が targetAncestorIds で始まるものを取得
+                    , orderBy("ancestorIds")
+                    , startAt(targetAncestorIds)
+                    , endAt(`${ targetAncestorIds }z`) // "1" < "Z" < "z"
                 )
             ).then(querySnapshot => {
                 querySnapshot.forEach(snapshot => {
                     const descendant = snapshot.data();
+                    console.log(">>> descendant:", snapshot.id);
                     if (descendant.ancestorIds === null) return;
                     const descendantNewAncestorIds = descendant.ancestorIds.replace(targetAncestorIds, `${ newAncestorIds }${ task.id }`);
                     batch.update(doc(taskCollectionRef, snapshot.id), { ancestorIds: descendantNewAncestorIds });
                 });
-                return batch.commit();
+                return batch.commit()
+                    .catch((error: FirestoreError) => {
+                        return Promise.reject(new ServiceError(BackendErrors.BKE0002, { cause: error }));
+                    });
             })
-            .catch(error => {
-                return Promise.reject( "taskの再配置に失敗しました。");
+            .catch((error: FirestoreError) => {
+                if (error.code === "permission-denied") {
+                    Promise.reject(new ServiceError(BackendErrors.BKE0001, { cause: error }));
+                } else {
+                    Promise.reject(new ServiceError(BackendErrors.SYSTEM, { cause: error }));
+                }
             });
         }
     };
