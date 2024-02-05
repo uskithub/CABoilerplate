@@ -69,6 +69,8 @@ export type TaskFunctions = {
     create: (taskDraft: TaskDraftProperties, userId: string) => Promise<TaskProperties>;
 
     update: (taskId: string, title: string) => Promise<void>;
+
+    rearrange: (task: TaskProperties, currentParent: TaskProperties, newParent: TaskProperties, index: number) => Promise<void>;
 };
 
 export type ProjectFunctions = {

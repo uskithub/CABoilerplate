@@ -51,8 +51,8 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                     const subscription = observable.subscribe({
                         next: changedTasks => {
                             const mutableUsersTasks = _store.usersTasks;
+                            console.log("@@@@ changedTasks", changedTasks.length);
                             changedTasks.forEach((changedTask) => {
-                                console.log("@@@@ changedTask", changedTask);
                                 switch (changedTask.case) {
                                 case ItemChangeType.added: {
                                     // hot reloadで増えてしまうので、同じものを予め削除しておく
@@ -62,6 +62,7 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                                             break;
                                         }
                                     }
+                                    console.log("@@@ [added]", changedTask.item);
                                     mutableUsersTasks.unshift(changedTask.item);
                                     break;
                                 }
@@ -73,7 +74,7 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                                     for (let i = 0, imax = mutableUsersTasks.length; i < imax; i++) {
                                         if (mutableUsersTasks[i].id === changedTask.id) {
                                             mutableUsersTasks.splice(i, 1, changedTask.item);
-                                            console.log("@@@", i, changedTask.item);
+                                            console.log("@@@ [modified]", i, changedTask.item);
                                             break;
                                         }
                                     }
@@ -92,6 +93,9 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                             });
                             // ソートしておく
                             mutableUsersTasks.sort((a, b) => {
+                                if (a.ancestorIds === b.ancestorIds) {
+                                    return a.id.localeCompare(b.id);
+                                }
                                 if (a.ancestorIds === null) return -1;
                                 if (b.ancestorIds === null) return 1;
                                 return a.ancestorIds.localeCompare(b.ancestorIds);
@@ -196,6 +200,28 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
             });
     };
 
+    const rearrangeTask = (usecase: Usecase<"taskManagement", "rearrangeTask">, actor: Actor, service: Service): Promise<Subscription | void> =>  {
+        const goals = d.rearrangeTask.keys.goals;
+        return usecase
+            .interactedBy(actor)
+            .then(result => {
+                if (result.type !== InteractResultType.success) {
+                    return console.error("TODO", result);
+                }
+
+                switch (result.lastSceneContext.scene) {
+                case goals.onSuccessInUpdating: {
+                    console.log("!!! onSuccessInUpdating");
+                    break;
+                }
+                case goals.taskDoesNotExist: {
+                    console.log("taskDoesNotExist", result.lastSceneContext.task);
+                    break;
+                }
+                }
+            });
+    };
+
     return {
         store
         , dispatch: (usecase: UsecasesOf<"taskManagement">, actor: Actor, service: Service): Promise<Subscription | void> => {
@@ -208,6 +234,9 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
             }
             case "updateTaskTitle": {
                 return updateTaskTitle(usecase, actor, service);
+            }
+            case "rearrangeTask": {
+                return rearrangeTask(usecase, actor, service);
             }
             }
         }

@@ -5,17 +5,14 @@ import { Task, TaskType } from "@/shared/service/domain/taskManagement/task";
 import type { TaskProperties } from "@/shared/service/domain/taskManagement/task";
 
 // view
-import { tree, findNodeById } from "vue3-tree";
+import { tree } from "vue3-tree";
 
 // system
 import type { Service } from "@/client/service/application/performers";
 import { SERVICE_KEY } from "@/client/service/application/performers";
-import { Syncable } from "@/client/system/common";
-import { inject, reactive } from "vue";
+import { computed, inject, reactive, watch } from "vue";
 import type { TreeEventHandlers } from "vue3-tree";
 import "vue3-tree/style.css";
-import { computed } from "vue";
-import { watch } from "vue";
 import { R } from "@/shared/service/application/usecases";
 
 const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;
@@ -31,31 +28,33 @@ const vFocus = {
  * task配列（ancestorIdsでソートされている）をツリー構造に変換する
  * @param tasks 
  */
-const organize = (tasks: TaskProperties[]): TaskTreenode[] => {
+const organizeToTreeStructure = (tasks: TaskProperties[]): [ Record<string, TaskProperties>, TaskTreenode[] ] => {
     const _taskIdMap = tasks.reduce((map, t) => {
         map[t.id] = t;
         return map;
     }, {} as Record<string, TaskProperties>);
 
-    return tasks
-        .reduce((result, t) => {
-            if (t.ancestorIds) {
-                const parentId = t.ancestorIds.slice(-TASK_ID_LENGTH);
-                if (_taskIdMap[parentId] !== undefined) {
-                    const idx = _taskIdMap[parentId].childrenIds.findIndex(id => id === t.id);
-                    _taskIdMap[parentId].children[idx] = t;
+    return [ _taskIdMap
+        , tasks
+            .reduce((result, t) => {
+                if (t.ancestorIds) {
+                    const parentId = t.ancestorIds.slice(-TASK_ID_LENGTH);
+                    if (_taskIdMap[parentId] !== undefined) {
+                        const idx = _taskIdMap[parentId].childrenIds.findIndex(id => id === t.id);
+                        _taskIdMap[parentId].children[idx] = t;
+                    } else {
+                        result.push(t);
+                    }
                 } else {
                     result.push(t);
                 }
-            } else {
-                result.push(t);
-            }
-            return result;
-        }, new Array<TaskProperties>())
-        .map(t => new TaskTreenode(t));
+                return result;
+            }, new Array<TaskProperties>())
+            .map(t => new TaskTreenode(t))
+        ];
 };
 
-const treenodes = organize(stores.taskManagement.usersTasks);
+let [ taskIdMap, treenodes ] = organizeToTreeStructure(stores.taskManagement.usersTasks);
 
 const state = reactive<{
     treenodes: TaskTreenode[];
@@ -70,7 +69,9 @@ const state = reactive<{
 
 watch(stores.taskManagement.usersTasks, (newVal, oldVal) => {
     console.log("usersTasks changed", newVal, oldVal);
-    state.treenodes = organize(newVal);
+    const [ _taskIdMap, treenodes ] = organizeToTreeStructure(newVal);
+    taskIdMap = _taskIdMap;
+    state.treenodes = treenodes
     state.version += 1;
 });
 
@@ -83,6 +84,24 @@ const onUpdateName = (root: TaskTreenode, id: string, newValue: string) => {
     dispatch(R.taskManagement.updateTaskTitle.basics.userEntersNewTaskName({ task, newTitle: newValue }));
 };
 
+type IdAndNode = { id: string; node: TaskTreenode; };
+
+const onArrange = (root: TaskTreenode, targetId: string, from: string, to: string, index: number) => {
+    console.log("arrange", root, targetId, from, to, index);
+    const target = taskIdMap[targetId];
+    const currentParent = taskIdMap[from];
+    const newParent = taskIdMap[to];
+    if (target === undefined || currentParent === undefined || newParent === undefined) {
+        console.error("node not found", from, to);
+        return;
+    }
+    dispatch(R.taskManagement.rearrangeTask.basics.userRearrangeTask({ 
+        task: target
+        , currentParent
+        , newParent
+        , index
+    }));    
+}
 </script>
 
 <template lang="pug">
@@ -92,6 +111,7 @@ v-container
       :node="tasknode"
       :version="state.version"
       @update-name="(id: string, newValue: string) => onUpdateName(tasknode, id, newValue)"
+      @arrange="(targetId: string, from: string, to: string, index: number) => onArrange(tasknode, targetId, from, to, index)"
     )
   
 </template>

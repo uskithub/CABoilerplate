@@ -13,7 +13,8 @@ export class AuthorizedUser extends MyBaseActor<UserProperties> {
     
     isAuthorizedTo(domain: DomainKeys, usecase: UsecaseKeys): boolean {
         if (domain === R.keys.authentication && usecase === R.authentication.keys.signOut
-            || domain === R.keys.taskManagement && usecase === R.taskManagement.keys.updateTaskTitle) {
+            || domain === R.keys.taskManagement && usecase === R.taskManagement.keys.updateTaskTitle
+            || domain === R.keys.taskManagement && usecase === R.taskManagement.keys.rearrangeTask) {
             return true;
         }
         return false;

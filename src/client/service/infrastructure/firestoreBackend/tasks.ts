@@ -3,7 +3,7 @@ import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./ent
 import { CollectionType, autoId } from ".";
 import { Log, Task, TaskDraft, TaskDraftProperties, TaskProperties, TaskStatus, TaskType } from "@/shared/service/domain/taskManagement/task";
 
-import { collection, Firestore, onSnapshot, where, query, writeBatch, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, Timestamp, FieldValue, SnapshotOptions, DocumentReference, setDoc, doc, serverTimestamp, updateDoc, PartialWithFieldValue } from "firebase/firestore";
+import { collection, Firestore, onSnapshot, where, query, writeBatch, FirestoreDataConverter, DocumentData, QueryDocumentSnapshot, Timestamp, FieldValue, SnapshotOptions, DocumentReference, setDoc, doc, serverTimestamp, updateDoc, PartialWithFieldValue, getDocs } from "firebase/firestore";
 import { Observable } from "rxjs";
 
 type LayerStatusType = string;
@@ -453,6 +453,75 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                     title
                     , updatedAt: serverTimestamp() //  項目を２つ更新すると、２回、nextが発火するようだ
                 });
+        }
+
+        , 
+        /**
+         * 1. removing or modifying from current parent
+         * 2. adding to new parent
+         * 3. modifying target's ancestorIds
+         * 4. modifying target's descendants' ancestorIds
+         * @param taskId 
+         * @param currentParent 
+         * @param newParent
+         * @param index
+         */
+        rearrange: (task: TaskProperties, currentParent: TaskProperties, newParent: TaskProperties, index: number): Promise<void> => {
+            const batch = writeBatch(db);
+            // Without converter. Because 'children' in firestore is string[], not TaskProperty[].
+            const taskCollectionRefForUpdateChildren = collection(db, CollectionType.tasks);
+            
+            /* 1. removing or modifying from current parent */
+            const exParentNewChildren = currentParent.childrenIds.filter(id => id !== task.id);
+            if (currentParent.id !== newParent.id) {
+                batch.update(doc(taskCollectionRefForUpdateChildren, currentParent.id), { children: exParentNewChildren });
+            } else {
+                exParentNewChildren.splice(index, 0, task.id);
+                batch.update(doc(taskCollectionRefForUpdateChildren, currentParent.id), { children: exParentNewChildren });
+                // END (skip 2,3)
+                return batch.commit()
+                    .catch(error => {
+                        return Promise.reject( "taskの再配置に失敗しました。");
+                    });                
+            }
+
+            /* 2. adding to new parent */
+            const newParentNewChildren = newParent.childrenIds.concat(); // copy
+            newParentNewChildren.splice(index, 0, task.id);
+
+            batch.update(doc(taskCollectionRefForUpdateChildren, newParent.id), { children: newParentNewChildren });
+
+            /* 3. modifying target's ancestorIds */
+            const newAncestorIds = `${ newParent.ancestorIds || "" }${ newParent.id }`;
+            batch.update(doc(taskCollectionRef, task.id), { ancestorIds: newAncestorIds });
+
+            if (task.childrenIds.length === 0) {
+                // END (skip 4)
+                return batch.commit()
+                    .catch(error => {
+                        return Promise.reject( "taskの再配置に失敗しました。");
+                    });
+            }
+
+            /* 4. modifying target's descendants' ancestorIds */
+            const targetAncestorIds = `${ task.ancestorIds || "" }${ task.id }`;
+            return getDocs(
+                query(
+                    taskCollectionRef
+                    , where("ancestorIds", ">=", targetAncestorIds)
+                )
+            ).then(querySnapshot => {
+                querySnapshot.forEach(snapshot => {
+                    const descendant = snapshot.data();
+                    if (descendant.ancestorIds === null) return;
+                    const descendantNewAncestorIds = descendant.ancestorIds.replace(targetAncestorIds, `${ newAncestorIds }${ task.id }`);
+                    batch.update(doc(taskCollectionRef, snapshot.id), { ancestorIds: descendantNewAncestorIds });
+                });
+                return batch.commit();
+            })
+            .catch(error => {
+                return Promise.reject( "taskの再配置に失敗しました。");
+            });
         }
     };
 }

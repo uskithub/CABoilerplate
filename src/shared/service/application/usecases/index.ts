@@ -11,9 +11,10 @@ import { ObservingUsersProjectsScenario } from "./taskManagement/observingUsersP
 import { GetWarrantyListScenario } from "./getWarrantyList";
 
 import { ObservingUsersTimelineScenario } from "./timeline/observingUsersTimeline";
+import { UpdateTaskTitleScenario } from "./taskManagement/updateTaskTitle";
+import { RearrangeTaskScenario } from "./taskManagement/rearrangeTask";
 
 import { AllUsecases, AllUsecasesOverDomain, Robustive, Usecase as _Usecase } from "robustive-ts";
-import { UpdateTaskTitleScenario } from "./taskManagement/updateTaskTitle";
 
 export const requirements = {
     application : {
@@ -35,6 +36,7 @@ export const requirements = {
         , observingUsersTasks : ObservingUsersTasksScenario
         , observingUsersProjects : ObservingUsersProjectsScenario
         , updateTaskTitle: UpdateTaskTitleScenario
+        , rearrangeTask: RearrangeTaskScenario
     }
 };
 

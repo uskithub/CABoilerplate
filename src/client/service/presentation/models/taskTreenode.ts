@@ -39,18 +39,4 @@ export class TaskTreenode extends BaseUpdatableTreenode<TaskProperties> {
         }
         return null;
     }
-
-    arrange(targetId : string, from: string, to: string, index: number) {
-        const node = this.findTaskById(targetId);
-        const exParent = this.findTaskById(from);
-        const newParent = this.findTaskById(to);
-        if (node === null || exParent === null || newParent === null) return;
-        // 元親から削除
-        exParent.children = exParent.children.filter((child: TaskProperties) => child.id !== targetId);
-        // 新親に追加
-        newParent.children.splice(index, 0, node);
-        // newParent.isFolding = false;
-        // サブツリーを再構築
-        this._subtrees = this.content.children.map(c => new (this.constructor as any)(c));
-    }
 }

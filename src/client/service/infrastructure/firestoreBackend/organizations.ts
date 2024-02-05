@@ -52,7 +52,7 @@ export function createOrganizationFunctions(db: Firestore): OrganizationFunction
                     organizationCollectionRef
                     , where("domain", "==", domain)
                 )
-            ).then((querySnapshot) => {
+            ).then(querySnapshot => {
                 if (querySnapshot.empty) {
                     return null;
                 } else {
