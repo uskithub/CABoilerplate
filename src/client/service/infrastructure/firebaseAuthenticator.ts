@@ -1,6 +1,6 @@
 import { Authenticator, SignInStatus, SignInStatuses } from "@interfaces/authenticator";
 import { FirebaseApp, FirebaseError } from "firebase/app";
-import { Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, Unsubscribe, signInWithEmailAndPassword, signOut, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from "firebase/auth";
+import { Auth, connectAuthEmulator, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, Unsubscribe, signInWithEmailAndPassword, signOut, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from "firebase/auth";
 import { Observable, ReplaySubject } from "rxjs";
 import { UserCredential, Account } from "@/shared/service/domain/authentication/user";
 
@@ -9,8 +9,14 @@ export class FirebaseAuthenticator implements Authenticator {
     #unscriber: Unsubscribe;
     #signInStatus: ReplaySubject<SignInStatus>;
 
-    constructor(app: FirebaseApp) {
-        this.#auth = getAuth(app);
+    constructor(app: FirebaseApp, isUsingEmulator: boolean = false) {
+        if (isUsingEmulator) {
+            const auth = getAuth();
+            connectAuthEmulator(auth, "http://127.0.0.1:9099");
+            this.#auth = auth;
+        } else {
+            this.#auth = getAuth(app);
+        }
         this.#signInStatus = new ReplaySubject(1);
 
         this.#unscriber = onAuthStateChanged(this.#auth, (user) => {

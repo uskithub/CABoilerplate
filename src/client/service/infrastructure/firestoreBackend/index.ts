@@ -1,10 +1,11 @@
 import { Backend, ConductFunctions, OrganizationFunctions, ProjectFunctions, TaskFunctions, UserFunctions } from "@/shared/service/domain/interfaces/backend";
-import { Firestore } from "firebase/firestore";
 import { createUserFunctions } from "./users";
 import { createTaskFunctions } from "./tasks";
 import { createProjectFunctions } from "./projects";
 import { createOrganizationFunctions } from "./organizations";
 import { createConductFunctions } from "./conducts";
+import { FirebaseApp } from "firebase/app";
+import { connectFirestoreEmulator, Firestore, getFirestore } from "firebase/firestore";
 
 export type ID = string;
 
@@ -63,8 +64,14 @@ export class FirestoreBackend implements Backend {
     tasks: TaskFunctions;
     projects: ProjectFunctions;
 
-    constructor(db: Firestore) {
-        this.#db = db;
+    constructor(app: FirebaseApp, isUsingEmulator: boolean = false) {
+        if (isUsingEmulator) {
+            const db = getFirestore();
+            connectFirestoreEmulator(db, '127.0.0.1', 8080);
+            this.#db = db;
+        } else {
+            this.#db = getFirestore(app);
+        }
         this.#unsubscribers = new Array<() => void>();
         this.users = createUserFunctions(this.#db);
         this.conducts = createConductFunctions(this.#db, this.#unsubscribers);

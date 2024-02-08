@@ -10,7 +10,6 @@ import dependencies from "@shared/service/domain/dependencies";
 // fireabse
 import { initializeApp } from "firebase/app";
 import firebaseConfig from "@client/system/config/firebase.config.json";
-import { getFirestore } from "firebase/firestore";
 import { FirebaseAuthenticator } from "@client/service/infrastructure/firebaseAuthenticator";
 import { FirestoreBackend } from "./service/infrastructure/firestoreBackend";
 
@@ -30,7 +29,7 @@ export const dictionary = i18n(navigator.language);
 const firebaseApp = initializeApp(firebaseConfig);
 dependencies.auth = new FirebaseAuthenticator(firebaseApp);
 dependencies.presence = new FirebasePresence(firebaseApp);
-dependencies.backend = new FirestoreBackend(getFirestore(firebaseApp));
+dependencies.backend = new FirestoreBackend(firebaseApp, true);
 dependencies.analytics = new FirebaseAnalytics();
 
 loadFonts();
