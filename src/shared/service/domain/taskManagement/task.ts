@@ -244,11 +244,33 @@ export class Task implements Entity<TaskProperties> {
                         , assignees: [userId]
                         , members: [userId]
                         , involved: [userId]
+                    }
+                    , {
+                        type: TaskType.requirement
+                        , status: TaskStatus.open
+                        , title: "タスク名を変更する"
+                        , purpose: "Joynの使い方を理解する"
+                        , goal: "サブタスクをすべて完了する"
+                        , author: userId
+                        , assignees: [userId]
+                        , members: [userId]
+                        , involved: [userId]
+                    }
+                    , {
+                        type: TaskType.requirement
+                        , status: TaskStatus.open
+                        , title: "タスクを完了する"
+                        , purpose: "Joynの使い方を理解する"
+                        , goal: "サブタスクをすべて完了する"
+                        , author: userId
+                        , assignees: [userId]
+                        , members: [userId]
+                        , involved: [userId]
                         , children: [
                             {
                                 type: TaskType.todo
                                 , status: TaskStatus.open
-                                , title: "チュートリアルを完了する"
+                                , title: "タスクを実行中にする"
                                 , purpose: "Joynの使い方を理解する"
                                 , goal: "サブタスクをすべて完了する"
                                 , author: userId
@@ -257,28 +279,6 @@ export class Task implements Entity<TaskProperties> {
                                 , involved: [userId]
                             }
                         ]
-                    }
-                    , {
-                        type: TaskType.requirement
-                        , status: TaskStatus.open
-                        , title: "チュートリアルを完了する"
-                        , purpose: "Joynの使い方を理解する"
-                        , goal: "サブタスクをすべて完了する"
-                        , author: userId
-                        , assignees: [userId]
-                        , members: [userId]
-                        , involved: [userId]
-                    }
-                    , {
-                        type: TaskType.requirement
-                        , status: TaskStatus.open
-                        , title: "チュートリアルを完了する"
-                        , purpose: "Joynの使い方を理解する"
-                        , goal: "サブタスクをすべて完了する"
-                        , author: userId
-                        , assignees: [userId]
-                        , members: [userId]
-                        , involved: [userId]
                     }
 
                 ]
