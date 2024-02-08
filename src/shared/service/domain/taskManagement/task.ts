@@ -72,7 +72,7 @@ export type TaskDraftProperties = {
     instractions?: string | undefined;
 
     author?: string | undefined;            // タスクを作ったユーザ
-    owner?: string | undefined;             // タスクのオーナー（作成時はauthor）
+    owner?: Array<string> | undefined;      // タスクのオーナー（作成時はauthor） ownerでないと、project/subprojectはdeleteできない
     assignees?: Array<string> | undefined;  // タスクをアサインされたメンバ（オーナーは含まない）
     members?: Array<string> | undefined;    // タスクの全メンバ（owner、assigneesは必ず包含。作成時はauthorも含むが外すことが可能）
     involved?: Array<string> | undefined;   // このタスクの全関係者（author, member）
@@ -97,7 +97,7 @@ export type TaskProperties = {
     instractions: string | null;
 
     author: string;            // タスクを作ったユーザ
-    owner: string;             // タスクのオーナー（作成時はauthor）
+    owner?: Array<string> | undefined;      // タスクのオーナー（作成時はauthor） ownerでないと、project/subprojectはdeleteできない
     assignees: Array<string>;  // タスクをアサインされたメンバ（オーナーは含まない）
     members: Array<string>;    // タスクの全メンバ（owner、assigneesは必ず包含。作成時はauthorも含むが外すことが可能）
     involved: Array<string>;   // このタスクの全関係者（author, member）
@@ -229,7 +229,7 @@ export class Task implements Entity<TaskProperties> {
                 , purpose: "Joynの使い方を理解する"
                 , goal: "サブタスクをすべて完了する"
                 , author: userId
-                , owner: userId
+                , owner: [userId]
                 , assignees: [userId]
                 , members: [userId]
                 , involved: [userId]
@@ -241,7 +241,6 @@ export class Task implements Entity<TaskProperties> {
                         , purpose: "タスク移動の自由度を理解する"
                         , goal: "タスクの組み換えを体験する"
                         , author: userId
-                        , owner: userId
                         , assignees: [userId]
                         , members: [userId]
                         , involved: [userId]
@@ -253,7 +252,6 @@ export class Task implements Entity<TaskProperties> {
                                 , purpose: "Joynの使い方を理解する"
                                 , goal: "サブタスクをすべて完了する"
                                 , author: userId
-                                , owner: userId
                                 , assignees: [userId]
                                 , members: [userId]
                                 , involved: [userId]
@@ -267,7 +265,6 @@ export class Task implements Entity<TaskProperties> {
                         , purpose: "Joynの使い方を理解する"
                         , goal: "サブタスクをすべて完了する"
                         , author: userId
-                        , owner: userId
                         , assignees: [userId]
                         , members: [userId]
                         , involved: [userId]
@@ -279,7 +276,6 @@ export class Task implements Entity<TaskProperties> {
                         , purpose: "Joynの使い方を理解する"
                         , goal: "サブタスクをすべて完了する"
                         , author: userId
-                        , owner: userId
                         , assignees: [userId]
                         , members: [userId]
                         , involved: [userId]
