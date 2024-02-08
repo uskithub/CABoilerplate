@@ -1,5 +1,4 @@
 import { BackendErrors, ChangedTask, TaskFunctions } from "@/shared/service/domain/interfaces/backend";
-import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./entities/tasks";
 import { CollectionType, autoId } from ".";
 import { Log, Task, TaskDraft, TaskDraftProperties, TaskProperties, TaskStatus, TaskType } from "@/shared/service/domain/taskManagement/task";
 
@@ -301,14 +300,13 @@ function decodeTypeAndStatus(value: LayerStatusType): [ TaskType, TaskStatus ] {
 
 const taskConverter: FirestoreDataConverter<TaskProperties> = {
     toFirestore(modelObject: TaskProperties): DocumentData {
-        return {
+        const item = {
             typeStatus: encodeTypeAndStatus(modelObject.type, modelObject.status)
             , title: modelObject.title
             , purpose: modelObject.purpose
             , goal: modelObject.goal
             , instractions: modelObject.instractions
             , author: modelObject.author
-            , owner: modelObject.owner
             , assignees: modelObject.assignees
             , members: modelObject.members
             , involved: modelObject.involved
@@ -323,6 +321,12 @@ const taskConverter: FirestoreDataConverter<TaskProperties> = {
             // 同様に createdAt は必ず serverTimestamp() でOK
             , createdAt: serverTimestamp()
         };
+
+        if (modelObject.owner) {
+            return { ...item, owner: modelObject.owner };
+        }
+
+        return item;
     }
     , fromFirestore: (snapshot: QueryDocumentSnapshot<DocumentData>, options?: SnapshotOptions | undefined): TaskProperties => {
         const id = snapshot.id;
