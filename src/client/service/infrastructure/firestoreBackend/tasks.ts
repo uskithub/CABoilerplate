@@ -359,7 +359,7 @@ const taskConverter: FirestoreDataConverter<TaskProperties> = {
 };
 
 export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => void>): TaskFunctions {
-    const taskCollectionRef = collection(db, CollectionType.tasks).withConverter(taskConverter);
+    const rootTaskCollectionRef = collection(db, CollectionType.tasks).withConverter(taskConverter);
     const taskCollectionGroupRef = collectionGroup(db, CollectionType.tasks).withConverter(taskConverter);
     return {
         /**
@@ -375,7 +375,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                         // Closed含まない: TA1 <= x < TZ1
                         , where("typeStatus", ">=", `${ LayerStatusTypeValues.layers.task }${ LayerStatusTypeValues.statuses.preinitiation }${ LayerStatusTypeValues.types.task.todo }`)
                         , where("typeStatus", "<",  `${ LayerStatusTypeValues.layers.task }${ LayerStatusTypeValues.statuses.closed }${ LayerStatusTypeValues.types.task.todo }`)
-                        // , where("involved", "array-contains", userId)
+                        , where("involved", "array-contains", userId)
                     )
                     , (snapshot) => {
                         const changedItems = snapshot.docChanges()
@@ -462,7 +462,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
             };
 
             const collectionRef = taskDraft.ancestorIds === undefined
-                ? taskCollectionRef
+                ? rootTaskCollectionRef
                 : collection(db, `${ CollectionType.tasks }/${ taskDraft.ancestorIds.slice(0, 20) }/${ CollectionType.tasks }`).withConverter(taskConverter);
             
             const task = _recursive(taskDraft, collectionRef);
@@ -485,7 +485,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
 
         , update: (task: TaskProperties, title: string): Promise<void> => {
             const collectionRef = task.ancestorIds === null
-                ? taskCollectionRef 
+                ? rootTaskCollectionRef 
                 : collection(db, `${ CollectionType.tasks }/${ task.ancestorIds.slice(0, 20) }/${ CollectionType.tasks }`).withConverter(taskConverter);
 
             return updateDoc(
@@ -521,15 +521,23 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
         rearrange: (task: TaskProperties, currentParent: TaskProperties, newParent: TaskProperties, index: number): Promise<void> => {
             const batch = writeBatch(db);
             // Without converter. Because 'children' in firestore is string[], not TaskProperty[].
-            const taskCollectionRefForUpdateChildren = collection(db, CollectionType.tasks);
+            const rootTaskId = task.ancestorIds!.slice(0, 20);
             
+            console.log("### root task id:", rootTaskId);
+            console.log("### current parent task id:", currentParent.id);
+            console.log("### new parent task id:", newParent.id);
+            console.log("### target task id:", task.id);
+
+            const taskCollectionRef = collection(db, `${ CollectionType.tasks }/${ rootTaskId }/${ CollectionType.tasks }`);
+
             /* 1. removing or modifying from current parent */
             const exParentNewChildren = currentParent.childrenIds.filter(id => id !== task.id);
+            const currentParentTaskCollectionRef = (currentParent.id === rootTaskId) ? collection(db, CollectionType.tasks) : taskCollectionRef
             if (currentParent.id !== newParent.id) {
-                batch.update(doc(taskCollectionRefForUpdateChildren, currentParent.id), { children: exParentNewChildren });
+                batch.update(doc(currentParentTaskCollectionRef, currentParent.id), { children: exParentNewChildren });
             } else {
                 exParentNewChildren.splice(index, 0, task.id);
-                batch.update(doc(taskCollectionRefForUpdateChildren, currentParent.id), { children: exParentNewChildren });
+                batch.update(doc(currentParentTaskCollectionRef, currentParent.id), { children: exParentNewChildren });
                 // END (skip 2,3)
                 return batch.commit()
                     .catch(error => {
@@ -541,7 +549,8 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
             const newParentNewChildren = newParent.childrenIds.concat(); // copy
             newParentNewChildren.splice(index, 0, task.id);
 
-            batch.update(doc(taskCollectionRefForUpdateChildren, newParent.id), { children: newParentNewChildren });
+            const newParentTaskCollectionRef = (newParent.id === rootTaskId) ? collection(db, CollectionType.tasks) : taskCollectionRef
+            batch.update(doc(newParentTaskCollectionRef, newParent.id), { children: newParentNewChildren });
 
             /* 3. modifying target's ancestorIds */
             const newAncestorIds = `${ newParent.ancestorIds || "" }${ newParent.id }`;
@@ -559,7 +568,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
             const targetAncestorIds = `${ task.ancestorIds || "" }${ task.id }`;
             return getDocs(
                 query(
-                    taskCollectionRef
+                    taskCollectionRef.withConverter(taskConverter)
                     // , where("involved", "array-contains", userId) <--- 現状のtaskとruleでは、これをやらないとpermission-deniedになる
                     // ancestorIds が targetAncestorIds で始まるものを取得
                     , orderBy("ancestorIds")
@@ -576,7 +585,12 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                 });
                 return batch.commit()
                     .catch((error: FirestoreError) => {
-                        return Promise.reject(new ServiceError(BackendErrors.BKE0002, { cause: error }));
+                        if (error.code === "permission-denied") {
+                            Promise.reject(new ServiceError(BackendErrors.BKE0001, { cause: error }));
+                        } else {
+                            console.error(`[FirestoreError] ${ error.code }: ${ error.message }`);
+                            Promise.reject(new ServiceError(BackendErrors.SYSTEM, { cause: error }));
+                        }
                     });
             })
             .catch((error: FirestoreError) => {
