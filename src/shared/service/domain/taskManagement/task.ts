@@ -289,7 +289,7 @@ export class Task implements Entity<TaskProperties> {
     }
 
     update(title: string) : Promise<void> {
-        return dependencies.backend.tasks.update(this.properties.id, title);
+        return dependencies.backend.tasks.update(this.properties, title);
     }
 
     rearrange(currentParent: TaskProperties, newParent: TaskProperties, index: number) : Promise<void> {
