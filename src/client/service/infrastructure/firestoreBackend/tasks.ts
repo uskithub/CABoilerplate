@@ -483,9 +483,13 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                 });
         }
 
-        , update: (taskId: string, title: string): Promise<void> => {
+        , update: (task: TaskProperties, title: string): Promise<void> => {
+            const collectionRef = task.ancestorIds === null
+                ? taskCollectionRef 
+                : collection(db, `${ CollectionType.tasks }/${ task.ancestorIds.slice(0, 20) }/${ CollectionType.tasks }`).withConverter(taskConverter);
+
             return updateDoc(
-                doc(taskCollectionRef, taskId)
+                doc(collectionRef, task.id)
                 , {
                     title
                     , updatedAt: serverTimestamp() //  項目を２つ更新すると、２回、nextが発火するようだ
