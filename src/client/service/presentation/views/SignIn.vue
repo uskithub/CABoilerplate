@@ -21,7 +21,7 @@ const state = reactive<{
     , isValid: true
 });
 
-const isPresentDialog = computed(() => stores.shared.signInStatus.case === SignInStatus.signIn);
+const isPresentDialog = computed(() => stores.shared.signInStatus.case === SignInStatus.signIn || stores.shared.signInStatus.case === SignInStatus.signingIn);
 // const isFormValid = computed(() => state.email !== null && state.password !== null);
 
 </script>

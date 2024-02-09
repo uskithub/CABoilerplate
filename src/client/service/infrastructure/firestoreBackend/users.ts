@@ -152,6 +152,7 @@ export function createUserFunctions(db: Firestore): UserFunctions {
                         if (error.code === "permission-denied") {
                             subscriber.error(new ServiceError(BackendErrors.BKE0001, { cause: error }));
                         } else {
+                            console.error(`[FirestoreError] ${ error.code }: ${ error.message }`);
                             subscriber.error(new SystemError(BackendErrors.SYSTEM, { cause: error }));
                         }
                     });
