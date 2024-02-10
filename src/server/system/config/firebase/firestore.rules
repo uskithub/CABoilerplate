@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth.uid == userId;
+    }
+    
+    match /organizations/{organizationsId} {
+      allow read: if request.auth != null;
+      // セッションがあれば誰でも作れる
+      allow create: if request.auth != null;
+    }
+
+    // Required for CollectionGroup Query
+    match /{path=**}/tasks/{taskId} {
+      // involvedにいるユーザは誰でも読める
+      allow list: if request.auth.uid in resource.data.involved;
+    }
+
+    // top level task collection
+    match /tasks/{rootTaskId} {
+      // involvedにいるユーザは誰でも読める
+      allow read: if request.auth != null && request.auth.uid in resource.data.involved;
+
+      // セッションがあれば誰でも作れる
+      allow create: if request.auth != null;
+      // involvedにいるユーザは誰でも更新できる
+      allow update: if request.auth != null && request.auth.uid in resource.data.involved;
+      // 消せるのは owner だけ
+      // allow delete: if request.auth != null && request.auth.uid in resource.data.owner;
+
+      // sub collection
+      match /tasks/{taskId} {
+        allow read: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/tasks/$(rootTaskId)).data.involved;
+        allow write: if request.auth != null && request.auth.uid in getAfter(/databases/$(database)/documents/tasks/$(rootTaskId)).data.involved;
+      }
+    }
+  }
+}

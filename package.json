@@ -2,7 +2,7 @@
   "name": "caboilerplate",
   "version": "0.0.0",
   "scripts": {
-    "serve": "vite",
+    "serve": "firebase emulators:start & vite",
     "build": "vite build",
     "dev": "nodemon --config src/server/system/config/nodemon.json src/server/system/main.ts",
     "preview": "vite preview",
@@ -10,7 +10,7 @@
     "playground": "ts-node src/playground.ts"
   },
   "dependencies": {
-    "firebase": "^9.7.0",
+    "firebase": "^10.8.0",
     "react": "^18.1.0",
     "roboto-fontface": "*",
     "rxjs": "^7.5.5",

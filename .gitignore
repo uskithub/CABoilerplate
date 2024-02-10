@@ -27,3 +27,7 @@ amplifytools.xcconfig
 
 amplify/backend/api/*/build
 amplify/backend/api/*/resolvers
+
+# for firebase emulator
+
+*-debug.log
