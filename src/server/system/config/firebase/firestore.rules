@@ -1,19 +1,24 @@
 rules_version = '2';
 service cloud.firestore {
 
-  function user_is_authenticated() {
-      return request.auth != null;
+  function forbidden(comment) {
+    return false;
   }
 
-  function user_is_authorized(userId) {
-      return user_is_authenticated() && request.auth.uid == userId;
+  function user_is_authenticated() {
+    return request.auth != null;
+  }
+
+  function user_oneself(userId) {
+    return user_is_authenticated() && request.auth.uid == userId;
   }
 
   match /databases/{database}/documents {
 
     match /users/{userId} {
-      allow get: if user_is_authorized(userId);
-      allow write: if user_is_authorized(userId);
+      allow get: if user_oneself(userId);
+      allow list: if forbidden("誰でも取得できてしまうので許可しない");
+      allow write: if user_oneself(userId);
     }
     
     match /organizations/{organizationsId} {
@@ -25,7 +30,8 @@ service cloud.firestore {
     // top level task collection
     match /tasks/{taskId} {
       // involvedにいるユーザは誰でも読める
-      allow read: if user_is_authenticated() && request.auth.uid in debug(resource.data).involved;
+      allow get: if user_is_authenticated() && request.auth.uid in debug(resource.data).involved;
+      allow list: if user_is_authenticated() && request.auth.uid in debug(resource.data).involved;
 
       // セッションがあれば誰でも作れる
       allow create: if user_is_authenticated();
