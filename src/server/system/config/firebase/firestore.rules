@@ -31,6 +31,9 @@ service cloud.firestore {
     match /tasks/{taskId} {
       // involvedにいるユーザは誰でも読める
       allow get: if user_is_authenticated() && request.auth.uid in debug(resource.data).involved;
+
+      // where句で指定した値が resource.data に入ってくる
+      // なので、 queryに where("involved", "array-contains", userId) を指定しないと以下のルールでエラーにできる
       allow list: if user_is_authenticated() && request.auth.uid in debug(resource.data).involved;
 
       // セッションがあれば誰でも作れる
