@@ -1,41 +1,38 @@
 rules_version = '2';
 service cloud.firestore {
+
+  function user_is_authenticated() {
+      return request.auth != null;
+  }
+
+  function user_is_authorized(userId) {
+      return user_is_authenticated() && request.auth.uid == userId;
+  }
+
   match /databases/{database}/documents {
 
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth.uid == userId;
+      allow get: if user_is_authorized(userId);
+      allow write: if user_is_authorized(userId);
     }
     
     match /organizations/{organizationsId} {
-      allow read: if request.auth != null;
+      allow read: if user_is_authenticated();
       // セッションがあれば誰でも作れる
-      allow create: if request.auth != null;
-    }
-
-    // Required for CollectionGroup Query
-    match /{path=**}/tasks/{taskId} {
-      // involvedにいるユーザは誰でも読める
-      allow list: if request.auth.uid in resource.data.involved;
+      allow create: if user_is_authenticated();
     }
 
     // top level task collection
-    match /tasks/{rootTaskId} {
+    match /tasks/{taskId} {
       // involvedにいるユーザは誰でも読める
-      allow read: if request.auth != null && request.auth.uid in resource.data.involved;
+      allow read: if user_is_authenticated() && request.auth.uid in debug(resource.data).involved;
 
       // セッションがあれば誰でも作れる
-      allow create: if request.auth != null;
+      allow create: if user_is_authenticated();
       // involvedにいるユーザは誰でも更新できる
-      allow update: if request.auth != null && request.auth.uid in resource.data.involved;
+      allow update: if user_is_authenticated() && request.auth.uid in resource.data.involved;
       // 消せるのは owner だけ
-      // allow delete: if request.auth != null && request.auth.uid in resource.data.owner;
-
-      // sub collection
-      match /tasks/{taskId} {
-        allow read: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/tasks/$(rootTaskId)).data.involved;
-        allow write: if request.auth != null && request.auth.uid in getAfter(/databases/$(database)/documents/tasks/$(rootTaskId)).data.involved;
-      }
+      // allow delete: if user_is_authenticated() && request.auth.uid in resource.data.owner;
     }
   }
 }
