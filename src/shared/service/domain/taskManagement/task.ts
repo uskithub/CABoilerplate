@@ -163,7 +163,7 @@ export class TaskDraft implements Entity<TaskDraftProperties> {
             , goal: this._properties.goal || null
             , instractions: this._properties.instractions || null
             , author: this._properties.author || this._userId
-            , owner: this._properties.owner || this._userId
+            , owner: this._properties.owner || [this._userId]
             , assignees: this._properties.assignees || []
             , members: this._properties.members || [this._userId]
             , involved: this._properties.involved || [this._userId]

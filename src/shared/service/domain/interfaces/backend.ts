@@ -81,7 +81,7 @@ export type ProjectFunctions = {
      * @param projectId 
      */
     observeUsersProjects(userId: string): Observable<ChangedTask[]>
-    observe(userId: string, projectId: string): Observable<Task>
+    // observe(userId: string, projectId: string): Observable<Task>
 };
 
 export interface Backend {

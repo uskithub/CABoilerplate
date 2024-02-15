@@ -12,11 +12,6 @@ const jestConfig: JestConfigWithTsJest = {
     , roots: [ "<rootDir>" ]
     , modulePaths: [ compilerOptions.baseUrl ]
     , moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths /*, { prefix: '<rootDir>/' } */)
-    , globals: {
-        "ts-jest": {
-            tsconfig: "tsconfig.json"
-        }
-    }
 };
 
 export default jestConfig;

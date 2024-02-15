@@ -1,11 +1,10 @@
 import { ChangedTask, ItemChangeType, ProjectFunctions } from "@/shared/service/domain/interfaces/backend";
-import { convert, convertLog, FSLog, FSTask, LayerStatusTypeValues } from "./entities/tasks";
+import {  LayerStatusTypeValues } from "./entities/tasks";
 import { CollectionType } from ".";
-import { Log, Task } from "@/shared/service/domain/taskManagement/task";
-
 
 import { addDoc, collection, collectionGroup, doc, DocumentChangeType, Firestore, getDocs, onSnapshot, orderBy, where, query, DocumentSnapshot, DocumentData, Unsubscribe } from "firebase/firestore";
 import { Observable } from "rxjs";
+import { taskConverter } from "./tasks";
 
 export function createProjectFunctions(db: Firestore, unsubscribers: Array<() => void>): ProjectFunctions {
     return {
@@ -17,7 +16,7 @@ export function createProjectFunctions(db: Firestore, unsubscribers: Array<() =>
             return new Observable(subscriber => {
                 const unsubscribe = onSnapshot(
                     query(
-                        collection(db, CollectionType.tasks)
+                        collection(db, CollectionType.tasks).withConverter(taskConverter)
                         , where("typeStatus", ">=", `${ LayerStatusTypeValues.layers.project }${ LayerStatusTypeValues.statuses.preinitiation }${ LayerStatusTypeValues.types.project.privateSubproject }`)
                         , where("typeStatus", "<",  `${ LayerStatusTypeValues.layers.project }${ LayerStatusTypeValues.statuses.closed }${ LayerStatusTypeValues.types.project.privateSubproject }`)
                         , where("involved", "array-contains", userId)
@@ -26,8 +25,8 @@ export function createProjectFunctions(db: Firestore, unsubscribers: Array<() =>
                         const promises = snapshot.docChanges()
                             .map(change => {
                                 const taskId = change.doc.id;
-                                const taskData = change.doc.data() as FSTask;
-                                return ChangedTask[change.type]({ id: taskId, item: convert(taskId, taskData) } );
+                                const task = change.doc.data();
+                                return ChangedTask[change.type]({ id: taskId, item: task } );
                                 // childrenを取得する場合をメモのために残しておく
                                 // return getDocs(
                                 //     query(
@@ -73,13 +72,13 @@ export function createProjectFunctions(db: Firestore, unsubscribers: Array<() =>
                 return () => unsubscribe();
             });
         }
-        
+        /*
         , observe: (userId: string, projectId: string): Observable<Task> => {
-            const taskCollectionRef = collection(db, CollectionType.tasks);
+            const taskCollectionRef = collection(db, CollectionType.tasks).withConverter(taskConverter);
             const unsubscribes: Unsubscribe[] = [];
             return new Observable(subscriber => {
-                let projctData: FSTask;
-                let descendants: Task[];
+                let projctData: TaskProperties;
+                let descendants: TaskProperties[];
                 let logs: Log[];
 
                 new Promise<void>((resolve) => {
@@ -95,14 +94,14 @@ export function createProjectFunctions(db: Firestore, unsubscribers: Array<() =>
                          *         allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/tasks/$(taskId)).data.involved;
                          *     }
                          * }
-                         */
+                         * /
                         doc(taskCollectionRef, projectId)
-                        , (snapshot: DocumentSnapshot<DocumentData>) => {
-                            const _projctData = snapshot.data() as FSTask;
-                            if (!projctData) {
+                        , (snapshot: DocumentSnapshot<TaskProperties>) => {
+                            const _projctData = snapshot.data();
+                            if (!projctData && _projctData) {
                                 projctData = _projctData;
                                 resolve();
-                            } else {
+                            } else if (_projctData){
                                 projctData = _projctData;
                             }
                         });
@@ -118,10 +117,10 @@ export function createProjectFunctions(db: Firestore, unsubscribers: Array<() =>
                                 )
                                 , (snapshot) => {
                                     if (!descendants) {
-                                        const _descendants = new Array<Task>();
+                                        const _descendants = new Array<TaskProperties>();
                                         snapshot.forEach(doc => {
-                                            const taskData = doc.data() as FSTask;
-                                            _descendants.push(convert(taskData.id, taskData));
+                                            const taskProperties = doc.data();
+                                            _descendants.push(taskProperties);
                                         });
                                         descendants = _descendants;
                                         resolve();
@@ -129,17 +128,17 @@ export function createProjectFunctions(db: Firestore, unsubscribers: Array<() =>
                                         snapshot.docChanges()
                                             .map(change => {
                                                 const taskId = change.doc.id;
-                                                const taskData = change.doc.data() as FSTask;
+                                                const taskProperties = change.doc.data();
                                                 // TODO
                                                 switch (change.type) {
                                                 case ItemChangeType.added: {
-                                                    descendants.unshift(convert(taskId, taskData));
+                                                    descendants.unshift(taskProperties);
                                                     break;
                                                 }
                                                 case ItemChangeType.modified: {
                                                     for (let i = 0, imax = descendants.length; i < imax; i++) {
                                                         if (descendants[i].id === taskId) {
-                                                            descendants.splice(i, 1, convert(taskId, taskData));
+                                                            descendants.splice(i, 1, taskProperties);
                                                             break;
                                                         }
                                                     }
@@ -224,6 +223,6 @@ export function createProjectFunctions(db: Firestore, unsubscribers: Array<() =>
                     })
                     .catch((error) => subscriber.error(error));
             });
-        }
+        }*/
     };
 }

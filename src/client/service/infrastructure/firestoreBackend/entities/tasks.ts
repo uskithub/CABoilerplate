@@ -293,8 +293,8 @@ const convertTimestamp = (t: Timestamp|FieldValue|null): Date => {
         return t.toDate();
     }
 };
-
-export function convert(id: string, task: FSTask, logs: Log[]|null = [], descendants: Task[]|null = null): Task {
+/*
+function convert(id: string, task: FSTask, logs: Log[]|null = [], descendants: Task[]|null = null): Task {
 
     let _descendants = new Array<Task>();
     if (descendants !== null) {
@@ -345,7 +345,7 @@ export function convert(id: string, task: FSTask, logs: Log[]|null = [], descend
 }
 
 
-export function convertLog(log: FSLog): Log {
+function convertLog(log: FSLog): Log {
     return {
         id: log.id
         , ancestorIds: log.ancestorIds
@@ -356,3 +356,4 @@ export function convertLog(log: FSLog): Log {
         , finishedAt: (log.finishedAt !== null && log.finishedAt !== undefined) ? log.finishedAt.toDate() : null
     };
 }
+*/

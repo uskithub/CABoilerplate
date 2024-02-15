@@ -299,7 +299,7 @@ function decodeTypeAndStatus(value: LayerStatusType): [ TaskType, TaskStatus ] {
     return [ type, status ];
 }
 
-const taskConverter: FirestoreDataConverter<TaskProperties> = {
+export const taskConverter: FirestoreDataConverter<TaskProperties> = {
     toFirestore(modelObject: TaskProperties): DocumentData {
         const item = {
             typeStatus: encodeTypeAndStatus(modelObject.type, modelObject.status)
