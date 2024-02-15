@@ -1,6 +1,16 @@
 {
     "users" : {
-        "SoR4yFNnoCYelNVVr1S3YzcOYg22" :{
+        "SoR4yFNnoCYelNVVr1S3YzcOYg22" : {
+            "createdAt" : "2020-07-01T07:00:00.000Z"
+            , "displayName" : "斉藤祐輔"
+            , "email" : "yusuke.saito@jibunstyle.com"
+            , "isEmailVerified" : true
+            , "organizationAndRoles" : [
+                "1DKTuq8pBl2E4ThOyfGQA"
+            ]
+            , "photoUrl" : "https://lh3.googleusercontent.com/a/ACg8ocIUXRt3taSnafGVRLtluwbtjlJv300-mjl5KNioHGIZJ2Y=s96-c"
+        }
+        , "jELRVkFjOLb9l5zukRxlEMOfRsB3" : {
             "createdAt" : "2020-07-01T07:00:00.000Z"
             , "displayName" : "斉藤祐輔"
             , "email" : "yusuke.saito@jibunstyle.com"

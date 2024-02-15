@@ -21,15 +21,17 @@ const FIREBASE_JSON = resolve(__dirname, "../../../firebase.json");
 let testEnv: RulesTestEnvironment;
 
 async function importTestData(db: Firestore) {
+    let summary: { [x:string]: number } = {};
     for (const [collectionName, documents] of Object.entries(testData)) {
         const collectionRef = collection(db, collectionName);
+        summary[collectionName] = 0;
         for (const [documentId, documentData] of Object.entries(documents)) {
             await setDoc(doc(collectionRef, documentId), documentData);
+            summary[collectionName] += 1;
         }
     }
-    console.log('Data imported successfully');
+    console.log('Data imported successfully:', summary);
 }
-
 
 beforeAll(async () => {
     const { host, port } = getFirestoreCoverageMeta(PROJECT_ID, FIREBASE_JSON);
@@ -88,9 +90,83 @@ describe(`${ CollectionType.users } collection`, () => {
             await expectFirestorePermissionDenied(db.collection(CollectionType.users).doc(userId).get());
         });
 
-        test("認証済ユーザが list できること", async () => {
+        test("認証済ユーザが get できること", async () => {
             const db = testEnv.authenticatedContext(userId).firestore();
             await expectPermissionGetSucceeds(db.collection(CollectionType.users).doc(userId).get());
+        });
+    });
+
+    describe("create", () => {
+        const userId = "not-exist-user-id";
+        test("未認証ユーザが create できないこと", async () => {
+            const db = testEnv.unauthenticatedContext().firestore();
+            await expectFirestorePermissionDenied(
+                db.collection(CollectionType.users)
+                    .doc(userId)
+                    .set({
+                        displayName: "hogehogeさん"
+                    })
+            );
+        });
+
+        test("認証済ユーザが自分のuidをidに create できること", async () => {
+            const db = testEnv.authenticatedContext(userId).firestore();
+            await expectPermissionGetSucceeds(
+                db.collection(CollectionType.users)
+                    .doc(userId)
+                    .set({
+                        displayName: "hogehogeさん"
+                    })
+            );
+        });
+
+        test("認証済ユーザが自分のuid以外をidに create できないこと", async () => {
+            const db = testEnv.authenticatedContext(userId).firestore();
+            await expectFirestorePermissionDenied(
+                db.collection(CollectionType.users)
+                    .doc("not-exist-another-user-id")
+                    .set({
+                        displayName: "hogehogeさん"
+                    })
+            );
+        });
+    });
+
+    describe("update", () => {
+        const userId = "SoR4yFNnoCYelNVVr1S3YzcOYg22";
+        const anotherUserId = "jELRVkFjOLb9l5zukRxlEMOfRsB3";
+        test("未認証ユーザが update できないこと", async () => {
+            const db = testEnv.unauthenticatedContext().firestore();
+            await expectFirestorePermissionDenied(
+                db.collection(CollectionType.users)
+                    .doc(userId)
+                    .update({
+                        displayName: "hogehogeさん"
+                    })
+            );
+        });
+
+        test("認証済ユーザが自分のdocumentを update できること", async () => {
+            const db = testEnv.authenticatedContext(userId).firestore();
+            await expectPermissionGetSucceeds(
+                db.collection(CollectionType.users)
+                    .doc(userId)
+                    .update({
+                        displayName: "hogehogeさん"
+                    })
+            );
+        });
+
+        // 上とどちらか１つならテストが通るが、２つともにするといかがエラーとなる
+        test("認証済ユーザが自分以外のdocumentを update できないこと", async () => {
+            const db = testEnv.authenticatedContext(userId).firestore();
+            await expectFirestorePermissionDenied(
+                db.collection(CollectionType.users)
+                    .doc(anotherUserId)
+                    .update({
+                        displayName: "hogehogeさん"
+                    })
+            );
         });
     });
 });
