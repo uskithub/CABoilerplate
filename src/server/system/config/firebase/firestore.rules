@@ -16,8 +16,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     match /users/{userId} {
-      allow get: if user_oneself(userId);
       allow list: if forbidden("誰でも取得できてしまうので許可しない");
+      allow get: if user_oneself(userId);
       allow write: if user_oneself(userId);
     }
     

@@ -75,7 +75,7 @@ export class PasswordValidation extends AbstructValidation<string, PasswordValid
     }
 }
 
-const isUserCredential = (arg: Account | UserCredential): arg is UserCredential => arg.user !== undefined;
+const isUserCredential = (arg: Account | UserCredential): arg is UserCredential => Object.keys(arg).findIndex(k => k === "user") > -1;
 
 export class User implements Entity<UserProperties> {
     account: Account;

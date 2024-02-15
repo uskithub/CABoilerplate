@@ -1,0 +1,45 @@
+{
+    "users" : {
+        "SoR4yFNnoCYelNVVr1S3YzcOYg22" :{
+            "createdAt" : "2020-07-01T07:00:00.000Z"
+            , "displayName" : "斉藤祐輔"
+            , "email" : "yusuke.saito@jibunstyle.com"
+            , "isEmailVerified" : true
+            , "organizationAndRoles" : [
+                "1DKTuq8pBl2E4ThOyfGQA"
+            ]
+            , "photoUrl" : "https://lh3.googleusercontent.com/a/ACg8ocIUXRt3taSnafGVRLtluwbtjlJv300-mjl5KNioHGIZJ2Y=s96-c"
+        }
+    }
+    , "organizations" : {
+        "1DKTuq8pBl2E4ThOyfGQ" : {
+            "administratorIds" : []
+            , "collaboratorIds" : []
+            , "createdAt" : "2024-02-15T03:53:18.000Z"
+            , "domain" : "jibunstyle.com"
+            , "memberIds" : []
+            , "ownerIds" : [
+                "SoR4yFNnoCYelNVVr1S3YzcOYg22"
+            ]
+        }
+    }
+    , "tasks" : {
+        "5ebSFBoMA09fXwwkIVmo" : {
+            "ancestorIds": "JLGGh2vfLlAFCn3RAKqzOsGORIYkY0g0FGGfPXQB"
+            , "assignees" :["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "author": "SoR4yFNnoCYelNVVr1S3YzcOYg22"
+            , "children" : []
+            , "createdAt" :"2020-07-01T07:00:00.000Z"
+            , "deadline" : null
+            , "goal": "サブタスクをすべて完了する"
+            , "instractions" : null
+            , "involved" : ["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "members": ["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "purpose" : "Joynの使い方を理解する"
+            , "startedAt" :null
+            , "templateId" : null
+            , "title" : "タスクを実行中にする"
+            , "typeStatus" : "TB1"
+        }
+    }
+}

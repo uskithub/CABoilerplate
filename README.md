@@ -821,3 +821,117 @@ export default createVuetify(
   }
 );
 ```
+
+# firebase Local Emulator Suite
+
+Firebase CLI をインストールします。
+
+@see: https://firebase.google.com/docs/cli?hl=ja&_gl=1*ufx907*_up*MQ..*_ga*MTMxMzc3ODYzNi4xNzA3OTYzOTM3*_ga_CW55HF8NVT*MTcwNzk2MzkzNi4xLjAuMTcwNzk2Mzk2MS4wLjAuMA..#install-cli-mac-linux
+
+
+```shell
+% curl -sL https://firebase.tools | bash
+% firebase login
+```
+
+```shell
+% firebase init
+% firebase init emulators
+```
+
+```firebase.json
+{
+  "database": {
+    "rules": "src/server/system/config/firebase/database.rules.json"
+  },
+  "firestore": {
+    "rules": "src/server/system/config/firebase/firestore.rules",
+    "indexes": "src/server/system/config/firebase/firestore.indexes.json"
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "database": {
+      "port": 9000
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  }
+}
+```
+
+ログファイルの場所はいじれない。
+
+```.gitignore
+# for firebase emulator
+
+*-debug.log
+```
+
+```package.json
+  "scripts": {
+    "serve": "firebase emulators:start & vite",
+    ...
+  },
+```
+
+# テスト
+
+最近の動向からJestを採用する。
+
+```shell
+% yarn add --dev jest ts-jest @types/jest
+% yarn ts-jest config:init
+```
+
+```package.json
+  "scripts": {
+    ...
+    "test": "jest",
+  },
+```
+
+testファイルにもimportに@が使えるように、tsconfig.jsonのincludeに以下を追加する。
+
+```tsconfig.json
+  "include": [
+    "test/**/*.ts",
+  ],
+```
+
+compile時にはtestフォルダは除外したいので tsconfig.build.json を作成。
+
+```tsconfig.build.json
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "test"
+  ]
+}
+```
+
+@see: https://qiita.com/takagimeow/items/f581f8a7bce97cefd7ff
+@see: https://zenn.dev/no4_dev/articles/15ba046e245ba090a3a3-2
+
+
+
+### Jest でも tsconfig の paths を使えるようにする
+
+@see: https://kulshekhar.github.io/ts-jest/docs/getting-started/paths-mapping
+
+
+
+## firestoreのテスト
+
+@see: https://firebase.google.com/docs/firestore/security/test-rules-emulator?hl=ja&_gl=1*kxn0jx*_up*MQ..*_ga*MTI1NjcxMTQyNi4xNzA3ODgxNTc1*_ga_CW55HF8NVT*MTcwNzg4MTU3NS4xLjAuMTcwNzg4MTU3NS4wLjAuMA..
+
+
+```shell
+％ yarn add --dev @firebase/rules-unit-testing
+```

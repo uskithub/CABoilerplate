@@ -26,7 +26,7 @@
     "esm": true, // nodeでimportを使うために必要
     "require": ["tsconfig-paths/register"] // tsconfig.jsonのpathsを使うために必要
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "amplify/**/*.graphql"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "test/**/*.ts"],
   "vueCompilerOptions": {
     "plugins": ["@volar/vue-language-plugin-pug"]
   },
