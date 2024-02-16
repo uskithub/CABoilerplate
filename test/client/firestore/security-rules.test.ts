@@ -135,13 +135,15 @@ describe(`${ CollectionType.users } collection`, () => {
     describe("update", () => {
         const userId = "SoR4yFNnoCYelNVVr1S3YzcOYg22";
         const anotherUserId = "jELRVkFjOLb9l5zukRxlEMOfRsB3";
+        const displayName = "hogehogeさん";
+
         test("未認証ユーザが update できないこと", async () => {
             const db = testEnv.unauthenticatedContext().firestore();
             await expectFirestorePermissionDenied(
                 db.collection(CollectionType.users)
                     .doc(userId)
                     .update({
-                        displayName: "hogehogeさん"
+                        displayName
                     })
             );
         });
@@ -152,21 +154,46 @@ describe(`${ CollectionType.users } collection`, () => {
                 db.collection(CollectionType.users)
                     .doc(userId)
                     .update({
-                        displayName: "hogehogeさん"
+                        displayName
                     })
             );
+
+            /**
+             * Updateだけでgetしないと以下のエラーが発生する
+             * console.warn
+             *   [2024-02-16T14:39:34.780Z]  @firebase/firestore: Firestore (10.8.0): GrpcConnection RPC 'Write' stream 0x5a09b9f3 error. Code: 5 Message: 5 NOT_FOUND: no entity to update: app: "dev~unit-testing"
+             *   path <
+             *     Element {
+             *       type: "users"
+             *       name: "SoR4yFNnoCYelNVVr1S3YzcOYg22"
+             *     }
+             *   >
+             *   
+             *   at Logger.defaultLogHandler [as _logHandler] (node_modules/@firebase/logger/src/logger.ts:115:57)
+             *   at Logger.Object.<anonymous>.Logger.warn (node_modules/@firebase/logger/src/logger.ts:206:5)
+             *   at logWarn (node_modules/@firebase/firestore/src/util/log.ts:69:15)
+             *   at ClientDuplexStreamImpl.<anonymous> (node_modules/@firebase/firestore/src/platform/node/grpc_connection.ts:303:9)
+             *   at Object.onReceiveStatus (node_modules/@grpc/grpc-js/src/client.ts:705:18)
+             *   at Object.onReceiveStatus (node_modules/@grpc/grpc-js/src/client-interceptors.ts:419:48)
+             *   at node_modules/@grpc/grpc-js/src/resolving-call.ts:132:24
+             */
+            const tmp = await db.collection(CollectionType.users)
+                .doc(userId)
+                .get();
+
+            expect(tmp.data()!.displayName).toBe(displayName);
         });
 
-        // 上とどちらか１つならテストが通るが、２つともにするといかがエラーとなる
         test("認証済ユーザが自分以外のdocumentを update できないこと", async () => {
             const db = testEnv.authenticatedContext(userId).firestore();
             await expectFirestorePermissionDenied(
                 db.collection(CollectionType.users)
                     .doc(anotherUserId)
                     .update({
-                        displayName: "hogehogeさん"
+                        displayName
                     })
             );
         });
+        
     });
 });
