@@ -23,7 +23,7 @@ interface FSTask {
     involved: Array<string>;
 
     rearrangeRootDepth: number; // セキュリティルールで使う。Rearrange対象のタスクのRootからの深さ
-    ancestorIds: string | null;
+    ancestorIds: Array<string>;
     children: Array<string>;
 
     // invitationIds?: Array<string> | undefined;
@@ -361,6 +361,8 @@ export const taskConverter: FirestoreDataConverter<TaskProperties> = {
 
 export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => void>): TaskFunctions {
     const rootTaskCollectionRef = collection(db, CollectionType.tasks).withConverter(taskConverter);
+    const taskCollectionGroupRef = collectionGroup(db, CollectionType.tasks).withConverter(taskConverter);
+
     return {
         /**
          * ユーザがInvolvedにいて、Closeされていない、Project以外のタスクを返す
@@ -371,7 +373,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
             return new Observable(subscriber => {
                 const unsubscribe = onSnapshot(
                     query(
-                        rootTaskCollectionRef
+                        taskCollectionGroupRef
                         // Closed含まない: TA1 <= x < TZ1
                         , where("typeStatus", ">=", `${ LayerStatusTypeValues.layers.task }${ LayerStatusTypeValues.statuses.preinitiation }${ LayerStatusTypeValues.types.task.todo }`)
                         , where("typeStatus", "<",  `${ LayerStatusTypeValues.layers.task }${ LayerStatusTypeValues.statuses.closed }${ LayerStatusTypeValues.types.task.todo }`)
@@ -417,7 +419,7 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
              * ツリー構造のタスクをバッチ処理します。
              * @returns IDやcreatedAtを設定して返します。
              */
-            const _recursive = (taskDraft: TaskDraftProperties, createdAt: Date = new Date(), ancestorIds: string | null = null): TaskProperties => {
+            const _recursive = (taskDraft: TaskDraftProperties, createdAt: Date = new Date(), ancestorIds: string[] = [], collectionRef: CollectionReference = collection(db, CollectionType.tasks)): TaskProperties => {
                 const id = autoId();
 
                 const node = {
@@ -444,17 +446,18 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
 
                 // 子がある場合は先に子を処理する（IDを取得するため）
                 if (taskDraft.children && taskDraft.children.length > 0) {
-                    const nextAncestorIds = (ancestorIds || "") + id;
+                    const nextAncestorIds = [...ancestorIds, id];
+                    const nextCollectionRef = collection(collectionRef, `${ id }/${ CollectionType.tasks }`);
                     // 再帰処理
                     taskDraft.children.forEach(child => {
-                        const childNode = _recursive(child, createdAt, nextAncestorIds);
+                        const childNode = _recursive(child, createdAt, nextAncestorIds, nextCollectionRef);
                         node.children.push(childNode);
                         node.childrenIds.push(childNode.id);
                     });
                 }
                 
                 // 最後に親を追加する
-                batch.set(doc(rootTaskCollectionRef, id), node)
+                batch.set(doc(collectionRef, id).withConverter(taskConverter), node)
                 // batch.set 後に createdAt を設定する（実際の値はサーバ側で設定させるため）
                 node.createdAt = createdAt;
                 return node;
@@ -511,9 +514,13 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
          */
         rearrange: (task: TaskProperties, currentParent: TaskProperties, newParent: TaskProperties, index: number): Promise<void> => {
             const batch = writeBatch(db);
-            // Without converter. Because 'children' in firestore is string[], not TaskProperty[].
-            const taskCollectionRefForUpdateChildren = collection(db, CollectionType.tasks);
             
+            const createCollectionRef = (ancestorIds: Array<string>) => {
+                return ancestorIds.reduce((collectionRef, id) => {
+                    return collection(collectionRef, `${ id }/${ CollectionType.tasks }`);
+                }, collection(db, CollectionType.tasks));
+            };
+
             console.log("### current parent task id:", currentParent.id);
             console.log("### new parent task id:", newParent.id);
             console.log("### target task id:", task.id);
@@ -521,10 +528,10 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
             /* 1. removing or modifying from current parent */
             const exParentNewChildren = currentParent.childrenIds.filter(id => id !== task.id);
             if (currentParent.id !== newParent.id) {
-                batch.update(doc(taskCollectionRefForUpdateChildren, currentParent.id), { children: exParentNewChildren });
+                batch.update(doc(createCollectionRef(currentParent.ancestorIds), currentParent.id), { children: exParentNewChildren });
             } else {
                 exParentNewChildren.splice(index, 0, task.id);
-                batch.update(doc(taskCollectionRefForUpdateChildren, currentParent.id), { children: exParentNewChildren });
+                batch.update(doc(createCollectionRef(currentParent.ancestorIds), currentParent.id), { children: exParentNewChildren });
                 // END (skip 2,3)
                 return batch.commit()
                     .catch(error => {
@@ -536,11 +543,11 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
             const newParentNewChildren = newParent.childrenIds.concat(); // copy
             newParentNewChildren.splice(index, 0, task.id);
 
-            batch.update(doc(taskCollectionRefForUpdateChildren, newParent.id), { children: newParentNewChildren });
+            batch.update(doc(createCollectionRef(newParent.ancestorIds), newParent.id), { children: newParentNewChildren });
 
             /* 3. modifying target's ancestorIds */
-            const newAncestorIds = `${ newParent.ancestorIds || "" }${ newParent.id }`;
-            batch.update(doc(taskCollectionRefForUpdateChildren, task.id), { ancestorIds: newAncestorIds });
+            const newAncestorIds = [ ...newParent.ancestorIds, newParent.id ];
+            batch.update(doc(createCollectionRef(newAncestorIds), task.id), { ancestorIds: newAncestorIds });
 
             if (task.childrenIds.length === 0) {
                 // END (skip 4)
@@ -551,27 +558,26 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
             }
 
             /* 4. modifying target's descendants' ancestorIds */
-            const targetAncestorIds = `${ task.ancestorIds || "" }${ task.id }`;
-            const depth = targetAncestorIds.length / 20;
+            const targetAncestorIds = [ ...task.ancestorIds, task.id ];
             
             return getDocs(
                 query(
-                    rootTaskCollectionRef
+                    createCollectionRef(targetAncestorIds).withConverter(taskConverter)
                     // , where("involved", "array-contains", userId) <--- 現状のtaskとruleでは、これをやらないとpermission-deniedになる
                     // ancestorIds が targetAncestorIds で始まるものを取得
-                    , orderBy("ancestorIds")
-                    , startAt(targetAncestorIds)
-                    , endAt(`${ targetAncestorIds }z`) // "1" < "Z" < "z"
+                    // , orderBy("ancestorIds")
+                    // , startAt(targetAncestorIds)
+                    // , endAt(`${ targetAncestorIds }z`) // "1" < "Z" < "z"
                 )
             ).then(querySnapshot => {
                 querySnapshot.forEach(snapshot => {
                     const descendant = snapshot.data();
                     console.log(">>> descendant:", snapshot.id);
                     if (descendant.ancestorIds === null) return;
-                    const descendantNewAncestorIds = descendant.ancestorIds.replace(targetAncestorIds, `${ newAncestorIds }${ task.id }`);
-                    batch.update(doc(taskCollectionRefForUpdateChildren, snapshot.id), {
-                        rearrangeRootDepth: depth
-                        , ancestorIds: descendantNewAncestorIds 
+                    const descendantNewAncestorIds = [...newAncestorIds, task.id ];
+                    batch.set(doc(createCollectionRef(descendantNewAncestorIds), snapshot.id), {
+                        ...descendant
+                        , ancestorIds: descendantNewAncestorIds
                     });
                 });
                 return batch.commit()

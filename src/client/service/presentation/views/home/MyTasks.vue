@@ -37,8 +37,8 @@ const organizeToTreeStructure = (tasks: TaskProperties[]): [ Record<string, Task
     return [ _taskIdMap
         , tasks
             .reduce((result, t) => {
-                if (t.ancestorIds) {
-                    const parentId = t.ancestorIds.slice(-TASK_ID_LENGTH);
+                if (t.ancestorIds.length > 0) {
+                    const parentId = t.ancestorIds[t.ancestorIds.length - 1];
                     if (_taskIdMap[parentId] !== undefined) {
                         const idx = _taskIdMap[parentId].childrenIds.findIndex(id => id === t.id);
                         _taskIdMap[parentId].children[idx] = t;

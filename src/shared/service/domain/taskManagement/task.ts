@@ -77,7 +77,7 @@ export type TaskDraftProperties = {
     members?: Array<string> | undefined;    // タスクの全メンバ（owner、assigneesは必ず包含。作成時はauthorも含むが外すことが可能）
     involved?: Array<string> | undefined;   // このタスクの全関係者（author, member）
 
-    ancestorIds?: string | undefined;
+    ancestorIds?: Array<string>;
     children?: Array<TaskDraftProperties> | undefined; // 子がない場合は明確に空配列を入れる
 
     startedAt?: Date | undefined;
@@ -102,7 +102,7 @@ export type TaskProperties = {
     members: Array<string>;    // タスクの全メンバ（owner、assigneesは必ず包含。作成時はauthorも含むが外すことが可能）
     involved: Array<string>;   // このタスクの全関係者（author, member）
 
-    ancestorIds: string | null;
+    ancestorIds: Array<string>;
     children: Array<TaskProperties>; // 子がない場合は明確に空配列を入れる
     childrenIds: Array<string>;      // Firestoreからの取得時、UserTasksなど、実態が取得できない場合があるため、IDのみを保持する
 
@@ -130,7 +130,7 @@ const initialTask = {
     // , members: new Array<string>()    // タスクの全メンバ（owner、assigneesは必ず包含。作成時はauthorも含むが外すことが可能）
     // , involved: Array<string>()   // このタスクの全関係者（author, member）
 
-    , ancestorIds: null
+    , ancestorIds: new Array<string>()
     , children: new Array<TaskProperties>()
 
     // , startedAt: Date|null;
@@ -167,7 +167,7 @@ export class TaskDraft implements Entity<TaskDraftProperties> {
             , assignees: this._properties.assignees || []
             , members: this._properties.members || [this._userId]
             , involved: this._properties.involved || [this._userId]
-            , ancestorIds: this._properties.ancestorIds || null
+            , ancestorIds: this._properties.ancestorIds || []
             , children
             , childrenIds: children.map(child => child.id)
             , startedAt: this._properties.startedAt || null

@@ -93,12 +93,12 @@ export function createTaskManagementPerformer(): TaskManagementPerformer {
                             });
                             // ソートしておく
                             mutableUsersTasks.sort((a, b) => {
-                                if (a.ancestorIds === b.ancestorIds) {
+                                if (a.ancestorIds.join("") === b.ancestorIds.join("")) {
                                     return a.id.localeCompare(b.id);
                                 }
-                                if (a.ancestorIds === null) return -1;
-                                if (b.ancestorIds === null) return 1;
-                                return a.ancestorIds.localeCompare(b.ancestorIds);
+                                if (a.ancestorIds.length === 0) return -1;
+                                if (b.ancestorIds.length === 0) return 1;
+                                return a.ancestorIds.join("").localeCompare(b.ancestorIds.join(""));
                             });
                         }
                         , error: err => console.error("Observer got an error: " + err)

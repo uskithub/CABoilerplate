@@ -61,5 +61,13 @@ service cloud.firestore {
       // 消せるのは owner だけ
       // allow delete: if user_is_authenticated() && request.auth.uid in resource.data.owner;
     }
+
+    match /{path=**}/tasks/{taskId} {
+      // involvedにいるユーザは誰でも読める
+      allow list: if user_is_authenticated();
+
+      // セッションがあれば誰でも作れる
+      allow create: if user_is_authenticated();
+    }
   }
 }
