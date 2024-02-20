@@ -34,8 +34,29 @@
         }
     }
     , "tasks" : {
-        "5ebSFBoMA09fXwwkIVmo" : {
-            "ancestorIds": "JLGGh2vfLlAFCn3RAKqzOsGORIYkY0g0FGGfPXQB"
+        "AkmewWWl9Spf7XRym4H8" : {
+            "ancestorIds": null
+            , "assignees" :["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "author": "SoR4yFNnoCYelNVVr1S3YzcOYg22"
+            , "children" : [
+                "qvbWaA7mxVUDg64KWKnJ"
+                , "9d2VpcdgCMDJlIJnmWwV"
+                , "EsnHf4vvPCNiQE9hajY4"
+            ]
+            , "createdAt" :"2020-07-01T07:00:00.000Z"
+            , "deadline" : null
+            , "goal": "サブタスクをすべて完了する"
+            , "instractions" : null
+            , "involved" : ["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "members": ["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "purpose" : "Joynの使い方を理解する"
+            , "startedAt" :null
+            , "templateId" : null
+            , "title" : "チュートリアルを完了する"
+            , "typeStatus" : "TB9"
+        }
+        , "qvbWaA7mxVUDg64KWKnJ" : {
+            "ancestorIds": "AkmewWWl9Spf7XRym4H8"
             , "assignees" :["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
             , "author": "SoR4yFNnoCYelNVVr1S3YzcOYg22"
             , "children" : []
@@ -45,6 +66,57 @@
             , "instractions" : null
             , "involved" : ["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
             , "members": ["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "purpose" : "Joynの使い方を理解する"
+            , "startedAt" :null
+            , "templateId" : null
+            , "title" : "ドラッグ＆ドロップでタスクを移動する"
+            , "typeStatus" : "TB8"
+        }
+        , "9d2VpcdgCMDJlIJnmWwV" : {
+            "ancestorIds": "AkmewWWl9Spf7XRym4H8"
+            , "assignees" :["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "author": "SoR4yFNnoCYelNVVr1S3YzcOYg22"
+            , "children" : []
+            , "createdAt" :"2020-07-01T07:00:00.000Z"
+            , "deadline" : null
+            , "goal": "サブタスクをすべて完了する"
+            , "instractions" : null
+            , "involved" : ["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "members": ["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "purpose" : "Joynの使い方を理解する"
+            , "startedAt" :null
+            , "templateId" : null
+            , "title" : "タスク名を変更する"
+            , "typeStatus" : "TB8"
+        }
+        , "EsnHf4vvPCNiQE9hajY4" : {
+            "ancestorIds": "AkmewWWl9Spf7XRym4H8"
+            , "assignees" :["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "author": "SoR4yFNnoCYelNVVr1S3YzcOYg22"
+            , "children" : ["bMyji3v549EZpZYwuCCa"]
+            , "createdAt" :"2020-07-01T07:00:00.000Z"
+            , "deadline" : null
+            , "goal": "サブタスクをすべて完了する"
+            , "instractions" : null
+            , "involved" : ["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "members": ["SoR4yFNnoCYelNVVr1S3YzcOYg22"]
+            , "purpose" : "Joynの使い方を理解する"
+            , "startedAt" :null
+            , "templateId" : null
+            , "title" : "タスクを完了する"
+            , "typeStatus" : "TB8"
+        }
+        , "bMyji3v549EZpZYwuCCa" : {
+            "ancestorIds": "AkmewWWl9Spf7XRym4H8EsnHf4vvPCNiQE9hajY4"
+            , "assignees" :["jELRVkFjOLb9l5zukRxlEMOfRsB3"]
+            , "author": "jELRVkFjOLb9l5zukRxlEMOfRsB3"
+            , "children" : []
+            , "createdAt" :"2020-07-01T07:00:00.000Z"
+            , "deadline" : null
+            , "goal": "サブタスクをすべて完了する"
+            , "instractions" : null
+            , "involved" : ["jELRVkFjOLb9l5zukRxlEMOfRsB3"]
+            , "members": ["jELRVkFjOLb9l5zukRxlEMOfRsB3"]
             , "purpose" : "Joynの使い方を理解する"
             , "startedAt" :null
             , "templateId" : null

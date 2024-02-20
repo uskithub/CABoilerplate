@@ -13,6 +13,10 @@ service cloud.firestore {
     return user_is_authenticated() && request.auth.uid == userId;
   }
 
+  function right(text, length) {
+    return string(text).size() < length ? text : string(text)[string(text).size()-length:length];
+  }
+
   match /databases/{database}/documents {
 
     match /users/{userId} {
@@ -20,6 +24,7 @@ service cloud.firestore {
       allow get: if user_oneself(userId);
       allow create: if user_oneself(userId);
       allow update: if user_oneself(userId);
+      allow delete: if user_oneself(userId);
     }
     
     match /organizations/{organizationsId} {
@@ -35,7 +40,19 @@ service cloud.firestore {
 
       // where句で指定した値が resource.data に入ってくる
       // なので、 queryに where("involved", "array-contains", userId) を指定しないと以下のルールでエラーにできる
-      allow list: if user_is_authenticated() && request.auth.uid in debug(resource.data).involved;
+      // allow list: if user_is_authenticated() && request.auth.uid in debug(resource.data).involved;
+
+      // Type error. Received: [constraint] Expected: [map,path]. for 'list' @ L45
+      allow list: if user_is_authenticated() && debug(resource.data.involved) && false
+
+
+      // @see: https://stackoverflow.com/questions/77676107/access-the-underlying-value-of-resource-data-for-list-query-in-firestore-securit
+      // @see: https://stackoverflow.com/questions/72178987/how-to-get-the-value-of-a-firestore-security-rules-array-contains-constraint-for
+      allow list: if user_is_authenticated() 
+      //   && request.query.filters[0].hofe == "hogehoge"
+        // && debug(resource.data.ancestorIds) != null
+        // Unsupported operation error. Received: string(constraint). Expected: string(int), string(float), string(null), string(string), string(bool), string(path). for 'list' @ L45
+        // && request.auth.uid in get(/databases/$(database)/documents/tasks/$(resource.data.ancestorIds.value)).data.involved;
 
       // セッションがあれば誰でも作れる
       allow create: if user_is_authenticated();
