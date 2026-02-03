@@ -16,13 +16,13 @@ interface FSTask {
     goal: string | null;
     instractions: string | null;
 
-    author: string;
-    owner?: Array<string> | undefined;
+    // author: string; // involved[0] を author とする
+    owner: Array<number>; // default [0]
     assignees: Array<string>;
-    members: Array<string>;
     involved: Array<string>;
+    editorial: Array<string>; // parent.(involved + editorial) - self.involved
 
-    rearrangeRootDepth: number; // セキュリティルールで使う。Rearrange対象のタスクのRootからの深さ
+    // rearrangeRootDepth: number; // セキュリティルールで使う。Rearrange対象のタスクのRootからの深さ
     ancestorIds: string | null;
     children: Array<string>;
 
@@ -570,8 +570,8 @@ export function createTaskFunctions(db: Firestore, unsubscribers: Array<() => vo
                     if (descendant.ancestorIds === null) return;
                     const descendantNewAncestorIds = descendant.ancestorIds.replace(targetAncestorIds, `${ newAncestorIds }${ task.id }`);
                     batch.update(doc(taskCollectionRefForUpdateChildren, snapshot.id), {
-                        rearrangeRootDepth: depth
-                        , ancestorIds: descendantNewAncestorIds 
+                        // rearrangeRootDepth: depth
+                        ancestorIds: descendantNewAncestorIds 
                     });
                 });
                 return batch.commit()

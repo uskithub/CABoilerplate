@@ -1,4 +1,3 @@
-import { Application } from "../domain/application/application";
 import { DomainKeys, UsecaseKeys } from "./usecases";
 
 import { BaseActor, BaseScenario, Context, DomainRequirements, IActor, InteractResult, Scenes } from "robustive-ts";

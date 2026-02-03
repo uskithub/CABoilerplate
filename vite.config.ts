@@ -32,4 +32,16 @@ export default defineConfig({
     , server: {
         port : 3001
     }
+    , devServer: {
+        proxy: {
+            "*": {
+                target: "http://localhost:3001"
+                , changeOrigin: true
+                , rewrite: path => {
+                    console.log("============", path)
+                    return path.replace('/api', '')
+                }
+            }
+        }
+    }
 });

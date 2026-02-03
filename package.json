@@ -13,9 +13,11 @@
     "firebase": "^10.8.0",
     "react": "^18.1.0",
     "roboto-fontface": "*",
+    "robustive-ts": "link:/Users/yusuke/Workspaces/robustive-ts",
     "rxjs": "^7.5.5",
     "vue": "^3.4.13",
     "vue-router": "4.2.5",
+    "vue3-tree": "link:/Users/yusuke/Workspaces/vue3-tree",
     "vuetify": "^v3.4.10",
     "webfontloader": "^1.6.28"
   },

@@ -1,6 +1,3 @@
-import { StringDecoder } from "string_decoder";
-import { DomainKeys } from "../service/application/usecases";
-
 type EnumDefs = { [key: string]: string; };
 
 export type ErrorContextFactory<Component extends string, D extends EnumDefs> = { 

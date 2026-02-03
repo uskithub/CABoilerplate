@@ -1,22 +1,15 @@
-// service
-
-// system
-import { reactive } from "vue";
+import { DrawerItem } from "../../presentation/components/drawer";
 import { Performer, Mutable, SharedStore, Store, Service } from ".";
-import { Observable, Subscription } from "rxjs";
 import { SignInStatuses } from "@/shared/service/domain/interfaces/authenticator";
-import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
-import { Actor } from "@/shared/service/application/actors";
 import { R, Usecase, UsecasesOf } from "@/shared/service/application/usecases";
-import { Task } from "@/shared/service/domain/taskManagement/task";
-import { DrawerContentType, DrawerItem } from "../../presentation/components/drawer";
-import { InteractResultType } from "robustive-ts";
-import { Account, UserProperties } from "@/shared/service/domain/authentication/user";
-import { AuthenticatedUser } from "@/shared/service/application/actors/authenticatedUser";
-import { dictionary as t } from "@/client/main";
-import { FirebaseError } from "firebase/app";
+import { Actor } from "@/shared/service/application/actors";
 import { ServiceError } from "@/shared/service/serviceErrors";
 import { BackendErrors } from "@/shared/service/domain/interfaces/backend";
+import { dictionary as t } from "@/client/main";
+
+import { reactive } from "vue";
+import { Subscription } from "rxjs";
+import { InteractResultType } from "robustive-ts";
 
 type ImmutableDrawerItems = Readonly<DrawerItem>;
 
