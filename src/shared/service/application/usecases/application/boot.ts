@@ -3,7 +3,7 @@ import { Application } from "@/shared/service/domain/application/application";
 import { User, Account, UserProperties } from "@/shared/service/domain/authentication/user";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty } from "robustive-ts";
+import type { Context, Empty } from "@robustive/robustive-ts";
 import { Observable, firstValueFrom, map } from "rxjs";
 
 /**

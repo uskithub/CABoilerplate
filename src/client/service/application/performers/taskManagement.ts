@@ -11,7 +11,7 @@ import { DrawerContentType, DrawerItem } from "../../presentation/components/dra
 
 // system
 import { reactive } from "vue";
-import { InteractResultType } from "robustive-ts";
+import { InteractResultType } from "@robustive/robustive-ts";
 import { Observable, Subscription } from "rxjs";
 
 type ImmutableTask = Readonly<TaskProperties>;

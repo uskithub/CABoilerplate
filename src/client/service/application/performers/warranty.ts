@@ -9,7 +9,7 @@ import { Actor } from "@/shared/service/application/actors";
 import { Warranty } from "@/shared/service/domain/entities/warranty";
 import { AuthorizedUser } from "@/shared/service/application/actors/authorizedUser";
 import { Usecase } from "@/shared/service/application/usecases";
-import { InteractResultType } from "robustive-ts";
+import { InteractResultType } from "@robustive/robustive-ts";
 
 export interface WarrantyStore extends Store {
     warranties: Warranty[]

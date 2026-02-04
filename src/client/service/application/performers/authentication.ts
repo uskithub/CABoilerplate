@@ -10,7 +10,7 @@ import { Account } from "@/shared/service/domain/authentication/user";
 // system
 import { reactive } from "vue";
 import { Subscription } from "rxjs";
-import { InteractResultType } from "robustive-ts";
+import { InteractResultType } from "@robustive/robustive-ts";
 
 
 export interface AuthenticationStore extends Store {

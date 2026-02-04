@@ -5,13 +5,12 @@ import { Task, TaskType } from "@/shared/service/domain/taskManagement/task";
 import type { TaskProperties } from "@/shared/service/domain/taskManagement/task";
 
 // view
-import { tree, findNodeById } from "vue3-tree";
+import { findNodeById } from "vue3-tree";
 // system
 import { inject, reactive, watch } from "vue";
 import type { Service } from "../../../application/performers";
 import { SERVICE_KEY } from "../../../application/performers";
 import type { TreeEventHandlers } from "vue3-tree";
-import "vue3-tree/style.css";
 
 // stubs
 import donedleTree from "../../../../../../test/stubs/donedle";

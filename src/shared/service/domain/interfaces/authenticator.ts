@@ -1,7 +1,7 @@
 import { Observable } from "rxjs";
 import { Account, UserCredential, UserProperties } from "../authentication/user";
 import { SwiftEnum, SwiftEnumCases } from "@/shared/system/utils/enum";
-import { Empty } from "robustive-ts";
+import { Empty } from "@robustive/robustive-ts";
 
 /**
  * サインインステータス

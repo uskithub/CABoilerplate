@@ -1,5 +1,5 @@
 import { Account, UserProperties } from "@/shared/service/domain/authentication/user";
-import { Context } from "robustive-ts";
+import { Context } from "@robustive/robustive-ts";
 import { Observable } from "rxjs";
 import { MyBaseScenario } from "../../common";
 

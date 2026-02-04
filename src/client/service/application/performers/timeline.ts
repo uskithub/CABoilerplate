@@ -3,7 +3,7 @@ import { Service, Mutable, Performer, Store } from ".";
 import { Actor } from "@/shared/service/application/actors";
 import { Observable, Subscription } from "rxjs";
 import { reactive } from "vue";
-import { InteractResultType } from "robustive-ts";
+import { InteractResultType } from "@robustive/robustive-ts";
 import { ChangedConduct, ItemChangeType } from "@/shared/service/domain/interfaces/backend";
 
 export interface TimelineStore extends Store {

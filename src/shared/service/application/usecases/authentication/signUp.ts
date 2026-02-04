@@ -2,7 +2,7 @@ import { User, type SignUpValidationResult, type Account, UserProperties, RoleTy
 import { Organization, OrganizationProperties } from "@/shared/service/domain/authentication/organization";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty } from "robustive-ts";
+import type { Context, Empty } from "@robustive/robustive-ts";
 import { firstValueFrom, map } from "rxjs";
 import { Task, TaskProperties } from "@/shared/service/domain/taskManagement/task";
 

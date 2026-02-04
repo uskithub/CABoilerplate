@@ -3,7 +3,7 @@ import { UserProperties } from "@/shared/service/domain/authentication/user";
 import { Task } from "@/shared/service/domain/taskManagement/task";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty } from "robustive-ts";
+import type { Context, Empty } from "@robustive/robustive-ts";
 import { map } from "rxjs";
 
 /**

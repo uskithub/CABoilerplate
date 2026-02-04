@@ -2,12 +2,12 @@
 import dependencies from "../dependencies";
 import { SignInStatus } from "../interfaces/authenticator";
 
-// import { Usecase, Nobody, Actor } from "robustive-ts";
+// import { Usecase, Nobody, Actor } from "@robustive/robustive-ts";
 import { Observable } from "rxjs";
 import { Actor } from "../../application/actors";
 import { Service } from "@/shared/system/interfaces/architecture";
 import { DomainKeys, R, UsecaseKeys } from "../../application/usecases";
-import { isNobody } from "robustive-ts";
+import { isNobody } from "@robustive/robustive-ts";
 import { isAuthorizedUser } from "../../application/actors/authorizedUser";
 import { isService } from "../../application/actors/service";
 import { isAuthenticatedUser } from "../../application/actors/authenticatedUser";

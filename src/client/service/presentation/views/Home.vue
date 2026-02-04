@@ -8,7 +8,6 @@ import drawer from "../components/drawer/drawer.vue";
 import { inject, reactive, ref } from "vue";
 import type { Service } from "../../application/performers";
 import { SERVICE_KEY } from "../../application/performers";
-import "vue3-tree/style.css";
 import { SignInStatus } from "@/shared/service/domain/interfaces/authenticator";
 import { R } from "@/shared/service/application/usecases";
 

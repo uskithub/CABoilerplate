@@ -1,4 +1,4 @@
-import { Context, Empty } from "robustive-ts";
+import { Context, Empty } from "@robustive/robustive-ts";
 import { MyBaseScenario } from "../../common";
 import { Task, TaskProperties } from "@/shared/service/domain/taskManagement/task";
 

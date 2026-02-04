@@ -9,7 +9,7 @@ import { dictionary as t } from "@/client/main";
 
 import { reactive } from "vue";
 import { Subscription } from "rxjs";
-import { InteractResultType } from "robustive-ts";
+import { InteractResultType } from "@robustive/robustive-ts";
 
 type ImmutableDrawerItems = Readonly<DrawerItem>;
 

@@ -4,15 +4,11 @@ import { TaskTreenode } from "../../models/taskTreenode";
 import { Task, TaskType } from "@/shared/service/domain/taskManagement/task";
 import type { TaskProperties } from "@/shared/service/domain/taskManagement/task";
 
-// view
-import { tree } from "vue3-tree";
-
 // system
 import type { Service } from "@/client/service/application/performers";
 import { SERVICE_KEY } from "@/client/service/application/performers";
 import { computed, inject, reactive, watch } from "vue";
 import type { TreeEventHandlers } from "vue3-tree";
-import "vue3-tree/style.css";
 import { R } from "@/shared/service/application/usecases";
 
 const { stores, dispatch } = inject<Service>(SERVICE_KEY)!;

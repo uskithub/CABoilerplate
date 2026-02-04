@@ -14,7 +14,7 @@ import { ObservingUsersTimelineScenario } from "./timeline/observingUsersTimelin
 import { UpdateTaskTitleScenario } from "./taskManagement/updateTaskTitle";
 import { RearrangeTaskScenario } from "./taskManagement/rearrangeTask";
 
-import { AllUsecases, AllUsecasesOverDomain, Robustive, Usecase as _Usecase } from "robustive-ts";
+import { AllUsecases, AllUsecasesOverDomain, Robustive, Usecase as _Usecase } from "@robustive/robustive-ts";
 
 export const requirements = {
     application : {

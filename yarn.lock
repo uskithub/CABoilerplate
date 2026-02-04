@@ -3058,6 +3058,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@robustive/robustive-ts@link:/Users/yusuke/Workspaces/robustive-ts/packages/core::locator=caboilerplate%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@robustive/robustive-ts@link:/Users/yusuke/Workspaces/robustive-ts/packages/core::locator=caboilerplate%40workspace%3A."
+  languageName: node
+  linkType: soft
+
 "@rollup/rollup-android-arm-eabi@npm:4.9.5":
   version: 4.9.5
   resolution: "@rollup/rollup-android-arm-eabi@npm:4.9.5"
@@ -5443,6 +5449,7 @@ __metadata:
     "@fortawesome/vue-fontawesome": "npm:^3.0.3"
     "@mdi/font": "npm:^7.1.96"
     "@prettier/plugin-pug": "npm:^2.0.0"
+    "@robustive/robustive-ts": "link:/Users/yusuke/Workspaces/robustive-ts/packages/core"
     "@types/jest": "npm:^29.5.12"
     "@types/node": "npm:^17.0.31"
     "@typescript-eslint/eslint-plugin": "npm:^5.22.0"
@@ -5462,7 +5469,6 @@ __metadata:
     pug: "npm:^3.0.2"
     react: "npm:^18.1.0"
     roboto-fontface: "npm:*"
-    robustive-ts: "link:/Users/yusuke/Workspaces/robustive-ts"
     rxjs: "npm:^7.5.5"
     sass: "npm:^1.69.7"
     sass-loader: "npm:^13.3.3"
@@ -11375,12 +11381,6 @@ __metadata:
   checksum: 10c0/175b3190d67f87b062e63d5fabe5aac10aaf8bc143854a2afd6beeac942302c62846de2de617dd202f76fb55a31e89e062e72be8c7ca7316caa9ba87cbafc9e1
   languageName: node
   linkType: hard
-
-"robustive-ts@link:/Users/yusuke/Workspaces/robustive-ts::locator=caboilerplate%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "robustive-ts@link:/Users/yusuke/Workspaces/robustive-ts::locator=caboilerplate%40workspace%3A."
-  languageName: node
-  linkType: soft
 
 "rollup@npm:^4.2.0":
   version: 4.9.5

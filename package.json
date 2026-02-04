@@ -10,10 +10,10 @@
     "playground": "ts-node src/playground.ts"
   },
   "dependencies": {
+    "@robustive/robustive-ts": "link:/Users/yusuke/Workspaces/robustive-ts/packages/core",
     "firebase": "^10.8.0",
     "react": "^18.1.0",
     "roboto-fontface": "*",
-    "robustive-ts": "link:/Users/yusuke/Workspaces/robustive-ts",
     "rxjs": "^7.5.5",
     "vue": "^3.4.13",
     "vue-router": "4.2.5",
@@ -56,5 +56,6 @@
     "vue-cli-plugin-vuetify": "~2.5.8",
     "vue-tsc": "^1.8.27",
     "vuetify-loader": "^2.0.0-alpha.9"
-  }
+  },
+  "packageManager": "yarn@4.12.0+sha512.f45ab632439a67f8bc759bf32ead036a1f413287b9042726b7cc4818b7b49e14e9423ba49b18f9e06ea4941c1ad062385b1d8760a8d5091a1a31e5f6219afca8"
 }

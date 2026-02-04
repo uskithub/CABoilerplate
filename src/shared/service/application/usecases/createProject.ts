@@ -1,4 +1,4 @@
-import { Usecase } from "robustive-ts";
+import { Usecase } from "@robustive/robustive-ts";
 import { Observable } from "rxjs";
 
 /**

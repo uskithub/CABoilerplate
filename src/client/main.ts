@@ -6,6 +6,8 @@ import { loadFonts } from "@client/system/plugins/webfontloader";
 
 import App from "./App.vue";
 import dependencies from "@shared/service/domain/dependencies";
+import Vue3TreePlugin from "vue3-tree";
+import "vue3-tree/style.css";
 
 // fireabse
 import { initializeApp } from "firebase/app";
@@ -35,6 +37,7 @@ dependencies.analytics = new FirebaseAnalytics();
 loadFonts();
 
 const app = createApp(App);
+app.use(Vue3TreePlugin);
 
 const router = loadRouter(app);
 loadVuetify(app);

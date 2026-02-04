@@ -3,7 +3,7 @@ import { ChangedConduct } from "@/shared/service/domain/interfaces/backend";
 import { Conduct } from "@/shared/service/domain/timeline/conduct";
 import { MyBaseScenario } from "../../common";
 
-import type { Context, Empty } from "robustive-ts";
+import type { Context, Empty } from "@robustive/robustive-ts";
 import { Observable } from "rxjs";
 
 /**
